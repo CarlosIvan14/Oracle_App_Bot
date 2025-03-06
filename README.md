@@ -17,7 +17,7 @@ The lab executes scripts that require the following software to run properly: (T
 
 ### TEAM TEC-GDL-46 SETUP
 1. Clone this repo.
-2. Download the wallet I passed on Discord on a known defined path without weird chars.
+2. Download the wallet I passed on Discord and extract it on a known defined path without weird chars.
 3. Update the Wallet Path on the MtdrSpring/backend/src/main/resources/application.properties on spring.datasource.url
 4. Go to MtdrSpring/backend & Run using:
 ```
