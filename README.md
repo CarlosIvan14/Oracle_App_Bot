@@ -13,20 +13,15 @@ The lab executes scripts that require the following software to run properly: (T
 * oci-cli
 * python 2.7^
 * terraform
-* kubectl
 * mvn (maven) 
 
 ### TEAM TEC-GDL-46 SETUP
 1. Clone this repo.
-2. Download the wallet on a known defined path without weird chars.
-3. Switch branch:
-```
-git checkout springboot-bot
-```
-4. Update the Wallet Path on the MtdrSpring/backend/src/main/resources/application.properties on spring.datasource.url
-5. Run using:
+2. Download the wallet I passed on Discord on a known defined path without weird chars.
+3. Update the Wallet Path on the MtdrSpring/backend/src/main/resources/application.properties on spring.datasource.url
+4. Go to MtdrSpring/backend & Run using:
 ```
 mvn clean install
 mvn spring-boot:run
 ```
-
+5. Wait for 30 seconds to let it run and go to http://localhost:8081
