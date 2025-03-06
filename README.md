@@ -16,4 +16,17 @@ The lab executes scripts that require the following software to run properly: (T
 * kubectl
 * mvn (maven) 
 
-## Expect more ...
+### TEAM TEC-GDL-46 SETUP
+1. Clone this repo.
+2. Download the wallet on a known defined path without weird chars.
+3. Switch branch:
+```
+git checkout springboot-bot
+```
+4. Update the Wallet Path on the MtdrSpring/backend/src/main/resources/application.properties on spring.datasource.url
+5. Run using:
+```
+mvn clean install
+mvn spring-boot:run
+```
+
