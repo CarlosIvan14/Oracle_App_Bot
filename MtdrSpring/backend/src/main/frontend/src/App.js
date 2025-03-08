@@ -68,8 +68,8 @@ function App() {
         (error) => { setError(error); }
       );
     }
-    function reloadOneIteam(id){
-      fetch(API_LIST+"/"+id)
+    function reloadOneIteam(id) {
+      fetch(API_LIST + "/" + id)
         .then(response => {
           if (response.ok) {
             return response.json();
@@ -79,17 +79,16 @@ function App() {
         })
         .then(
           (result) => {
+            // Reemplazamos el objeto completo en vez de solo "description" y "done"
             const items2 = items.map(
-              x => (x.id === id ? {
-                 ...x,
-                 'description':result.description,
-                 'done': result.done
-                } : x));
+              x => (x.id === id ? result : x)
+            );
             setItems(items2);
           },
           (error) => {
             setError(error);
-          });
+          }
+        );
     }
     function modifyItem(id, description, done) {
       // console.log("deleteItem("+deleteId+")")
@@ -146,46 +145,50 @@ function App() {
        // this useEffect will run once
        // similar to componentDidMount()
     );
-    function addItem(text){
-      console.log("addItem("+text+")")
+    function getPriorityLabel(priority) {
+      switch (priority) {
+        case 1:
+          return "Alta";
+        case 2:
+          return "Media";
+        case 3:
+          return "Baja";
+        default:
+          return "Sin definir";
+      }
+    }
+    function addItem(task) {
+      console.log("addItem", task);
       setInserting(true);
-      var data = {};
-      console.log(data);
-      data.description = text;
       fetch(API_LIST, {
         method: 'POST',
-        // We convert the React state to JSON and send it as the POST body
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data),
-      }).then((response) => {
-        // This API doens't return a JSON document
-        console.log(response);
-        console.log();
-        console.log(response.headers.location);
-        // return response.json();
+        body: JSON.stringify(task),
+      })
+      .then(response => {
         if (response.ok) {
           return response;
         } else {
           throw new Error('Something went wrong ...');
         }
-      }).then(
-        (result) => {
-          var id = result.headers.get('location');
-          var newItem = {"id": id, "description": text}
-          setItems([newItem, ...items]);
-          setInserting(false);
-        },
-        (error) => {
-          setInserting(false);
-          setError(error);
-        }
-      );
-    }
+      })
+      .then((result) => {
+        const id = result.headers.get('location');
+        // Se crea un nuevo objeto incluyendo el ID devuelto
+        const newItem = { ...task, id: id };
+        setItems([newItem, ...items]);
+        setInserting(false);
+      })
+      .catch((error) => {
+        setInserting(false);
+        setError(error);
+      });
+    }    
     return (
       <div className="App">
-        <h1>MY TODO LIST</h1>
+        <h1>MY TASK LIST</h1>
         <NewItem addItem={addItem} isInserting={isInserting}/>
         { error &&
           <p>Error: {error.message}</p>
@@ -203,6 +206,9 @@ function App() {
               <td className="description">{item.description}</td>
               { /*<td>{JSON.stringify(item, null, 2) }</td>*/ }
               <td className="date"><Moment format="MMM Do hh:mm:ss">{item.createdAt}</Moment></td>
+              <td>{item.deadline}</td>
+              <td>{getPriorityLabel(item.priority)}</td>
+              <td>{item.assignedUser ? item.assignedUser.name : "Sin usuario"}</td>
               <td><Button variant="contained" className="DoneButton" onClick={(event) => toggleDone(event, item.id, item.description, !item.done)} size="small">
                     Done
                   </Button></td>

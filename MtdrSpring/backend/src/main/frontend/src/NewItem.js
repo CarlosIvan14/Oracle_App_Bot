@@ -1,63 +1,69 @@
-/*
-## MyToDoReact version 1.0.
-##
-## Copyright (c) 2022 Oracle, Inc.
-## Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
-*/
-/*
- * Component that supports creating a new todo item.
- * @author  jean.de.lavarene@oracle.com
- */
+import React, { useState } from 'react';
 
-import React, { useState } from "react";
-import Button from '@mui/material/Button';
+function NewItem({ addItem, isInserting }) {
+  const [description, setDescription] = useState('');
+  const [deadline, setDeadline] = useState('');
+  const [priority, setPriority] = useState('');
+  const [assignedUserId, setAssignedUserId] = useState('');
 
-
-function NewItem(props) {
-  const [item, setItem] = useState('');
-  function handleSubmit(e) {
-    // console.log("NewItem.handleSubmit("+e+")");
-    if (!item.trim()) {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!description || !deadline || !priority || !assignedUserId) {
+      alert("Por favor, completa todos los campos");
       return;
     }
-    // addItem makes the REST API call:
-    props.addItem(item);
-    setItem("");
-    e.preventDefault();
-  }
-  function handleChange(e) {
-    setItem(e.target.value);
-  }
+    // Se crea el objeto con los nuevos campos
+    const newTask = {
+      description,
+      deadline, // debe estar en formato "yyyy-MM-dd"
+      priority: parseInt(priority, 10),
+      assignedUser: { id: parseInt(assignedUserId, 10) }
+    };
+    addItem(newTask);
+    // Limpiar el formulario
+    setDescription('');
+    setDeadline('');
+    setPriority('');
+    setAssignedUserId('');
+  };
+
   return (
-    <div id="newinputform">
-    <form>
+    <form onSubmit={handleSubmit}>
       <input
-        id="newiteminput"
-        placeholder="New item"
         type="text"
-        autoComplete="off"
-        value={item}
-        onChange={handleChange}
-        // No need to click on the "ADD" button to add a todo item. You
-        // can simply press "Enter":
-        onKeyDown={event => {
-          if (event.key === 'Enter') {
-            handleSubmit(event);
-          }
-        }}
+        placeholder="Descripción"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
       />
-      <span>&nbsp;&nbsp;</span>
-      <Button
-        className="AddButton"
-        variant="contained"
-        disabled={props.isInserting}
-        onClick={!props.isInserting ? handleSubmit : null}
-        size="small"
+      <input
+        type="date"
+        placeholder="Fecha Límite"
+        value={deadline}
+        onChange={(e) => setDeadline(e.target.value)}
+      />
+      <select
+        value={priority}
+        onChange={(e) => setPriority(e.target.value)}
       >
-        {props.isInserting ? 'Adding…' : 'Add'}
-      </Button>
+        <option value="">Prioridad</option>
+        <option value="1">Alta</option>
+        <option value="2">Media</option>
+        <option value="3">Baja</option>
+      </select>
+      <input
+        type="number"
+        placeholder="ID Usuario"
+        value={assignedUserId}
+        onChange={(e) => setAssignedUserId(e.target.value)}
+      />
+      <button 
+        type="submit" 
+        className="AddButton"
+        disabled={isInserting}
+      >
+        {isInserting ? "Agregando..." : "Agregar Tarea"}
+      </button>
     </form>
-    </div>
   );
 }
 

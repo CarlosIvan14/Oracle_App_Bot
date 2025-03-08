@@ -1,28 +1,45 @@
 package com.springboot.MyTodoList.model;
 
-
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 /*
-    representation of the TODOITEM table that exists already
-    in the autonomous database
+    Representation of the TODOITEM table that exists in the autonomous database.
  */
 @Entity
 @Table(name = "TODOITEM")
 public class ToDoItem {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int ID;
-    @Column(name = "DESCRIPTION")
-    String description;
-    @Column(name = "CREATION_TS")
-    OffsetDateTime creation_ts;
-    @Column(name = "done")
-    boolean done;
-    public ToDoItem(){
+    private int ID;
 
+    @Column(name = "DESCRIPTION")
+    private String description;
+
+    @Column(name = "CREATION_TS")
+    private OffsetDateTime creation_ts;
+
+    @Column(name = "DONE")
+    private boolean done;
+
+    // Nuevo campo: deadline
+    @Column(name = "DEADLINE")
+    private LocalDate deadline;
+
+    // Nuevo campo: priority
+    @Column(name = "PRIORITY")
+    private Integer priority;
+
+    // Relación con ORACLE_USERS
+    @ManyToOne
+    @JoinColumn(name = "ASSIGNED_USER")
+    private OracleUser assignedUser;
+
+    public ToDoItem() {
     }
+
     public ToDoItem(int ID, String description, OffsetDateTime creation_ts, boolean done) {
         this.ID = ID;
         this.description = description;
@@ -62,6 +79,30 @@ public class ToDoItem {
         this.done = done;
     }
 
+    public LocalDate getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(LocalDate deadline) {
+        this.deadline = deadline;
+    }
+
+    public Integer getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Integer priority) {
+        this.priority = priority;
+    }
+
+    public OracleUser getAssignedUser() {
+        return assignedUser;
+    }
+
+    public void setAssignedUser(OracleUser assignedUser) {
+        this.assignedUser = assignedUser;
+    }
+
     @Override
     public String toString() {
         return "ToDoItem{" +
@@ -69,6 +110,9 @@ public class ToDoItem {
                 ", description='" + description + '\'' +
                 ", creation_ts=" + creation_ts +
                 ", done=" + done +
+                ", deadline=" + deadline +
+                ", priority=" + priority +
+                ", assignedUser=" + (assignedUser != null ? assignedUser.getId() : null) +
                 '}';
     }
 }
