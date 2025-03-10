@@ -3,10 +3,9 @@ import TaskListItem from './TaskListItem';
 
 function TaskList({ items, toggleDone, deleteItem }) {
   return (
-    <div id="maincontent">
-      {/* Table for Not Done items */}
-      <table id="itemlistNotDone" className="min-w-full divide-y divide-gray-200 mb-4">
-        <tbody className="bg-white divide-y divide-gray-200">
+    <div id="maincontent" className="bg-gray-800 bg-opacity-50 p-4 rounded-lg">
+      <table id="itemlistNotDone" className="min-w-full divide-y divide-gray-700 mb-4">
+        <tbody className="divide-y divide-gray-700">
           {items.map(item => (
             !item.done && (
               <TaskListItem 
@@ -20,12 +19,12 @@ function TaskList({ items, toggleDone, deleteItem }) {
         </tbody>
       </table>
 
-      {/* Heading for Done items */}
-      <h2 id="donelist" className="text-2xl font-semibold mb-2">Done items</h2>
+      <h2 id="donelist" className="text-2xl font-semibold mb-2 text-white">
+        Done items
+      </h2>
 
-      {/* Table for Done items */}
-      <table id="itemlistDone" className="min-w-full divide-y divide-gray-200">
-        <tbody className="bg-white divide-y divide-gray-200">
+      <table id="itemlistDone" className="min-w-full divide-y divide-gray-700">
+        <tbody className="divide-y divide-gray-700">
           {items.map(item => (
             item.done && (
               <TaskListItem 
