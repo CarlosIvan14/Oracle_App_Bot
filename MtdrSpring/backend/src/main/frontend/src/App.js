@@ -1,58 +1,39 @@
-          /*
+/*
 ## MyToDoReact version 1.0.
 ##
 ## Copyright (c) 2022 Oracle, Inc.
 ## Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
 */
 /*
- * This is the application main React component. We're using "function"
- * components in this application. No "class" components should be used for
- * consistency.
- * @author  jean.de.lavarene@oracle.com
+ * Esta es la aplicación principal en React utilizando componentes funcionales.
  */
 import React, { useState, useEffect } from 'react';
 import NewItem from './NewItem';
 import API_LIST from './API';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { Button, TableBody, CircularProgress } from '@mui/material';
-import Moment from 'react-moment';
 
-/* In this application we're using Function Components with the State Hooks
- * to manage the states. See the doc: https://reactjs.org/docs/hooks-state.html
- * This App component represents the entire app. It renders a NewItem component
- * and two tables: one that lists the todo items that are to be done and another
- * one with the items that are already done.
- */
+// Helper para formatear fechas, similar a react-moment
+function formatDate(dateString) {
+  const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+  return new Date(dateString).toLocaleString('en-US', options);
+}
+
 function App() {
-    // isLoading is true while waiting for the backend to return the list
-    // of items. We use this state to display a spinning circle:
-    const [isLoading, setLoading] = useState(false);
-    // Similar to isLoading, isInserting is true while waiting for the backend
-    // to insert a new item:
-    const [isInserting, setInserting] = useState(false);
-    // The list of todo items is stored in this state. It includes the "done"
-    // "not-done" items:
-    const [items, setItems] = useState([]);
-    // In case of an error during the API call:
-    const [error, setError] = useState();
+  const [isLoading, setLoading] = useState(false);
+  const [isInserting, setInserting] = useState(false);
+  const [items, setItems] = useState([]);
+  const [error, setError] = useState();
 
-    function deleteItem(deleteId) {
-      // console.log("deleteItem("+deleteId+")")
-      fetch(API_LIST+"/"+deleteId, {
-        method: 'DELETE',
-      })
+  function deleteItem(deleteId) {
+    fetch(API_LIST + "/" + deleteId, { method: 'DELETE' })
       .then(response => {
-        // console.log("response=");
-        // console.log(response);
         if (response.ok) {
-          // console.log("deleteItem FETCH call is ok");
           return response;
         } else {
           throw new Error('Something went wrong ...');
         }
       })
       .then(
-        (result) => {
+        () => {
           const remainingItems = items.filter(item => item.id !== deleteId);
           setItems(remainingItems);
         },
@@ -60,113 +41,95 @@ function App() {
           setError(error);
         }
       );
-    }
-    function toggleDone(event, id, description, done) {
-      event.preventDefault();
-      modifyItem(id, description, done).then(
-        (result) => { reloadOneIteam(id); },
-        (error) => { setError(error); }
-      );
-    }
-    function reloadOneIteam(id) {
-      fetch(API_LIST + "/" + id)
-        .then(response => {
-          if (response.ok) {
-            return response.json();
-          } else {
-            throw new Error('Something went wrong ...');
-          }
-        })
-        .then(
-          (result) => {
-            // Reemplazamos el objeto completo en vez de solo "description" y "done"
-            const items2 = items.map(
-              x => (x.id === id ? result : x)
-            );
-            setItems(items2);
-          },
-          (error) => {
-            setError(error);
-          }
-        );
-    }
-    function modifyItem(id, description, done) {
-      // console.log("deleteItem("+deleteId+")")
-      var data = {"description": description, "done": done};
-      return fetch(API_LIST+"/"+id, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      })
+  }
+
+  function toggleDone(event, id, description, done) {
+    event.preventDefault();
+    modifyItem(id, description, done).then(
+      () => { reloadOneItem(id); },
+      (error) => { setError(error); }
+    );
+  }
+
+  function reloadOneItem(id) {
+    fetch(API_LIST + "/" + id)
       .then(response => {
-        // console.log("response=");
-        // console.log(response);
         if (response.ok) {
-          // console.log("deleteItem FETCH call is ok");
+          return response.json();
+        } else {
+          throw new Error('Something went wrong ...');
+        }
+      })
+      .then(
+        (result) => {
+          const updatedItems = items.map(x => (x.id === id ? result : x));
+          setItems(updatedItems);
+        },
+        (error) => {
+          setError(error);
+        }
+      );
+  }
+
+  function modifyItem(id, description, done) {
+    const data = { "description": description, "done": done };
+    return fetch(API_LIST + "/" + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+      .then(response => {
+        if (response.ok) {
           return response;
         } else {
           throw new Error('Something went wrong ...');
         }
       });
-    }
-    /*
-    To simulate slow network, call sleep before making API calls.
-    const sleep = (milliseconds) => {
-      return new Promise(resolve => setTimeout(resolve, milliseconds))
-    }
-    */
-    useEffect(() => {
-      setLoading(true);
-      // sleep(5000).then(() => {
-      fetch(API_LIST)
-        .then(response => {
-          if (response.ok) {
-            return response.json();
-          } else {
-            throw new Error('Something went wrong ...');
-          }
-        })
-        .then(
-          (result) => {
-            setLoading(false);
-            setItems(result);
-          },
-          (error) => {
-            setLoading(false);
-            setError(error);
-          });
+  }
 
-      //})
-    },
-    // https://en.reactjs.org/docs/faq-ajax.html
-    [] // empty deps array [] means
-       // this useEffect will run once
-       // similar to componentDidMount()
-    );
-    function getPriorityLabel(priority) {
-      switch (priority) {
-        case 1:
-          return "Alta";
-        case 2:
-          return "Media";
-        case 3:
-          return "Baja";
-        default:
-          return "Sin definir";
-      }
-    }
-    function addItem(task) {
-      console.log("addItem", task);
-      setInserting(true);
-      fetch(API_LIST, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(task),
+  useEffect(() => {
+    setLoading(true);
+    fetch(API_LIST)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Something went wrong ...');
+        }
       })
+      .then(
+        (result) => {
+          setLoading(false);
+          setItems(result);
+        },
+        (error) => {
+          setLoading(false);
+          setError(error);
+        }
+      );
+  }, []);
+
+  function getPriorityLabel(priority) {
+    switch (priority) {
+      case 1:
+        return "Alta";
+      case 2:
+        return "Media";
+      case 3:
+        return "Baja";
+      default:
+        return "Sin definir";
+    }
+  }
+
+  function addItem(task) {
+    console.log("addItem", task);
+    setInserting(true);
+    fetch(API_LIST, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(task),
+    })
       .then(response => {
         if (response.ok) {
           return response;
@@ -176,7 +139,6 @@ function App() {
       })
       .then((result) => {
         const id = result.headers.get('location');
-        // Se crea un nuevo objeto incluyendo el ID devuelto
         const newItem = { ...task, id: id };
         setItems([newItem, ...items]);
         setInserting(false);
@@ -185,62 +147,77 @@ function App() {
         setInserting(false);
         setError(error);
       });
-    }    
-    return (
-      <div className="App">
-        <h1>MY TASK LIST</h1>
-        <NewItem addItem={addItem} isInserting={isInserting}/>
-        { error &&
-          <p>Error: {error.message}</p>
-        }
-        { isLoading &&
-          <CircularProgress />
-        }
-        { !isLoading &&
-        <div id="maincontent">
-        <table id="itemlistNotDone" className="itemlist">
-          <TableBody>
-          {items.map(item => (
-            !item.done && (
-            <tr key={item.id}>
-              <td className="description">{item.description}</td>
-              { /*<td>{JSON.stringify(item, null, 2) }</td>*/ }
-              <td className="date"><Moment format="MMM Do hh:mm:ss">{item.createdAt}</Moment></td>
-              <td>{item.deadline}</td>
-              <td>{getPriorityLabel(item.priority)}</td>
-              <td>{item.assignedUser ? item.assignedUser.name : "Sin usuario"}</td>
-              <td><Button variant="contained" className="DoneButton" onClick={(event) => toggleDone(event, item.id, item.description, !item.done)} size="small">
-                    Done
-                  </Button></td>
-            </tr>
-          )))}
-          </TableBody>
-        </table>
-        <h2 id="donelist">
-          Done items
-        </h2>
-        <table id="itemlistDone" className="itemlist">
-          <TableBody>
-          {items.map(item => (
-            item.done && (
+  }
 
-            <tr key={item.id}>
-              <td className="description">{item.description}</td>
-              <td className="date"><Moment format="MMM Do hh:mm:ss">{item.createdAt}</Moment></td>
-              <td><Button variant="contained" className="DoneButton" onClick={(event) => toggleDone(event, item.id, item.description, !item.done)} size="small">
-                    Undo
-                  </Button></td>
-              <td><Button startIcon={<DeleteIcon />} variant="contained" className="DeleteButton" onClick={() => deleteItem(item.id)} size="small">
-                    Delete
-                  </Button></td>
-            </tr>
-          )))}
-          </TableBody>
-        </table>
+  return (
+    <div className="App p-4">
+      <h1 className="text-3xl font-bold mb-4">MY TASK LIST</h1>
+      <NewItem addItem={addItem} isInserting={isInserting} />
+      {error && <p className="text-red-500">Error: {error.message}</p>}
+      {isLoading && (
+        <div className="flex justify-center items-center my-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
-        }
-
-      </div>
-    );
+      )}
+      {!isLoading && (
+        <div id="maincontent">
+          <table id="itemlistNotDone" className="min-w-full divide-y divide-gray-200 mb-4">
+            <tbody className="bg-white divide-y divide-gray-200">
+              {items.map(item => (
+                !item.done && (
+                  <tr key={item.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.description}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(item.createdAt)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.deadline}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{getPriorityLabel(item.priority)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.assignedUser ? item.assignedUser.name : "Sin usuario"}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs"
+                        onClick={(event) => toggleDone(event, item.id, item.description, !item.done)}>
+                        Done
+                      </button>
+                    </td>
+                  </tr>
+                )
+              ))}
+            </tbody>
+          </table>
+          <h2 id="donelist" className="text-2xl font-semibold mb-2">Done items</h2>
+          <table id="itemlistDone" className="min-w-full divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200">
+              {items.map(item => (
+                item.done && (
+                  <tr key={item.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.description}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(item.createdAt)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-xs"
+                        onClick={(event) => toggleDone(event, item.id, item.description, !item.done)}>
+                        Undo
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-xs flex items-center"
+                        onClick={() => deleteItem(item.id)}>
+                        {/* Ícono "x" con SVG, sustituye a DeleteIcon */}
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                )
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
 }
+
 export default App;
