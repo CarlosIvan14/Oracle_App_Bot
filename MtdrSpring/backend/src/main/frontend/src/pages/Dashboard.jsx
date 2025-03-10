@@ -1,0 +1,189 @@
+// Dashboard.jsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import NewItemModal from '../components/NewItem/NewItemModal';
+import TaskList from '../components/TaskList/TaskList';
+import API_LIST from '../API';
+
+function Dashboard() {
+  const [isLoading, setLoading] = useState(false);
+  const [isInserting, setInserting] = useState(false);
+  const [items, setItems] = useState([]);
+  const [error, setError] = useState();
+
+  const navigate = useNavigate();
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const isManager = user && user.role === 'manager';
+
+  const handleLogout = () => {
+    navigate('/');
+    localStorage.removeItem('user');
+  };
+
+  function deleteItem(deleteId) {
+    fetch(API_LIST + "/" + deleteId, { method: 'DELETE' })
+      .then(response => {
+        if (response.ok) {
+          const remainingItems = items.filter(item => item.id !== deleteId);
+          setItems(remainingItems);
+        } else {
+          throw new Error('Something went wrong ...');
+        }
+      })
+      .catch(error => setError(error));
+  }
+
+  function toggleDone(event, id, description, done) {
+    event.preventDefault();
+    modifyItem(id, description, done).then(
+      () => reloadOneIteam(id),
+      error => setError(error)
+    );
+  }
+
+  function reloadOneIteam(id) {
+    fetch(API_LIST + "/" + id)
+      .then(response => {
+        if (response.ok) return response.json();
+        else throw new Error('Something went wrong ...');
+      })
+      .then(
+        result => {
+          const items2 = items.map(x => (x.id === id ? result : x));
+          setItems(items2);
+        },
+        error => setError(error)
+      );
+  }
+
+  function modifyItem(id, description, done) {
+    const data = { description, done };
+    return fetch(API_LIST + "/" + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+      .then(response => {
+        if (response.ok) return response;
+        else throw new Error('Something went wrong ...');
+      });
+  }
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(API_LIST)
+      .then(response => {
+        if (response.ok) return response.json();
+        else throw new Error('Something went wrong ...');
+      })
+      .then(
+        result => {
+          setLoading(false);
+          setItems(result);
+        },
+        error => {
+          setLoading(false);
+          setError(error);
+        }
+      );
+  }, []);
+
+  function addItem(task) {
+    setInserting(true);
+    fetch(API_LIST, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(task),
+    })
+      .then(response => {
+        if (response.ok) return response;
+        else throw new Error('Something went wrong ...');
+      })
+      .then(result => {
+        const id = result.headers.get('location');
+        const newItem = { ...task, id };
+        setItems([newItem, ...items]);
+        setInserting(false);
+      })
+      .catch(error => {
+        setInserting(false);
+        setError(error);
+      });
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col items-center">
+      {/* Si el usuario es manager, mostramos el botón para abrir el modal de nueva tarea */}
+      {isManager && (
+        <div className="mt-10 flex justify-center">
+          <NewItemModal addItem={addItem} isInserting={isInserting} />
+          <button
+          onClick={handleLogout}
+          className="
+            bg-transparent
+            text-white
+            font-semibold
+            py-2
+            px-4
+            rounded-full
+            transition
+            duration-200
+            transform hover:scale-105
+            hover:border hover:border-red-500
+          "
+        >
+          Cerrar Sesión
+        </button>
+        </div>
+      )}
+      {!isManager && (
+        <div className="mt-10 flex justify-center">
+          <button
+          onClick={handleLogout}
+          className="
+            bg-transparent
+            text-white
+            font-semibold
+            py-2
+            px-4
+            rounded-full
+            transition
+            duration-200
+            transform hover:scale-105
+            hover:border hover:border-red-500
+          "
+        >
+          Cerrar Sesión
+        </button>
+        </div>
+      )}
+      {/* Contenedor para la lista de tareas */}
+      <div className="w-full max-w-4xl bg-black bg-opacity-40 backdrop-blur-md p-8 rounded-xl shadow-xl mt-8">
+        <h1 className="text-4xl text-white font-bold mb-6 text-center">
+          MY TASK LIST
+        </h1>
+
+        {error && (
+          <p className="text-red-400 text-center mt-4">
+            Error: {error.message}
+          </p>
+        )}
+
+        {isLoading ? (
+          <div className="flex justify-center items-center my-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-300"></div>
+          </div>
+        ) : (
+          <TaskList
+            items={items}
+            toggleDone={toggleDone}
+            deleteItem={deleteItem}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default Dashboard;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css'; // Import base CSS
+import 'react-datepicker/dist/react-datepicker.css';
 
 function NewItemModal({ addItem, isInserting }) {
   // Estados para el modal
@@ -8,7 +8,7 @@ function NewItemModal({ addItem, isInserting }) {
 
   // Estados para los campos del formulario
   const [description, setDescription] = useState('');
-  const [deadline, setDeadline] = useState(null); // almacenaremos un objeto Date
+  const [deadline, setDeadline] = useState(null); // objeto Date
   const [priority, setPriority] = useState('');
   const [assignedUserId, setAssignedUserId] = useState('');
 
@@ -19,12 +19,12 @@ function NewItemModal({ addItem, isInserting }) {
       return;
     }
 
-    // Convertir la fecha a formato yyyy-MM-dd (o como necesites)
+    // Convertir la fecha a formato yyyy-MM-dd
     const isoDate = deadline.toISOString().split('T')[0];
 
     const newTask = {
       description,
-      deadline: isoDate, // Usamos la fecha formateada
+      deadline: isoDate,
       priority: parseInt(priority, 10),
       assignedUser: { id: parseInt(assignedUserId, 10) }
     };
@@ -53,21 +53,18 @@ function NewItemModal({ addItem, isInserting }) {
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M15.232 5.232l3.536 3.536m-2.036-5.036l-8.5 8.5a2.121 
-           2.121 0 000 3l2 2a2.121 2.121 0 003 0l8.5-8.5a2.121 2.121 0 
-           000-3l-2-2a2.121 2.121 0 00-3 0z"
+        d="M15.232 5.232l3.536 3.536m-2.036-5.036l-8.5 8.5a2.121 2.121 0 000 3l2 2a2.121 2.121 0 003 0l8.5-8.5a2.121 2.121 0 000-3l-2-2a2.121 2.121 0 00-3 0z"
       />
     </svg>
   );
 
   return (
     <>
-      {/* Botón que abre el modal */}
+      {/* Botón que abre el modal con borde cyan al hover */}
       <button
         className="
           flex items-center 
-          bg-transparent
-          hover:border-cyan-500 
+          bg-transparent 
           text-white 
           font-semibold 
           py-2 
@@ -76,6 +73,7 @@ function NewItemModal({ addItem, isInserting }) {
           transition 
           duration-200
           transform hover:scale-105
+          hover:border hover:border-cyan-500
         "
         onClick={() => setShowModal(true)}
       >
@@ -111,7 +109,7 @@ function NewItemModal({ addItem, isInserting }) {
               transition duration-200 transform hover:scale-105
             "
           >
-            {/* Botón para cerrar modal */}
+            {/* Botón para cerrar modal con borde cyan al hover */}
             <button
               className="
                 absolute 
@@ -122,6 +120,7 @@ function NewItemModal({ addItem, isInserting }) {
                 transition
                 duration-200
                 transform hover:scale-105
+                hover:border hover:border-cyan-500
               "
               onClick={() => setShowModal(false)}
             >
@@ -178,7 +177,7 @@ function NewItemModal({ addItem, isInserting }) {
                 <DatePicker
                   selected={deadline}
                   onChange={(date) => setDeadline(date)}
-                  dateFormat="yyyy-MM-dd" // El formato que verás en el input
+                  dateFormat="yyyy-MM-dd"
                   placeholderText="Selecciona una fecha"
                   className="
                     w-full
@@ -192,7 +191,6 @@ function NewItemModal({ addItem, isInserting }) {
                     focus:ring-cyan-500
                     transition duration-200 transform hover:scale-105
                   "
-                  // Para que el calendario emergente sea oscuro
                   calendarClassName="bg-gray-800 text-white border border-gray-600"
                 />
               </div>
@@ -262,6 +260,7 @@ function NewItemModal({ addItem, isInserting }) {
                   transition 
                   duration-200
                   transform hover:scale-105
+                  hover:border hover:border-cyan-500
                 "
               >
                 {isInserting ? "Agregando..." : "Agregar Tarea"}
