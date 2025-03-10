@@ -40,14 +40,18 @@ function TaskListItem({ item, toggleDone, deleteItem }) {
         {!item.done ? (
           <button
             className="
-              bg-blue-500 
-              hover:bg-blue-600 
-              text-white 
-              font-bold 
-              py-1 
-              px-2 
-              rounded 
-              text-xs
+              flex items-center 
+              bg-transparent 
+              text-green-500 
+              font-semibold 
+              py-2 
+              px-4 
+              rounded-full
+              transition-all 
+              duration-200
+              hover:text-white
+              hover:border
+              hover:border-green-500
             "
             onClick={(event) => toggleDone(event, item.id, item.description, !item.done)}
           >
@@ -56,14 +60,18 @@ function TaskListItem({ item, toggleDone, deleteItem }) {
         ) : (
           <button
             className="
-              bg-green-500 
-              hover:bg-green-600 
-              text-white 
-              font-bold 
-              py-1 
-              px-2 
-              rounded 
-              text-xs
+              flex items-center 
+              bg-transparent 
+              text-cyan-500 
+              font-semibold 
+              py-2 
+              px-4 
+              rounded-full
+              transition-all
+              duration-200
+              hover:text-white
+              hover:border
+              hover:border-cyan-500
             "
             onClick={(event) => toggleDone(event, item.id, item.description, !item.done)}
           >
@@ -75,16 +83,18 @@ function TaskListItem({ item, toggleDone, deleteItem }) {
         <td className="px-6 py-3 whitespace-nowrap">
           <button
             className="
-              bg-red-500 
-              hover:bg-red-600 
-              text-white 
-              font-bold 
-              py-1 
-              px-2 
-              rounded 
-              text-xs 
-              flex 
-              items-center
+              flex items-center 
+              bg-transparent 
+              text-red-500 
+              font-semibold 
+              py-2 
+              px-4 
+              rounded-full
+              transition-all
+              duration-200
+              hover:text-white
+              hover:border
+              hover:border-red-500
             "
             onClick={() => deleteItem(item.id)}
           >
