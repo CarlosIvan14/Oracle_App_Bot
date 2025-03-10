@@ -31,7 +31,7 @@ body {
 }
 
 /* Contenedor principal de la app */
-.App {
+.ManagerDashboard {
   background: var(--bg-dark);
   color: var(--text-light);
   display: flex;

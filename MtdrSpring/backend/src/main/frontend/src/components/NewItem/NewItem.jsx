@@ -30,7 +30,6 @@ function NewItem({ addItem, isInserting }) {
   return (
     <form onSubmit={handleSubmit}>
       <input
-        className='rounded-full'
         type="text"
         placeholder="Descripción"
         value={description}
