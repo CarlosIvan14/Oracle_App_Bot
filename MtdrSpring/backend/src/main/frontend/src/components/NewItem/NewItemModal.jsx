@@ -2,6 +2,15 @@ import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
+// Lista de usuarios harcodeada
+const teamMembers = [
+  { id: 1, name: 'Jorge' },
+  { id: 1, name: 'Carlos' },
+  { id: 1, name: 'Maria' },
+  { id: 1, name: 'Ana' },
+  { id: 1, name: 'Pedro' },
+];
+
 function NewItemModal({ addItem, isInserting }) {
   // Estados para el modal
   const [showModal, setShowModal] = useState(false);
@@ -10,11 +19,13 @@ function NewItemModal({ addItem, isInserting }) {
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState(null); // objeto Date
   const [priority, setPriority] = useState('');
-  const [assignedUserId, setAssignedUserId] = useState('');
+  // En lugar de ID real, guardamos la posición
+  const [userPosition, setUserPosition] = useState('');
 
+  // Manejo de submit del formulario
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!description || !deadline || !priority || !assignedUserId) {
+    if (!description || !deadline || !priority || !userPosition) {
       alert("Por favor, completa todos los campos");
       return;
     }
@@ -22,11 +33,21 @@ function NewItemModal({ addItem, isInserting }) {
     // Convertir la fecha a formato yyyy-MM-dd
     const isoDate = deadline.toISOString().split('T')[0];
 
+    // Convertimos la posición ingresada a un índice de array (restando 1)
+    const pos = parseInt(userPosition, 10) - 1;
+    // Validamos que esté en rango
+    if (pos < 0 || pos >= teamMembers.length) {
+      alert(`La posición debe ser entre 1 y ${teamMembers.length}`);
+      return;
+    }
+    // Obtenemos el id real
+    const assignedUserId = teamMembers[pos].id;
+
     const newTask = {
       description,
       deadline: isoDate,
       priority: parseInt(priority, 10),
-      assignedUser: { id: parseInt(assignedUserId, 10) }
+      assignedUser: { id: assignedUserId },
     };
     addItem(newTask);
 
@@ -34,7 +55,7 @@ function NewItemModal({ addItem, isInserting }) {
     setDescription('');
     setDeadline(null);
     setPriority('');
-    setAssignedUserId('');
+    setUserPosition('');
 
     // Cerrar modal
     setShowModal(false);
@@ -53,7 +74,9 @@ function NewItemModal({ addItem, isInserting }) {
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M15.232 5.232l3.536 3.536m-2.036-5.036l-8.5 8.5a2.121 2.121 0 000 3l2 2a2.121 2.121 0 003 0l8.5-8.5a2.121 2.121 0 000-3l-2-2a2.121 2.121 0 00-3 0z"
+        d="M15.232 5.232l3.536 3.536m-2.036-5.036l-8.5 8.5a2.121 
+           2.121 0 000 3l2 2a2.121 2.121 0 003 0l8.5-8.5a2.121 2.121 0 
+           000-3l-2-2a2.121 2.121 0 00-3 0z"
       />
     </svg>
   );
@@ -173,7 +196,6 @@ function NewItemModal({ addItem, isInserting }) {
                 <label className="block mb-1 font-semibold">
                   Fecha Límite
                 </label>
-                {/* DatePicker personalizado */}
                 <DatePicker
                   selected={deadline}
                   onChange={(date) => setDeadline(date)}
@@ -191,6 +213,7 @@ function NewItemModal({ addItem, isInserting }) {
                     focus:ring-cyan-500
                     transition duration-200 transform hover:scale-105
                   "
+                  wrapperClassName="w-full"
                   calendarClassName="bg-gray-800 text-white border border-gray-600"
                 />
               </div>
@@ -222,15 +245,26 @@ function NewItemModal({ addItem, isInserting }) {
                 </select>
               </div>
 
+              {/* Listado de usuarios */}
               <div>
                 <label className="block mb-1 font-semibold">
-                  ID Usuario
+                  Rank de Usuarios para esta tarea:
+                </label>
+                <ul className="ml-4 mb-2 text-sm">
+                  {teamMembers.map((member, index) => (
+                    <li key={member.id}>
+                      {index + 1}. {member.name}
+                    </li>
+                  ))}
+                </ul>
+                <label className="block mb-1 font-semibold">
+                  Ingresa la posición del usuario al que quieres asignar la tarea (1 - {teamMembers.length})
                 </label>
                 <input
                   type="number"
-                  value={assignedUserId}
-                  onChange={(e) => setAssignedUserId(e.target.value)}
-                  placeholder="ID del usuario"
+                  value={userPosition}
+                  onChange={(e) => setUserPosition(e.target.value)}
+                  placeholder="Número de posición"
                   className="
                     w-full 
                     bg-gray-700 
@@ -251,8 +285,7 @@ function NewItemModal({ addItem, isInserting }) {
                 disabled={isInserting}
                 className="
                   w-full
-                  bg-cyan-600 
-                  hover:bg-cyan-700 
+                  bg-transparent
                   text-white 
                   font-semibold 
                   py-2 
@@ -263,7 +296,7 @@ function NewItemModal({ addItem, isInserting }) {
                   hover:border hover:border-cyan-500
                 "
               >
-                {isInserting ? "Agregando..." : "Agregar Tarea"}
+                {isInserting ? "Agregando..." : "Agregar Tarea +"}
               </button>
             </form>
           </div>

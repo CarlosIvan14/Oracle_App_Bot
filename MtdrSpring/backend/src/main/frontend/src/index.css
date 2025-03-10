@@ -4,64 +4,65 @@
 @tailwind components;
 @tailwind utilities;
 @import "react-datepicker/dist/react-datepicker.css";
-/* Ejemplo de sobrescritura para que el popup sea oscuro */
-
-/* Contenedor principal del DatePicker */
+/* Contenedor principal y fondo */
 .react-datepicker,
 .react-datepicker__month-container {
-  background-color: #2d3748; /* gris oscuro */
-  color: #fff;              /* texto blanco */
-  border: 1px solid #4a5568;
+  background-color: #2d3748 !important; /* gris oscuro */
+  color: #fff !important;
+  border: 1px solid #4a5568 !important;
 }
 
-/* Encabezado (barra superior con mes y flechas) */
+/* Triángulo del popup */
+.react-datepicker__triangle {
+  border-bottom-color: #2d3748 !important;
+}
+
+/* Encabezado (barra superior con mes/año) */
 .react-datepicker__header {
-  background-color: #2d3748;
-  border-bottom: 1px solid #4a5568;
+  background-color: #2d3748 !important;
+  border-bottom: 1px solid #4a5568 !important;
 }
 
-/* Texto del mes actual (ej. "March 2025") */
+/* Texto del mes actual (e.g. "March 2025"), días de la semana */
 .react-datepicker__current-month,
-.react-datepicker-time__header,
+.react-datepicker__day-name,
+.react-datepicker__time-name,
 .react-datepicker-year-header {
-  color: #fff; 
+  color: #fff !important;
 }
 
 /* Flechas de navegación (prev/next) */
 .react-datepicker__navigation--previous,
 .react-datepicker__navigation--next {
-  top: 10px; /* Ajusta según necesites */
-}
-
-/* Color de la flecha en los íconos de navegación */
-.react-datepicker__navigation-icon::before {
-  border-color: #fff; /* Flecha blanca */
-}
-
-/* Nombres de días (ej. "Su Mo Tu...") */
-.react-datepicker__day-name {
-  color: #fff;
-  background-color: #2d3748;
+  /* Opcional: invierte color si quieres flechas claras */
+  filter: invert(100%);
 }
 
 /* Días del calendario */
 .react-datepicker__day {
-  color: #fff; /* texto de los días */
+  color: #fff !important; /* Texto blanco */
+  background-color: #2d3748 !important;
 }
 
 /* Días fuera del mes actual */
 .react-datepicker__day--outside-month {
-  color: #718096; /* un gris claro */
+  color: #718096 !important; /* gris claro */
 }
 
-/* Día seleccionado (fondo cyan-500 y texto blanco) */
+/* Día seleccionado */
 .react-datepicker__day--selected,
 .react-datepicker__day--keyboard-selected {
-  background-color: #06b6d4; /* tailwind cyan-500 */
-  color: #fff !important;    /* forzamos blanco */
+  background-color: #06b6d4 !important; /* cyan-500 */
+  color: #fff !important;
 }
 
 /* Día hover */
 .react-datepicker__day:hover {
-  background-color: #4a5568; /* hover un poco más claro */
+  background-color: #4a5568 !important; /* hover un poco más claro */
+}
+
+/* Día de hoy (opcional, si quieres resaltarlo) */
+.react-datepicker__day--today {
+  border: 1px solid #06b6d4 !important;
+  color: #fff !important;
 }

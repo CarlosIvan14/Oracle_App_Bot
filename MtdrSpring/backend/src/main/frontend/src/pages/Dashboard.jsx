@@ -17,10 +17,10 @@ function Dashboard() {
   const isManager = user && user.role === 'manager';
 
   const handleLogout = () => {
-    navigate('/');
     localStorage.removeItem('user');
+    window.location.href = '/';
   };
-
+  
   function deleteItem(deleteId) {
     fetch(API_LIST + "/" + deleteId, { method: 'DELETE' })
       .then(response => {
