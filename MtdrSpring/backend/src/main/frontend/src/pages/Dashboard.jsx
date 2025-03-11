@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import NewItemModal from '../components/NewItem/NewItemModal';
 import TaskList from '../components/TaskList/TaskList';
 import API_LIST from '../API';
+import NewUserModal from '../components/NewUserModal/NewUserModal';
 
 function Dashboard() {
   const [isLoading, setLoading] = useState(false);
@@ -120,6 +121,7 @@ function Dashboard() {
       {isManager && (
         <div className="mt-10 flex justify-center">
           <NewItemModal addItem={addItem} isInserting={isInserting} />
+          <NewUserModal isRegistering={false} />
           <button
             onClick={handleLogout}
             className="
