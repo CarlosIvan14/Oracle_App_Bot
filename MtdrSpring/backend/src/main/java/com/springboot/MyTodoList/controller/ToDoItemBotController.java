@@ -298,7 +298,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                         
                         // Crear instancia mínima de OracleUser (usa setId)
                         OracleUser assignedUser = new OracleUser();
-                        assignedUser.setId(assignedUserId);
+                        assignedUser.setIdUser(assignedUserId);
                         newItem.setAssignedUser(assignedUser);
                         
                         toDoItemService.addToDoItem(newItem);

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
+import java.util.List;
 @Service
 public class ToDoItemService {
 
@@ -82,7 +82,7 @@ public class ToDoItemService {
             }
 
             // Usuario asignado (solo si no es null)
-            if (td.getAssignedUser() != null && td.getAssignedUser().getId() != 0) {
+            if (td.getAssignedUser() != null && td.getAssignedUser().getIdUser() != 0) {
                 existing.setAssignedUser(td.getAssignedUser());
             }
 
@@ -94,5 +94,9 @@ public class ToDoItemService {
             return null;
         }
     }
+        // ToDoItemService.java
+        public List<ToDoItem> getItemsByUserId(int userId) {
+            return toDoItemRepository.findByAssignedUserIdUser(userId);
+        }
 
 }

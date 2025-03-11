@@ -8,7 +8,7 @@ const teamMembers = [
   { id: 1, name: 'Carlos' },
   { id: 1, name: 'Maria' },
   { id: 1, name: 'Ana' },
-  { id: 1, name: 'Pedro' },
+  { id: 26, name: 'JohnDoe' },
 ];
 
 function NewItemModal({ addItem, isInserting }) {
@@ -47,7 +47,7 @@ function NewItemModal({ addItem, isInserting }) {
       description,
       deadline: isoDate,
       priority: parseInt(priority, 10),
-      assignedUser: { id: assignedUserId },
+      assignedUser: { idUser: assignedUserId },
     };
     addItem(newTask);
 

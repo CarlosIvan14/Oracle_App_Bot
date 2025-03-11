@@ -1,7 +1,7 @@
 package com.springboot.MyTodoList.model;
 
 import javax.persistence.*;
-
+import java.util.List;
 @Entity
 @Table(name = "ORACLE_USERS")
 public class OracleUser {
@@ -28,7 +28,9 @@ public class OracleUser {
 
     @Column(name = "TELEGRAM_USERNAME")
     private String telegramUsername;
-
+    // OracleUser.java
+    @OneToMany(mappedBy = "assignedUser")
+    private List<ToDoItem> tasks;
     // Constructors
     public OracleUser() {}
 
@@ -43,11 +45,11 @@ public class OracleUser {
     }
 
     // Getters and Setters
-    public int getId() {
+    public int getIdUser() {
         return idUser;
     }
-
-    public void setId(int idUser) {
+    
+    public void setIdUser(int idUser) {
         this.idUser = idUser;
     }
 

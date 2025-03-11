@@ -65,6 +65,9 @@ public class ToDoItemController {
         }
     }
 
-
+    @GetMapping(value = "/todolist/user/{userId}")
+    public List<ToDoItem> getToDoItemsByUser(@PathVariable int userId) {
+        return toDoItemService.getItemsByUserId(userId);
+    }
 
 }

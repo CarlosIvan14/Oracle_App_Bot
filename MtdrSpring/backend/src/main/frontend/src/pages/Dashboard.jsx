@@ -1,5 +1,4 @@
-// Dashboard.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NewItemModal from '../components/NewItem/NewItemModal';
 import TaskList from '../components/TaskList/TaskList';
@@ -12,15 +11,37 @@ function Dashboard() {
   const [error, setError] = useState();
 
   const navigate = useNavigate();
-  const storedUser = localStorage.getItem('user');
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  const user = useMemo(() => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  }, []); // Solo se calcula una vez
   const isManager = user && user.role === 'manager';
-
   const handleLogout = () => {
     localStorage.removeItem('user');
     window.location.href = '/';
   };
+
+  // Fetch de tareas para el usuario activo
+  useEffect(() => {
+    if (user?.id) {
+      setLoading(true);
+      const url = user.role === 'manager' 
+        ? API_LIST 
+        : `${API_LIST}/user/${user.id}`;
   
+      fetch(url)
+        .then(response => response.json())
+        .then(result => {
+          setItems(result);
+          setLoading(false);
+        })
+        .catch(error => {
+          setError(error);
+          setLoading(false);
+        });
+    }
+  }, []); // Sin dependencias (se ejecuta solo al montar)
+
   function deleteItem(deleteId) {
     fetch(API_LIST + "/" + deleteId, { method: 'DELETE' })
       .then(response => {
@@ -70,25 +91,6 @@ function Dashboard() {
       });
   }
 
-  useEffect(() => {
-    setLoading(true);
-    fetch(API_LIST)
-      .then(response => {
-        if (response.ok) return response.json();
-        else throw new Error('Something went wrong ...');
-      })
-      .then(
-        result => {
-          setLoading(false);
-          setItems(result);
-        },
-        error => {
-          setLoading(false);
-          setError(error);
-        }
-      );
-  }, []);
-
   function addItem(task) {
     setInserting(true);
     fetch(API_LIST, {
@@ -119,43 +121,43 @@ function Dashboard() {
         <div className="mt-10 flex justify-center">
           <NewItemModal addItem={addItem} isInserting={isInserting} />
           <button
-          onClick={handleLogout}
-          className="
-            bg-transparent
-            text-white
-            font-semibold
-            py-2
-            px-4
-            rounded-full
-            transition
-            duration-200
-            transform hover:scale-105
-            hover:border hover:border-red-500
-          "
-        >
-          Cerrar Sesión
-        </button>
+            onClick={handleLogout}
+            className="
+              bg-transparent
+              text-white
+              font-semibold
+              py-2
+              px-4
+              rounded-full
+              transition
+              duration-200
+              transform hover:scale-105
+              hover:border hover:border-red-500
+            "
+          >
+            Cerrar Sesión
+          </button>
         </div>
       )}
       {!isManager && (
         <div className="mt-10 flex justify-center">
           <button
-          onClick={handleLogout}
-          className="
-            bg-transparent
-            text-white
-            font-semibold
-            py-2
-            px-4
-            rounded-full
-            transition
-            duration-200
-            transform hover:scale-105
-            hover:border hover:border-red-500
-          "
-        >
-          Cerrar Sesión
-        </button>
+            onClick={handleLogout}
+            className="
+              bg-transparent
+              text-white
+              font-semibold
+              py-2
+              px-4
+              rounded-full
+              transition
+              duration-200
+              transform hover:scale-105
+              hover:border hover:border-red-500
+            "
+          >
+            Cerrar Sesión
+          </button>
         </div>
       )}
       {/* Contenedor para la lista de tareas */}

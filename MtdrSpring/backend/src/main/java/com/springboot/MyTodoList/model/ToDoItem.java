@@ -34,7 +34,7 @@ public class ToDoItem {
 
     // Relación con ORACLE_USERS
     @ManyToOne
-    @JoinColumn(name = "ASSIGNED_USER")
+    @JoinColumn(name = "ASSIGNED_USER") // Nombre de la columna en la tabla TODOITEM
     private OracleUser assignedUser;
 
     public ToDoItem() {
@@ -112,7 +112,7 @@ public class ToDoItem {
                 ", done=" + done +
                 ", deadline=" + deadline +
                 ", priority=" + priority +
-                ", assignedUser=" + (assignedUser != null ? assignedUser.getId() : null) +
+                ", assignedUser=" + (assignedUser != null ? assignedUser.getIdUser() : null) +
                 '}';
     }
 }
