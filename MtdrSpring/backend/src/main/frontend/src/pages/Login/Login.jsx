@@ -3,25 +3,47 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Login({ onLogin }) {
-  const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Simulate authentication (replace with actual API call)
-    if (username === 'manager' && password === '123') {
-      // Hardcode manager con id 1 (por ejemplo)
-      onLogin({ username, role: 'manager', id: 1 });
-      navigate('/manager');
-    } else if (username === 'user' && password === '123') {
-      // Hardcode user con id 2
-      onLogin({ username, role: 'user', id: 26 });
-      navigate('/user');
-    } else {
-      setError('Invalid username or password');
+    try {
+      const response = await fetch('http://localhost:8081/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Invalid username or password');
+      }
+
+      const userData = await response.json();
+
+     // Access properties directly from `userData`
+     const idUser = userData.idUser;
+     const userName = userData.name;
+     const role = userData.role;
+ 
+     // Call onLogin with the necessary data
+     onLogin({ idUser, name: userName, role });
+
+      // Navigate based on role
+      if (role === 'manager') {
+        navigate('/manager');
+      } else if (role === 'developer') {
+        navigate('/developer');
+      } else {
+        setError('Unknown role');
+      }
+    } catch (error) {
+      setError(error.message);
     }
   };
 
@@ -34,12 +56,12 @@ function Login({ onLogin }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-white font-medium">Username</label>
+            <label className="block text-white font-medium">Name</label>
             <input
               className="w-full border text-white bg-slate-600 border-gray-800 px-4 py-2 rounded-3xl focus:outline-none focus:ring-2 focus:ring-blue-500 transform transition duration-200 hover:scale-105"
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
             />
           </div>

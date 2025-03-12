@@ -24,11 +24,11 @@ function Dashboard() {
 
   // Fetch de tareas para el usuario activo
   useEffect(() => {
-    if (user?.id) {
+    if (user?.idUser) {
       setLoading(true);
       const url = user.role === 'manager' 
         ? API_LIST 
-        : `${API_LIST}/user/${user.id}`;
+        : `${API_LIST}/user/${user.idUser}`;
   
       fetch(url)
         .then(response => response.json())

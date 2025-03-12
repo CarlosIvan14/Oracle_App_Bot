@@ -25,13 +25,13 @@ function AppRouter() {
     <Router>
       <Routes>
         {/* Home Page (Temporary Redirect to Login if No User) */}
-        <Route path="/" element={!user ? <Login onLogin={handleLogin} /> : <Navigate to={user.role === 'manager' ? '/manager' : '/user'} />} />
+        <Route path="/" element={!user ? <Login onLogin={handleLogin} /> : <Navigate to={user.role === 'manager' ? '/manager' : '/developer'} />} />
 
         {/* Manager Dashboard (Protected Route) */}
         <Route path="/manager" element={user?.role === 'manager' ? <Dashboard /> : <Navigate to="/" />} />
 
         {/* User Dashboard (Protected Route) */}
-        <Route path="/user" element={user?.role === 'user' ? <Dashboard /> : <Navigate to="/" />} />
+        <Route path="/developer" element={user?.role === 'developer' ? <Dashboard /> : <Navigate to="/" />} />
 
         {/* Fallback Route */}
         <Route path="*" element={<Navigate to="/" />} />

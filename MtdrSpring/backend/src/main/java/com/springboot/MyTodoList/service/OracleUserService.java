@@ -4,10 +4,9 @@ import com.springboot.MyTodoList.model.OracleUser;
 import com.springboot.MyTodoList.repository.OracleUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Optional;
 
+import java.util.Optional;
 @Service
 public class OracleUserService {
 
@@ -23,6 +22,13 @@ public class OracleUserService {
     }
 
     public OracleUser registerUser(OracleUser oracleUser) {
-         return oracleUserRepository.save(oracleUser);
+        return oracleUserRepository.save(oracleUser);
     }
+
+    // Login a user
+    public Optional<OracleUser> loginUser(String name, String password) {
+        // Find the user by name and password
+        return oracleUserRepository.findByNameAndPassword(name, password);
+    }
+
 }
