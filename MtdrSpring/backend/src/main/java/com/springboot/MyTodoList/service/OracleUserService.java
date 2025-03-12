@@ -5,15 +5,24 @@ import com.springboot.MyTodoList.repository.OracleUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class OracleUserService {
 
     @Autowired
     private OracleUserRepository oracleUserRepository;
 
-    // Register a new user
+    public List<OracleUser> getAllUsers() {
+         return oracleUserRepository.findAll();
+    }
+
+    public Optional<OracleUser> getUserById(int id) {
+         return oracleUserRepository.findById(id);
+    }
+
     public OracleUser registerUser(OracleUser oracleUser) {
-        // Add validation or business logic here if needed
-        return oracleUserRepository.save(oracleUser);
+         return oracleUserRepository.save(oracleUser);
     }
 }

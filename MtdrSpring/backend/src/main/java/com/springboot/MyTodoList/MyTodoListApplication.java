@@ -15,6 +15,8 @@ import com.springboot.MyTodoList.controller.ToDoItemBotController;
 import com.springboot.MyTodoList.service.ToDoItemService;
 import com.springboot.MyTodoList.util.BotMessages;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 @SpringBootApplication
 public class MyTodoListApplication implements CommandLineRunner {
 
@@ -30,6 +32,13 @@ public class MyTodoListApplication implements CommandLineRunner {
 	private String botName;
 
 	public static void main(String[] args) {
+		// Cargar variables de entorno desde el archivo .env ubicado en la raíz (misma carpeta que pom.xml)
+        Dotenv dotenv = Dotenv.configure()
+                              .directory("./")
+                              .load();
+        // Configurar la API key como propiedad del sistema para que Spring Boot la inyecte con @Value
+        System.setProperty("openai.api.key", dotenv.get("OPENAI_API_KEY"));
+        
 		SpringApplication.run(MyTodoListApplication.class, args);
 	}
 
