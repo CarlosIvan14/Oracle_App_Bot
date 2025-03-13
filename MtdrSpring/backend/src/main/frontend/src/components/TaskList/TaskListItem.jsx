@@ -23,19 +23,27 @@ function getPriorityLabel(priority) {
 function TaskListItem({ item, toggleDone, deleteItem }) {
   return (
     <tr className="hover:bg-gray-700 text-white">
-      <td className="px-6 py-3 whitespace-nowrap">{item.description}</td>
+      {/* Descripción con salto de línea y corte de palabras */}
+      <td className="px-6 py-3 whitespace-pre-line break-words">
+        {item.description}
+      </td>
+
       <td className="px-6 py-3 whitespace-nowrap">
         {item.createdAt ? formatDate(item.createdAt) : "--"}
       </td>
+
       <td className="px-6 py-3 whitespace-nowrap">
         {item.deadline || "--"}
       </td>
+
       <td className="px-6 py-3 whitespace-nowrap">
         {getPriorityLabel(item.priority)}
       </td>
+
       <td className="px-6 py-3 whitespace-nowrap">
         {item.assignedUser ? item.assignedUser.name : "Sin usuario"}
       </td>
+
       <td className="px-6 py-3 whitespace-nowrap">
         {!item.done ? (
           <button
@@ -53,7 +61,9 @@ function TaskListItem({ item, toggleDone, deleteItem }) {
               hover:border
               hover:border-green-500
             "
-            onClick={(event) => toggleDone(event, item.id, item.description, !item.done)}
+            onClick={(event) =>
+              toggleDone(event, item.id, item.description, !item.done)
+            }
           >
             Done
           </button>
@@ -73,12 +83,15 @@ function TaskListItem({ item, toggleDone, deleteItem }) {
               hover:border
               hover:border-cyan-500
             "
-            onClick={(event) => toggleDone(event, item.id, item.description, !item.done)}
+            onClick={(event) =>
+              toggleDone(event, item.id, item.description, !item.done)
+            }
           >
             Undo
           </button>
         )}
       </td>
+
       {item.done && (
         <td className="px-6 py-3 whitespace-nowrap">
           <button

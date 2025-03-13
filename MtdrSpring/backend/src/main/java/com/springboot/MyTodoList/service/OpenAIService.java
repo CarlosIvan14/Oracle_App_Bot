@@ -36,8 +36,13 @@ public class OpenAIService {
                   .append("\n");
         }
         // Solicitar una salida precisa: una lista de IDs separados por coma sin texto adicional
-        prompt.append("Ordena los usuarios de mejor a peor perfil basándote en el usuario que tenga las skills mas adecuadas de acorde a la descripción de la tarea y si no tienen parecido, entonces ordenalas en base solo a las skills.y");
-        prompt.append("Devuelve únicamente una lista de IDs (sin espacios ni texto adicional), separados por comas y no omitas ningun usuario ordenalos todos.");
+        prompt.append("Ordena los usuarios de mejor a peor perfil basándote en el usuario que tenga las skills más adecuadas de acuerdo a la descripción de la tarea. ");
+        prompt.append("Si no hay un match directo, ordénalos en base solo a las skills. ");
+        prompt.append("Ordena los usuarios de mejor a peor perfil basándote en sus skills en relación con la tarea.");
+        prompt.append(" Devuelve ÚNICAMENTE una lista de IDs en el siguiente formato: 'ID1,ID2,ID3,ID4,ID5'.");
+        prompt.append(" No incluyas ninguna otra palabra, explicación, ni comentarios. SOLO la lista de IDs. Y no omitas ninguno de los IDs que se te pasaron.");
+        prompt.append(" Ejemplo de salida válida: '53,54,30,50,1,41,52'.");
+
 
         // Preparar la llamada a la API de OpenAI utilizando el endpoint de chat completions
         RestTemplate restTemplate = new RestTemplate();
@@ -51,7 +56,7 @@ public class OpenAIService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-4o");
         // Aumentamos max_tokens y configuramos temperature para respuestas más deterministas
-        requestBody.put("max_tokens", 250);
+        requestBody.put("max_tokens", 100);
         requestBody.put("temperature", 0);
         
         List<Map<String, String>> messages = new ArrayList<>();

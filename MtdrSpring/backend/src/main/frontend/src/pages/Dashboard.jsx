@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { FaUsers } from 'react-icons/fa'; // Ejemplo de ícono de usuarios
 import NewItemModal from '../components/NewItem/NewItemModal';
 import TaskList from '../components/TaskList/TaskList';
 import API_LIST from '../API';
@@ -15,21 +16,22 @@ function Dashboard() {
   const user = useMemo(() => {
     const storedUser = localStorage.getItem('user');
     return storedUser ? JSON.parse(storedUser) : null;
-  }, []); // Solo se calcula una vez
+  }, []);
+
   const isManager = user && user.role === 'manager';
+
   const handleLogout = () => {
     localStorage.removeItem('user');
     window.location.href = '/';
   };
 
-  // Fetch de tareas para el usuario activo
   useEffect(() => {
     if (user?.idUser) {
       setLoading(true);
       const url = user.role === 'manager' 
-        ? API_LIST 
+        ? API_LIST
         : `${API_LIST}/user/${user.idUser}`;
-  
+
       fetch(url)
         .then(response => response.json())
         .then(result => {
@@ -41,7 +43,7 @@ function Dashboard() {
           setLoading(false);
         });
     }
-  }, []); // Sin dependencias (se ejecuta solo al montar)
+  }, []);
 
   function deleteItem(deleteId) {
     fetch(API_LIST + "/" + deleteId, { method: 'DELETE' })
@@ -117,11 +119,32 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col items-center">
-      {/* Si el usuario es manager, mostramos el botón para abrir el modal de nueva tarea */}
       {isManager && (
-        <div className="mt-10 flex justify-center">
+        <div className="mt-10 flex gap-4 justify-center">
           <NewItemModal addItem={addItem} isInserting={isInserting} />
           <NewUserModal isRegistering={false} />
+
+          {/* Botón para ir a la lista de usuarios */}
+          <Link
+            to="/users"
+            className="
+              flex items-center
+              bg-transparent
+              text-white
+              font-semibold
+              py-2
+              px-4
+              rounded-full
+              transition
+              duration-200
+              transform hover:scale-105
+              hover:border hover:border-blue-500
+            "
+          >
+            <FaUsers className="mr-2" />
+            Ver Usuarios
+          </Link>
+
           <button
             onClick={handleLogout}
             className="
@@ -141,6 +164,7 @@ function Dashboard() {
           </button>
         </div>
       )}
+
       {!isManager && (
         <div className="mt-10 flex justify-center">
           <button
@@ -162,6 +186,7 @@ function Dashboard() {
           </button>
         </div>
       )}
+
       {/* Contenedor para la lista de tareas */}
       <div className="w-full max-w-4xl bg-black bg-opacity-40 backdrop-blur-md p-8 rounded-xl shadow-xl mt-8">
         <h1 className="text-4xl text-white font-bold mb-6 text-center">

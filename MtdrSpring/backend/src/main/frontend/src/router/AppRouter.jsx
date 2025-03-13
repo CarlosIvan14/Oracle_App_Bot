@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from '../pages/Login/Login';
 import Dashboard from '../pages/Dashboard';
-
+import UserList from '../pages/UserList'; 
 
 function AppRouter() {
   const [user, setUser] = useState(null);
@@ -32,7 +32,7 @@ function AppRouter() {
 
         {/* User Dashboard (Protected Route) */}
         <Route path="/developer" element={user?.role === 'developer' ? <Dashboard /> : <Navigate to="/" />} />
-
+        <Route path="/users" element={<UserList />} />
         {/* Fallback Route */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
