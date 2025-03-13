@@ -36,7 +36,7 @@ public class OpenAIService {
                   .append("\n");
         }
         // Solicitar una salida precisa: una lista de IDs separados por coma sin texto adicional
-        prompt.append("Ordena los usuarios de mejor a peor perfil basándote en el usuario que tenga las skills mas adecuadas de acorde a la descripción de la tarea. ");
+        prompt.append("Ordena los usuarios de mejor a peor perfil basándote en el usuario que tenga las skills mas adecuadas de acorde a la descripción de la tarea y si no tienen parecido, entonces ordenalas en base solo a las skills.y");
         prompt.append("Devuelve únicamente una lista de IDs (sin espacios ni texto adicional), separados por comas y no omitas ningun usuario ordenalos todos.");
 
         // Preparar la llamada a la API de OpenAI utilizando el endpoint de chat completions

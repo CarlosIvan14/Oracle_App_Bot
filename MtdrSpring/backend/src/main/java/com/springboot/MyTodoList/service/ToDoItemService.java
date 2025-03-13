@@ -1,10 +1,12 @@
 package com.springboot.MyTodoList.service;
 
+import com.springboot.MyTodoList.model.OracleUser;
 import com.springboot.MyTodoList.model.ToDoItem;
 import com.springboot.MyTodoList.repository.ToDoItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -94,9 +96,10 @@ public class ToDoItemService {
             return null;
         }
     }
-        // ToDoItemService.java
-        public List<ToDoItem> getItemsByUserId(int userId) {
-            return toDoItemRepository.findByAssignedUserIdUser(userId);
-        }
+
+    // ToDoItemService.java
+    public List<ToDoItem> getItemsByUserId(int userId) {
+        return toDoItemRepository.findByAssignedUserIdUser(userId);
+    }
 
 }

@@ -74,6 +74,20 @@ public class OracleUserController {
                 return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<OracleUser> updateUser(@PathVariable int id, @RequestBody OracleUser userUpdates) {
+        try {
+            Optional<OracleUser> updatedUser = oracleUserService.updateUser(id, userUpdates);
+            if (updatedUser.isPresent()) {
+                return new ResponseEntity<>(updatedUser.get(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
 
 
