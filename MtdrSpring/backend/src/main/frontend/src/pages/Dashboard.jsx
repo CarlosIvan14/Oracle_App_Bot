@@ -11,6 +11,8 @@ function Dashboard() {
   const [isInserting, setInserting] = useState(false);
   const [items, setItems] = useState([]);
   const [error, setError] = useState();
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [isRegistering, setRegistering] = useState(false);
 
   const navigate = useNavigate();
   const user = useMemo(() => {
@@ -117,12 +119,41 @@ function Dashboard() {
       });
   }
 
+  const handleCloseUserModal = () => {
+    setShowUserModal(false);
+  };
+
+  const handleOpenUserModal = () => {
+    setShowUserModal(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col items-center">
       {isManager && (
         <div className="mt-10 flex gap-4 justify-center">
           <NewItemModal addItem={addItem} isInserting={isInserting} />
-          <NewUserModal isRegistering={false} />
+          <button
+          onClick={handleOpenUserModal}
+          className="
+            flex items-center 
+            bg-transparent 
+            text-white 
+            font-semibold 
+            py-2 
+            px-4 
+            rounded-full
+            transition 
+            duration-200
+            transform hover:scale-105
+            hover:border hover:border-purple-500
+          "
+        >
+          Registrar Usuario
+        </button>
+          <NewUserModal
+          isOpen={showUserModal}
+          onClose={handleCloseUserModal}
+          isRegistering={isRegistering}/>
 
           {/* Botón para ir a la lista de usuarios */}
           <Link
