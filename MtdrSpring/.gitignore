@@ -2,4 +2,4 @@
 **/build/**
 **/target/**
 **.env**
-**application.properties**
+
