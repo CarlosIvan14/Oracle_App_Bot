@@ -118,7 +118,7 @@ function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col items-center">
+    <div className="min-h-screen bg-gradient-to-b from-customDarkligth to-customDark flex flex-col items-center">
       {isManager && (
         <div className="mt-10 flex gap-4 justify-center">
           <NewItemModal addItem={addItem} isInserting={isInserting} />

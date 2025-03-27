@@ -80,7 +80,7 @@ function UserList() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-700 to-gray-950 p-8">
+    <div className="min-h-screen  bg-gradient-to-b from-customDarkligth to-customDark p-8">
       <div className="flex items-center justify-center mb-6">
         <NewUserModal
             isRegistering={true}
@@ -114,7 +114,7 @@ function UserList() {
       <div className="max-w-5xl mx-auto bg-black bg-opacity-40 p-6 rounded-xl">
         <table className="min-w-full table-auto text-white">
           <thead>
-            <tr className="border-b border-gray-600">
+            <tr className="border-b border-customeDarkLight">
               <th className="py-3 px-4 text-left">Usuario</th>
               <th className="py-3 px-4 text-left">Nombre</th>
               <th className="py-3 px-4 text-left">Skills</th>
@@ -125,8 +125,7 @@ function UserList() {
             {users.map((u) => (
               <tr
                 key={u.idUser}
-                className="border-b border-gray-600 hover:bg-gray-700"
-              >
+                className="border-b border-customeDarkLigth hover:bg-customeDarkLigth">
                 {/* Ícono de usuario */}
                 <td className="py-3 px-4">
                   <FaUser className="text-2xl" />
@@ -140,7 +139,7 @@ function UserList() {
                   {editingUserId === u.idUser ? (
                     <input
                       type="text"
-                      className="bg-gray-800 p-2 rounded w-full text-white"
+                      className="bg-customeDark p-2 rounded w-full text-white"
                       value={editedSkills}
                       onChange={(e) => setEditedSkills(e.target.value)}
                     />

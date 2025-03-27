@@ -22,7 +22,7 @@ function getPriorityLabel(priority) {
 
 function TaskListItem({ item, toggleDone, deleteItem }) {
   return (
-    <tr className="hover:bg-gray-700 text-white">
+    <tr className="hover:bg-customDarkligth text-white">
       {/* Descripción con salto de línea y corte de palabras */}
       <td className="px-6 py-3 whitespace-pre-line break-words">
         {item.description}

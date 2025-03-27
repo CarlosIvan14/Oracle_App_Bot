@@ -48,17 +48,17 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-700 to-gray-950">
-      <div className="bg-slate-800 bg-opacity-90 p-10 rounded-2xl shadow-2xl w-96 h-96">
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-customDarkligth to-customDark">
+      <div className="bg-customDark bg-opacity-90 p-10 rounded-2xl shadow-2xl w-96 h-97">
         <h2 className="text-3xl font-bold text-center text-white mb-6">Login</h2>
         
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        {error && <p className="text-red-700 text-center mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-white font-medium">Name</label>
             <input
-              className="w-full border text-white bg-slate-600 border-gray-800 px-4 py-2 rounded-3xl focus:outline-none focus:ring-2 focus:ring-blue-500 transform transition duration-200 hover:scale-105"
+              className="w-full border text-white bg-customDarkligth border-gray-800 px-4 py-2 rounded-3xl focus:outline-none focus:ring-2 focus:ring-gray-300 transform transition duration-200 hover:scale-105"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -69,7 +69,7 @@ function Login({ onLogin }) {
           <div className="pb-6">
             <label className="block text-white font-medium">Password</label>
             <input
-              className="w-full border text-white bg-slate-600 border-gray-800 px-4 py-2 rounded-3xl focus:outline-none focus:ring-2 focus:ring-blue-500 transform transition duration-200 hover:scale-105"
+              className="w-full border text-white bg-customDarkligth border-gray-800 px-4 py-2 rounded-3xl focus:outline-none focus:ring-2 focus:ring-gray-300 transform transition duration-200 hover:scale-105"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -79,7 +79,7 @@ function Login({ onLogin }) {
 
           <button 
             type="submit" 
-            className="w-full bg-gradient-to-bl from-cyan-900 to-purple-700 text-white py-2 rounded-full font-semibold transform transition duration-200 hover:scale-105"
+            className="w-full bg-red-500 text-white py-2 rounded-full font-semibold transform transition duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-300"
           >
             Log In
           </button>

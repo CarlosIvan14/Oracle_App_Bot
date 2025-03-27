@@ -3,7 +3,7 @@ import TaskListItem from './TaskListItem';
 
 function TaskList({ items, toggleDone, deleteItem }) {
   return (
-    <div id="maincontent" className="bg-gray-800 bg-opacity-50 p-4 rounded-lg">
+    <div id="maincontent" className="bg-customDark bg-opacity-50 p-4 rounded-lg">
 
       {/* Tareas pendientes */}
       <h2 className="text-2xl font-semibold mb-2 text-white">
@@ -21,7 +21,7 @@ function TaskList({ items, toggleDone, deleteItem }) {
           mb-4
         "
       >
-        <tbody className="divide-y divide-gray-700">
+        <tbody className="divide-y divide-customDarkligth">
           {items
             .filter(item => !item.done)
             .map(item => (
@@ -47,10 +47,10 @@ function TaskList({ items, toggleDone, deleteItem }) {
           w-full 
           break-words 
           divide-y 
-          divide-gray-700
+          divide-customDarkligth
         "
       >
-        <tbody className="divide-y divide-gray-700">
+        <tbody className="divide-y divide-customDarkligth">
           {items
             .filter(item => item.done)
             .map(item => (
