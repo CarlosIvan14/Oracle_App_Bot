@@ -32,6 +32,10 @@ public class ToDoItem {
     @Column(name = "PRIORITY")
     private Integer priority;
 
+     // Nuevo campo para el estado de la tarea (por ejemplo, "ASSIGNED", "IN_PROGRESS", "COMPLETED")
+     @Column(name = "STATE")
+     private String state;
+
     // Relación con ORACLE_USERS
     @ManyToOne
     @JoinColumn(name = "ASSIGNED_USER") // Nombre de la columna en la tabla TODOITEM
@@ -103,6 +107,14 @@ public class ToDoItem {
         this.assignedUser = assignedUser;
     }
 
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
     @Override
     public String toString() {
         return "ToDoItem{" +
@@ -112,6 +124,7 @@ public class ToDoItem {
                 ", done=" + done +
                 ", deadline=" + deadline +
                 ", priority=" + priority +
+                ", state=" + state +
                 ", assignedUser=" + (assignedUser != null ? assignedUser.getIdUser() : null) +
                 '}';
     }

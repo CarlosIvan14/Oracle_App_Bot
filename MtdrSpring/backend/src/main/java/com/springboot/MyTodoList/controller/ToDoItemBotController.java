@@ -16,8 +16,11 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -65,6 +68,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         private Integer taskPriority;
         private List<OracleUser> aiSortedUsers; // lista devuelta por la AI
         private int chosenPosition; // índice elegido en la lista
+        private int currentProjectId;
+        private int currentSprintId;
 
         // Datos para crear usuario
         private String newUserName;
@@ -80,6 +85,173 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
     // Mapa: chatId -> estado de conversación
     private final Map<Long, BotConversationState> conversationStates = new HashMap<>();
+
+    // Harcodeo de proyectos
+    // Proyectos con IDs simples (1,2,3...)
+    private static List<Map<String, Object>> PROJECTS = List.of(
+        Map.of("id", 1, "name", "Proyecto Oracle Migration"),
+        Map.of("id", 2, "name", "Proyecto Billing System"),
+        Map.of("id", 3, "name", "Proyecto Web Chatbot"),
+        Map.of("id", 4, "name", "Proyecto Mobile Banking")
+    );
+
+    // Sprints con IDs en decenas según proyecto
+    private static final Map<Integer, List<Map<String, Object>>> SPRINTS_DATA = Map.of(
+        1, List.of( // Proyecto 1
+            Map.of("id", 11, "name", "Sprint 1", "status", "Activo"),
+            Map.of("id", 12, "name", "Sprint 2", "status", "Activo")
+        ),
+        2, List.of( // Proyecto 2
+            Map.of("id", 21, "name", "Sprint Alpha", "status", "Cerrado"),
+            Map.of("id", 22, "name", "Sprint Beta", "status", "Activo")
+        ),
+        3, List.of( // Proyecto 3
+            Map.of("id", 31, "name", "Sprint Velocidad", "status", "Activo")
+        ),
+        4, List.of( // Proyecto 4
+            Map.of("id", 41, "name", "Sprint Seguridad", "status", "Planificado")
+        )
+    );
+
+    // Tareas organizadas por sprint (ID sprint + 2 dígitos)
+    private static Map<Integer, List<Map<String, Object>>> SPRINT_TASKS = new HashMap<>();
+
+    // Inicializar tareas de ejemplo
+    static {
+        // Sprint 11 (Proyecto 1)
+        SPRINT_TASKS.put(11, new ArrayList<>(Arrays.asList(
+            Map.of("id", 1101, "description", "Migrar base de datos", "status", "ASSIGNED"),
+            Map.of("id", 1102, "description", "Configurar servidores Oracle", "status", "IN_PROGRESS")
+        )));
+        
+        // Sprint 12 (Proyecto 1)
+        SPRINT_TASKS.put(12, new ArrayList<>(Arrays.asList(
+            Map.of("id", 1201, "description", "Optimizar consultas SQL", "status", "COMPLETED")
+        )));
+
+        // Sprint 21 (Proyecto 2)
+        SPRINT_TASKS.put(21, new ArrayList<>(Arrays.asList(
+            Map.of("id", 2101, "description", "Diseñar módulo facturación", "status", "ASSIGNED")
+        )));
+    }
+
+    private void startLoginFlow(long chatId, BotConversationState state) {
+        state.flow = Flow.LOGIN;
+        state.step = 1;
+        sendMsg(chatId, "¡Bienvenido! Por favor, ingresa tu *nombre* de usuario:", true);
+    }
+
+    private void showSprintsForProject(long chatId, int projectId) {
+        List<Map<String, Object>> sprints = SPRINTS_DATA.getOrDefault(projectId, new ArrayList<>());
+        
+        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+        keyboard.setResizeKeyboard(true);
+        List<KeyboardRow> rows = new ArrayList<>();
+
+        // Cabecera con botón de regreso
+        KeyboardRow backRow = new KeyboardRow();
+        backRow.add("⬅️ Volver a Proyectos");
+        rows.add(backRow);
+
+        // Título
+        KeyboardRow titleRow = new KeyboardRow();
+        titleRow.add("🔄 Sprints del Proyecto " + projectId);
+        rows.add(titleRow);
+
+        // Lista de sprints
+        for (Map<String, Object> sprint : sprints) {
+            KeyboardRow row = new KeyboardRow();
+            String statusIcon = "Activo".equals(sprint.get("status")) ? "🟢" : "🔴";
+            row.add(statusIcon + " " + sprint.get("name") + " (ID: " + sprint.get("id") + ")");
+            rows.add(row);
+        }
+
+        keyboard.setKeyboard(rows);
+        
+        SendMessage msg = new SendMessage();
+        msg.setChatId(chatId);
+        msg.setText("Selecciona un sprint:");
+        msg.setReplyMarkup(keyboard);
+        
+        try {
+            execute(msg);
+        } catch (TelegramApiException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+    private void listTasksForSprint(long chatId, int sprintId) {
+        List<Map<String, Object>> tasks = SPRINT_TASKS.getOrDefault(sprintId, new ArrayList<>());
+        
+        // Filtrar por estado
+        List<Map<String, Object>> assigned = tasks.stream()
+            .filter(t -> "ASSIGNED".equals(t.get("status")))
+            .collect(Collectors.toList());
+        
+        List<Map<String, Object>> inProgress = tasks.stream()
+            .filter(t -> "IN_PROGRESS".equals(t.get("status")))
+            .collect(Collectors.toList());
+        
+        List<Map<String, Object>> completed = tasks.stream()
+            .filter(t -> "COMPLETED".equals(t.get("status")))
+            .collect(Collectors.toList());
+    
+        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+        keyboard.setResizeKeyboard(true);
+        List<KeyboardRow> rows = new ArrayList<>();
+    
+        // Botones de navegación
+        KeyboardRow headerRow = new KeyboardRow();
+        headerRow.add("⬅️ Volver a Sprints");
+        rows.add(headerRow);
+    
+        // Sección Assigned
+        if (!assigned.isEmpty()) {
+            rows.add(createTitleRow("📥 ASIGNADAS"));
+            assigned.forEach(task -> {
+                KeyboardRow row = new KeyboardRow();
+                row.add(task.get("description") + " [ID: " + task.get("id") + "]");
+                row.add("▶️ START-" + task.get("id"));
+                rows.add(row);
+            });
+        }
+    
+        // Sección In Progress
+        if (!inProgress.isEmpty()) {
+            rows.add(createTitleRow("⏳ EN PROGRESO"));
+            inProgress.forEach(task -> {
+                KeyboardRow row = new KeyboardRow();
+                row.add(task.get("description") + " [ID: " + task.get("id") + "]");
+                row.add("❌ CANCEL-" + task.get("id"));
+                row.add("✅ DONE-" + task.get("id"));
+                rows.add(row);
+            });
+        }
+    
+        // Sección Completed
+        if (!completed.isEmpty()) {
+            rows.add(createTitleRow("✅ COMPLETADAS"));
+            completed.forEach(task -> {
+                KeyboardRow row = new KeyboardRow();
+                row.add(task.get("description") + " [ID: " + task.get("id") + "]");
+                row.add("↩️ UNDO-" + task.get("id"));
+                rows.add(row);
+            });
+        }
+    
+        keyboard.setKeyboard(rows);
+        
+        SendMessage msg = new SendMessage();
+        msg.setChatId(chatId);
+        msg.setText("Tablero del Sprint " + sprintId);
+        msg.setReplyMarkup(keyboard);
+        
+        try {
+            execute(msg);
+        } catch (TelegramApiException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
 
     public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService) {
         super(botToken);
@@ -99,79 +271,169 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         if (!update.hasMessage() || !update.getMessage().hasText()) {
             return;
         }
+        
         String messageText = update.getMessage().getText().trim();
         long chatId = update.getMessage().getChatId();
-
-        // 0. Revisar si es /menu
-        if (messageText.equalsIgnoreCase("/menu")) {
-            BotConversationState st = conversationStates.getOrDefault(chatId, new BotConversationState());
-            resetFlow(st);
-            if (st.loggedUser != null) {
-                showMainMenu(chatId, st.loggedUser);
-            } else {
-                sendMsg(chatId, "No hay sesión activa. Usa /start para loguearte.", false);
-            }
-            conversationStates.put(chatId, st);
+        BotConversationState state = conversationStates.computeIfAbsent(chatId, k -> new BotConversationState());
+    
+        // 1. Manejar comandos especiales
+        if (messageText.equalsIgnoreCase("/start")) {
+            handleStartCommand(chatId, state);
+            return;
+        } else if (messageText.equalsIgnoreCase("/menu")) {
+            handleMenuCommand(chatId, state);
+            return;
+        } else if (messageText.equalsIgnoreCase("/logout")) {
+            logoutUser(chatId);
             return;
         }
-
-        // 1. Procesar DONE, UNDO, DELETE si aparece en el texto
-        if (messageText.contains("-DONE")) {
-            handleDoneAction(chatId, messageText);
-            return;
-        } else if (messageText.contains("-UNDO")) {
-            handleUndoAction(chatId, messageText);
-            return;
-        } else if (messageText.contains("-DELETE")) {
-            handleDeleteAction(chatId, messageText);
+    
+        // 2. Manejar navegación entre proyectos y sprints
+        if (handleNavigation(chatId, messageText, state)) {
             return;
         }
-
-        // 2. Revisar/crear estado si no existe
-        conversationStates.putIfAbsent(chatId, new BotConversationState());
-        BotConversationState state = conversationStates.get(chatId);
-
-        // 3. Si el usuario no está logueado, forzamos el flujo de login
+    
+        // 3. Si el usuario no está logueado, forzar login
         if (state.loggedUser == null && state.flow != Flow.LOGIN) {
-            state.flow = Flow.LOGIN;
-            state.step = 1;
-            sendMsg(chatId, "¡Bienvenido! Por favor, ingresa tu *nombre* de usuario:", true);
+            startLoginFlow(chatId, state);
             return;
         }
-
-        // 4. Si estamos en medio de un flujo (LOGIN, ADD_TASK, ADD_USER, EDIT_SKILL), procesarlo
+    
+        // 4. Manejar flujos activos (login, agregar tarea/usuario)
         if (state.flow != Flow.NONE) {
             processFlow(chatId, messageText, state);
             return;
         }
-
-        // 5. Menú principal (ya logueado, sin flujo)
+    
+        // 5. Manejar acciones en tareas
+        if (handleTaskActions(chatId, messageText, state)) {
+            return;
+        }
+    
+        // 6. Manejar selección de proyectos
+        if (handleProjectSelection(chatId, messageText, state)) {
+            return;
+        }
+    
+        // 7. Opciones del menú principal
+        handleMainMenuOptions(chatId, messageText, state);
+    }
+    
+    // Métodos auxiliares nuevos
+    private void handleStartCommand(long chatId, BotConversationState state) {
+        state.flow = Flow.LOGIN;
+        state.step = 1;
+        sendMsg(chatId, "¡Bienvenido! Por favor, ingresa tu *nombre* de usuario:", true);
+    }
+    
+    private void handleMenuCommand(long chatId, BotConversationState state) {
+        resetFlow(state);
+        if (state.loggedUser != null) {
+            showMainMenu(chatId, state.loggedUser);
+        } else {
+            sendMsg(chatId, "No hay sesión activa. Usa /start para loguearte.", false);
+        }
+    }
+    
+    private boolean handleNavigation(long chatId, String messageText, BotConversationState state) {
+        if (messageText.equals("⬅️ Volver a Proyectos")) {
+            showMainMenu(chatId, state.loggedUser);
+            return true;
+        } else if (messageText.equals("⬅️ Volver a Sprints")) {
+            if (state.currentProjectId != 0) {
+                showSprintsForProject(chatId, state.currentProjectId);
+            } else {
+                showMainMenu(chatId, state.loggedUser);
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    private boolean handleProjectSelection(long chatId, String messageText, BotConversationState state) {
+        Matcher projectMatcher = Pattern.compile(".*\\(ID: (\\d+)\\)").matcher(messageText);
+        if (projectMatcher.find()) {
+            int projectId = Integer.parseInt(projectMatcher.group(1));
+            state.currentProjectId = projectId;
+            showSprintsForProject(chatId, projectId);
+            return true;
+        }
+        return false;
+    }
+    
+    private boolean handleTaskActions(long chatId, String messageText, BotConversationState state) {
+        String[] actionParts = messageText.split("-");
+        if (actionParts.length == 2) {
+            String action = actionParts[1];
+            if (Arrays.asList("START", "CANCEL", "DONE", "UNDO").contains(action)) {
+                try {
+                    int taskId = Integer.parseInt(actionParts[0].replaceAll("[^\\d]", ""));
+                    int sprintId = taskId / 100; // Obtener ID de sprint de los primeros dígitos
+                    
+                    List<Map<String, Object>> tasks = SPRINT_TASKS.getOrDefault(sprintId, new ArrayList<>());
+                    Optional<Map<String, Object>> task = tasks.stream()
+                        .filter(t -> (int) t.get("id") == taskId)
+                        .findFirst();
+                    
+                    if (task.isPresent()) {
+                        switch(action) {
+                            case "START":
+                                task.get().put("status", "IN_PROGRESS");
+                                break;
+                            case "CANCEL":
+                                task.get().put("status", "ASSIGNED");
+                                break;
+                            case "DONE":
+                                task.get().put("status", "COMPLETED");
+                                break;
+                            case "UNDO":
+                                task.get().put("status", "IN_PROGRESS");
+                                break;
+                        }
+                        listTasksForSprint(chatId, sprintId);
+                    } else {
+                        sendMsg(chatId, "⚠️ Tarea no encontrada", false);
+                    }
+                } catch (NumberFormatException e) {
+                    sendMsg(chatId, "❌ ID de tarea inválido", false);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private void handleMainMenuOptions(long chatId, String messageText, BotConversationState state) {
         OracleUser user = state.loggedUser;
-        boolean isManager = user != null && "manager".equalsIgnoreCase(user.getRole());
-
+        boolean isManager = "manager".equalsIgnoreCase(user.getRole());
+        
         switch (messageText) {
-            case "/start":
-            case "Show Main Screen":
-                showMainMenu(chatId, user);
-                break;
-            case "Logout":
-            case "/logout":
-                logoutUser(chatId);
-                break;
             case "List Tasks":
-                listTasksForUser(chatId, user);
+                if (state.currentSprintId != 0) {
+                    listTasksForSprint(chatId, state.currentSprintId);
+                } else {
+                    sendMsg(chatId, "Primero selecciona un sprint", false);
+                }
+                break;
+            case "View Users":
+                if (isManager) viewUsers(chatId);
+                break;
+            case "Add Task":
+                if (isManager) startAddTaskFlow(chatId);
+                break;
+            case "Add User":
+                if (isManager) startAddUserFlow(chatId);
                 break;
             default:
-                if (isManager) {
-                    if (messageText.equals("Add Task")) {
-                        startAddTaskFlow(chatId);
-                    } else if (messageText.equals("Add User")) {
-                        startAddUserFlow(chatId);
-                    } else if (messageText.equals("View Users")) {
-                        viewUsers(chatId);
-                    } else {
-                        sendMsg(chatId, "Opción no reconocida. Usa el menú.", false);
-                    }
+                // Manejar selección de sprint
+                Optional<Map<String, Object>> selectedSprint = SPRINTS_DATA.values().stream()
+                    .flatMap(List::stream)
+                    .filter(s -> messageText.contains(String.valueOf(s.get("id"))))
+                    .findFirst();
+                
+                if (selectedSprint.isPresent()) {
+                    state.currentSprintId = (int) selectedSprint.get().get("id");
+                    listTasksForSprint(chatId, state.currentSprintId);
                 } else {
                     sendMsg(chatId, "Opción no reconocida. Usa el menú.", false);
                 }
@@ -183,79 +445,75 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     //  Manejo de DONE, UNDO, DELETE
     // --------------------------------------------------------------------------------
 
+    // --------------------------------------------------------------------------------
+    //  Handlers de Acciones de Tareas
+    // --------------------------------------------------------------------------------
+
+    private void handleStartAction(long chatId, String text) {
+        int taskId = extractId(text, "-START");
+        int sprintId = taskId / 100;
+        
+        List<Map<String, Object>> tasks = SPRINT_TASKS.getOrDefault(sprintId, new ArrayList<>());
+        tasks.stream()
+            .filter(t -> (int) t.get("id") == taskId)
+            .findFirst()
+            .ifPresent(t -> t.put("status", "IN_PROGRESS"));
+        
+        sendMsg(chatId, "▶️ Tarea en progreso: " + taskId, false);
+        listTasksForSprint(chatId, sprintId);
+    }
+
+    private void handleCancelAction(long chatId, String text) {
+        int taskId = extractId(text, "-CANCEL");
+        int sprintId = taskId / 100;
+        
+        List<Map<String, Object>> tasks = SPRINT_TASKS.getOrDefault(sprintId, new ArrayList<>());
+        tasks.stream()
+            .filter(t -> (int) t.get("id") == taskId)
+            .findFirst()
+            .ifPresent(t -> t.put("status", "ASSIGNED"));
+        
+        sendMsg(chatId, "⏮️ Tarea devuelta a asignadas: " + taskId, false);
+        listTasksForSprint(chatId, sprintId);
+    }
+
     private void handleDoneAction(long chatId, String text) {
-        // Si hay prefijo "->", quitarlo:
-        if (text.startsWith("->")) {
-            text = text.substring(2).trim();
-        }
-        // Extraer ID antes del "-DONE"
-        int dashIndex = text.indexOf("-DONE");
-        if (dashIndex == -1) {
-            sendMsg(chatId, "No se encontró ID para DONE.", false);
-            return;
-        }
-        String idStr = text.substring(0, dashIndex).trim();
-        try {
-            int id = Integer.parseInt(idStr);
-            ToDoItem item = getToDoItemById(id).getBody();
-            if (item == null) {
-                sendMsg(chatId, "No se encontró la tarea con ID " + id, false);
-                return;
-            }
-            item.setDone(true);
-            updateToDoItem(id, item);
-            BotHelper.sendMessageToTelegram(chatId, BotMessages.ITEM_DONE.getMessage(), this);
-        } catch (Exception e) {
-            logger.error("Error al procesar DONE: " + e.getMessage(), e);
-            sendMsg(chatId, "Error al marcar DONE.", false);
-        }
+        int taskId = extractId(text, "-DONE");
+        int sprintId = taskId / 100;
+        
+        List<Map<String, Object>> tasks = SPRINT_TASKS.getOrDefault(sprintId, new ArrayList<>());
+        tasks.stream()
+            .filter(t -> (int) t.get("id") == taskId)
+            .findFirst()
+            .ifPresent(t -> t.put("status", "COMPLETED"));
+        
+        sendMsg(chatId, "✅ Tarea completada: " + taskId, false);
+        listTasksForSprint(chatId, sprintId);
     }
 
     private void handleUndoAction(long chatId, String text) {
-        if (text.startsWith("->")) {
-            text = text.substring(2).trim();
-        }
-        int dashIndex = text.indexOf("-UNDO");
-        if (dashIndex == -1) {
-            sendMsg(chatId, "No se encontró ID para UNDO.", false);
-            return;
-        }
-        String idStr = text.substring(0, dashIndex).trim();
+        int taskId = extractId(text, "-UNDO");
+        int sprintId = taskId / 100;
+        
+        List<Map<String, Object>> tasks = SPRINT_TASKS.getOrDefault(sprintId, new ArrayList<>());
+        tasks.stream()
+            .filter(t -> (int) t.get("id") == taskId)
+            .findFirst()
+            .ifPresent(t -> t.put("status", "IN_PROGRESS"));
+        
+        sendMsg(chatId, "↩️ Tarea devuelta a en progreso: " + taskId, false);
+        listTasksForSprint(chatId, sprintId);
+    }
+
+    private int extractId(String text, String command) {
         try {
-            int id = Integer.parseInt(idStr);
-            ToDoItem item = getToDoItemById(id).getBody();
-            if (item == null) {
-                sendMsg(chatId, "No se encontró la tarea con ID " + id, false);
-                return;
-            }
-            item.setDone(false);
-            updateToDoItem(id, item);
-            BotHelper.sendMessageToTelegram(chatId, BotMessages.ITEM_UNDONE.getMessage(), this);
-        } catch (Exception e) {
-            logger.error("Error al procesar UNDO: " + e.getMessage(), e);
-            sendMsg(chatId, "Error al marcar UNDO.", false);
+            return Integer.parseInt(text.replace(command, "").replaceAll("[^\\d]", ""));
+        } catch (NumberFormatException e) {
+            logger.error("Error extrayendo ID: " + e.getMessage());
+            return -1;
         }
     }
 
-    private void handleDeleteAction(long chatId, String text) {
-        if (text.startsWith("->")) {
-            text = text.substring(2).trim();
-        }
-        int dashIndex = text.indexOf("-DELETE");
-        if (dashIndex == -1) {
-            sendMsg(chatId, "No se encontró ID para DELETE.", false);
-            return;
-        }
-        String idStr = text.substring(0, dashIndex).trim();
-        try {
-            int id = Integer.parseInt(idStr);
-            deleteToDoItem(id);
-            BotHelper.sendMessageToTelegram(chatId, BotMessages.ITEM_DELETED.getMessage(), this);
-        } catch (Exception e) {
-            logger.error("Error al procesar DELETE: " + e.getMessage(), e);
-            sendMsg(chatId, "Error al eliminar la tarea.", false);
-        }
-    }
 
     // --------------------------------------------------------------------------------
     //  Procesos de Flujo
@@ -310,6 +568,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     //  MENÚ PRINCIPAL
     // --------------------------------------------------------------------------------
     private void showMainMenu(long chatId, OracleUser user) {
+        if (user == null) {
+            sendMsg(chatId, "No tienes sesion activa. Usa /start para loguearte.", false);
+            return;
+        }
+
         boolean isManager = "manager".equalsIgnoreCase(user.getRole());
         ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
         keyboard.setResizeKeyboard(true);
@@ -323,8 +586,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         // Opciones especiales si es manager
         if (isManager) {
             KeyboardRow row2 = new KeyboardRow();
-            row2.add("Add Task");
-            row2.add("Add User");
             row2.add("View Users");
             rows.add(row2);
         }
@@ -334,8 +595,19 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         rowLogout.add("Logout");
         rows.add(rowLogout);
 
-        keyboard.setKeyboard(rows);
+        // Opciones de proyectos
+        KeyboardRow titleRow = new KeyboardRow();
+        titleRow.add("==🚀 Proyectos Activos 🚀==");
+        rows.add(titleRow);
 
+        for (Map<String, Object> proj : PROJECTS) {
+            KeyboardRow row = new KeyboardRow();
+            row.add("📁 " + proj.get("name") + " (ID: " + proj.get("id") + ")");
+            rows.add(row);
+        }
+        
+        keyboard.setKeyboard(rows);
+        
         SendMessage msg = new SendMessage();
         msg.setChatId(chatId);
         msg.setText("Menú principal:");
@@ -350,79 +622,69 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     // --------------------------------------------------------------------------------
     //  LISTAR TAREAS (Manager -> todas, Developer -> solo suyas)
     // --------------------------------------------------------------------------------
-    private void listTasksForUser(long chatId, OracleUser user) {
-        List<ToDoItem> items;
-        if ("manager".equalsIgnoreCase(user.getRole())) {
-            items = getAllToDoItems();
-        } else {
-            items = getToDoItemsByUser(user.getIdUser());
-        }
-
+    /* private void listTasksForUser(long chatId, OracleUser user) {
+        // Filtrar tareas por estado
+        List<Map<String, Object>> assignedTasks = SPRINT_TASKS.stream()
+                .filter(t -> "ASSIGNED".equalsIgnoreCase((String) t.get("status")))
+                .collect(Collectors.toList());
+        
+        List<Map<String, Object>> inProgressTasks = SPRINT_TASKS.stream()
+                .filter(t -> "IN_PROGRESS".equalsIgnoreCase((String) t.get("status")))
+                .collect(Collectors.toList());
+        
+        List<Map<String, Object>> completedTasks = SPRINT_TASKS.stream()
+                .filter(t -> "COMPLETED".equalsIgnoreCase((String) t.get("status")))
+                .collect(Collectors.toList());
+    
         ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
         keyboard.setResizeKeyboard(true);
         List<KeyboardRow> rows = new ArrayList<>();
-
+    
         // Botón para volver al menú principal
         KeyboardRow headerRow = new KeyboardRow();
         headerRow.add("Show Main Screen");
         rows.add(headerRow);
-
-        // Tareas pendientes
-        List<ToDoItem> active = items.stream()
-                .filter(i -> !i.isDone())
-                .collect(Collectors.toList());
-        if (!active.isEmpty()) {
-            KeyboardRow titleActive = new KeyboardRow();
-            titleActive.add("=== PENDIENTES ===");
-            rows.add(titleActive);
-
-            for (ToDoItem item : active) {
+    
+        // Sección Assigned
+        if (!assignedTasks.isEmpty()) {
+            rows.add(createTitleRow("=== ASSIGNED ==="));
+            for (Map<String, Object> task : assignedTasks) {
                 KeyboardRow row = new KeyboardRow();
-                String priorityText = getPriorityText(item.getPriority());
-                String userName = (item.getAssignedUser() != null) ? item.getAssignedUser().getName() : "Sin user";
-
-                // "id-DONE"
-                String line = item.getID() + "-DONE";
-                row.add(item.getDescription());
-                row.add("P:" + priorityText);
-                row.add("U:" + userName);
-                // Prefijamos "->" por estética, se limpia en handleDoneAction
-                row.add("->" + line);
+                row.add((String) task.get("description"));
+                row.add("VIEW +");
+                row.add(task.get("id") + "-START");
                 rows.add(row);
             }
         }
-
-        // Tareas completadas
-        List<ToDoItem> doneList = items.stream()
-                .filter(ToDoItem::isDone)
-                .collect(Collectors.toList());
-        if (!doneList.isEmpty()) {
-            KeyboardRow titleDone = new KeyboardRow();
-            titleDone.add("=== COMPLETADAS ===");
-            rows.add(titleDone);
-
-            for (ToDoItem item : doneList) {
+    
+        // Sección In Progress
+        if (!inProgressTasks.isEmpty()) {
+            rows.add(createTitleRow("=== IN PROGRESS ==="));
+            for (Map<String, Object> task : inProgressTasks) {
                 KeyboardRow row = new KeyboardRow();
-                String priorityText = getPriorityText(item.getPriority());
-                String userName = (item.getAssignedUser() != null) ? item.getAssignedUser().getName() : "Sin user";
-
-                // "id-UNDO", "id-DELETE"
-                String lineUndo = item.getID() + "-UNDO";
-                String lineDel = item.getID() + "-DELETE";
-
-                row.add(item.getDescription());
-                row.add("P:" + priorityText);
-                row.add("U:" + userName);
-                row.add("->" + lineUndo);
-                row.add("->" + lineDel);
+                row.add((String) task.get("description"));
+                row.add("VIEW +");
+                row.add(task.get("id") + "-CANCEL");
+                row.add(task.get("id") + "-DONE");
                 rows.add(row);
             }
         }
-
+    
+        // Sección Completed
+        if (!completedTasks.isEmpty()) {
+            rows.add(createTitleRow("=== COMPLETED ==="));
+            for (Map<String, Object> task : completedTasks) {
+                KeyboardRow row = new KeyboardRow();
+                row.add((String) task.get("description"));
+                row.add(task.get("id") + "-UNDO");
+                rows.add(row);
+            }
+        }
+    
         keyboard.setKeyboard(rows);
         SendMessage msg = new SendMessage();
         msg.setChatId(chatId);
-        msg.setText("Tus tareas:");
+        msg.setText("Tablero Kanban:");
         msg.setReplyMarkup(keyboard);
         try {
             execute(msg);
@@ -430,7 +692,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             logger.error(e.getMessage(), e);
         }
     }
-
+ */
     // --------------------------------------------------------------------------------
     //  FLUJO: AÑADIR TAREA (manager)
     // --------------------------------------------------------------------------------
@@ -490,39 +752,38 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                     sendMsg(chatId, "Prioridad inválida. Ingresa 1, 2 o 3:", false);
                 }
                 break;
-            case 5:
-                try {
-                    int pos = Integer.parseInt(messageText.trim());
-                    if (pos < 1 || pos > state.aiSortedUsers.size()) {
-                        sendMsg(chatId, "Posición fuera de rango. Debe ser entre 1 y " + state.aiSortedUsers.size(), false);
-                        return;
+                case 5:
+                    try {
+                        int pos = Integer.parseInt(messageText.trim());
+                        int currentSprintId = state.currentSprintId;
+                        
+                        // Verificar si el sprint tiene lista de tareas
+                        if (!SPRINT_TASKS.containsKey(currentSprintId)) {
+                            SPRINT_TASKS.put(currentSprintId, new ArrayList<>());
+                        }
+                        
+                        // Generar nuevo ID
+                        int newTaskId = currentSprintId * 100 + SPRINT_TASKS.get(currentSprintId).size() + 1;
+                        
+                        Map<String, Object> newTask = new HashMap<>();
+                        newTask.put("id", newTaskId);
+                        newTask.put("description", state.taskDescription);
+                        newTask.put("deadline", state.taskDeadline);
+                        newTask.put("priority", state.taskPriority);
+                        newTask.put("status", "ASSIGNED");
+                        
+                        SPRINT_TASKS.get(currentSprintId).add(newTask);
+                        
+                        sendMsg(chatId, "✅ Tarea creada!", false);
+                        resetFlow(state);
+                        listTasksForSprint(chatId, currentSprintId);
+                        
+                    } catch (Exception e) {
+                        logger.error("Error al crear tarea: " + e.getMessage());
+                        sendMsg(chatId, "❌ Error al crear la tarea", false);
                     }
-                    state.chosenPosition = pos - 1;
-                    OracleUser chosenUser = state.aiSortedUsers.get(state.chosenPosition);
-                    ToDoItem newItem = new ToDoItem();
-                    newItem.setDescription(state.taskDescription);
-                    newItem.setCreation_ts(OffsetDateTime.now());
-                    newItem.setDeadline(state.taskDeadline);
-                    newItem.setPriority(state.taskPriority);
-                    newItem.setDone(false);
-
-                    OracleUser assignedUser = new OracleUser();
-                    assignedUser.setIdUser(chosenUser.getIdUser());
-                    newItem.setAssignedUser(assignedUser);
-
-                    boolean createdOk = doCreateItem(newItem);
-                    if (createdOk) {
-                        sendMsg(chatId, "¡Tarea creada exitosamente!", false);
-                    } else {
-                        sendMsg(chatId, "Hubo un error al crear la tarea.", false);
-                    }
-                    resetFlow(state);
-                    showMainMenu(chatId, state.loggedUser);
-                } catch (Exception e) {
-                    sendMsg(chatId, "Número inválido. Ingresa un valor entre 1 y " + state.aiSortedUsers.size(), false);
-                }
-                break;
-        }
+                    break;
+            }
     }
 
     // --------------------------------------------------------------------------------
@@ -598,7 +859,31 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         }
         sb.append("\nSi deseas editar el skill de un usuario, escribe: /editskill <id>\n");
         sb.append("O escribe /menu para volver al menú.");
-        sendMsg(chatId, sb.toString(), false);
+
+        //Añadir usuario
+        ReplyKeyboardMarkup keyboar = new ReplyKeyboardMarkup();
+        keyboar.setResizeKeyboard(true);
+        List<KeyboardRow> rows = new ArrayList<>();
+
+        KeyboardRow addUserRow = new KeyboardRow();
+        addUserRow.add("Add User");
+        rows.add(addUserRow);
+
+        KeyboardRow backRow = new KeyboardRow();
+        backRow.add("Show Main Screen");
+        rows.add(backRow);
+
+        keyboar.setKeyboard(rows);
+
+        SendMessage msg = new SendMessage();
+        msg.setChatId(chatId);
+        msg.setText(sb.toString());
+        msg.setReplyMarkup(keyboar);
+        try {
+            execute(msg);
+        } catch (TelegramApiException e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 
     // ------------------------------------------------------------------
@@ -621,7 +906,16 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     // --------------------------------------------------------------------------------
     private void logoutUser(long chatId) {
         conversationStates.remove(chatId);
-        sendMsg(chatId, "Has cerrado sesión. Usa /start para iniciar de nuevo.", false);
+        SendMessage msg = new SendMessage();
+        msg.setChatId(chatId);
+        msg.setText("Has cerrado sesión. Usa /start para iniciar de nuevo.");
+        msg.setReplyMarkup(new ReplyKeyboardRemove(true));
+
+        try {
+            execute(msg);
+        } catch (TelegramApiException e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 
     // --------------------------------------------------------------------------------
@@ -642,6 +936,12 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         state.newUserTelegramUsername = null;
         state.editUserId = 0;
         state.editNewSkill = null;
+    }
+
+    private KeyboardRow createTitleRow(String title) {
+        KeyboardRow row = new KeyboardRow();
+        row.add(title);
+        return row;
     }
 
     private void sendMsg(long chatId, String text, boolean markdown) {
