@@ -121,17 +121,28 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         // Sprint 11 (Proyecto 1)
         SPRINT_TASKS.put(11, new ArrayList<>(Arrays.asList(
             Map.of("id", 1101, "description", "Migrar base de datos", "status", "ASSIGNED"),
-            Map.of("id", 1102, "description", "Configurar servidores Oracle", "status", "IN_PROGRESS")
+            Map.of("id", 1102, "description", "Configurar servidores Oracle", "status", "IN_PROGRESS"),
+            Map.of("id", 1103, "description", "Frontend Dev", "status", "ASSIGNED"),
+            Map.of("id", 1104, "description", "Conectar API´s", "status", "COMPLETED")
         )));
         
         // Sprint 12 (Proyecto 1)
         SPRINT_TASKS.put(12, new ArrayList<>(Arrays.asList(
-            Map.of("id", 1201, "description", "Optimizar consultas SQL", "status", "COMPLETED")
+            Map.of("id", 1201, "description", "Optimizar consultas SQL", "status", "COMPLETED"),
+            Map.of("id", 1202, "description", "Migrar base de datos", "status", "ASSIGNED"),
+            Map.of("id", 1203, "description", "Configurar servidores Oracle", "status", "IN_PROGRESS"),
+            Map.of("id", 1204, "description", "Frontend Dev", "status", "ASSIGNED"),
+            Map.of("id", 1205, "description", "Conectar API´s", "status", "COMPLETED")
         )));
 
         // Sprint 21 (Proyecto 2)
         SPRINT_TASKS.put(21, new ArrayList<>(Arrays.asList(
-            Map.of("id", 2101, "description", "Diseñar módulo facturación", "status", "ASSIGNED")
+            Map.of("id", 2101, "description", "Diseñar módulo facturación", "status", "ASSIGNED"),
+            Map.of("id", 2102, "description", "Implementar API de pagos", "status", "IN_PROGRESS"),
+            Map.of("id", 2103, "description", "Crear interfaz de usuario", "status", "COMPLETED"),
+            Map.of("id", 2104, "description", "Integrar con sistema de terceros", "status", "ASSIGNED"),
+            Map.of("id", 2105, "description", "Realizar pruebas de integración", "status", "COMPLETED")
+
         )));
     }
 
@@ -155,7 +166,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
         // Título
         KeyboardRow titleRow = new KeyboardRow();
-        titleRow.add("🔄 Sprints del Proyecto " + projectId);
+        titleRow.add("🔄 Tasks del Sprint " + projectId);
         rows.add(titleRow);
 
         // Lista de sprints
@@ -207,7 +218,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     
         // Sección Assigned
         if (!assigned.isEmpty()) {
-            rows.add(createTitleRow("📥 ASIGNADAS"));
+            rows.add(createTitleRow("==📥 ASIGNADAS 📥=="));
             assigned.forEach(task -> {
                 KeyboardRow row = new KeyboardRow();
                 row.add(task.get("description") + " [ID: " + task.get("id") + "]");
@@ -218,7 +229,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     
         // Sección In Progress
         if (!inProgress.isEmpty()) {
-            rows.add(createTitleRow("⏳ EN PROGRESO"));
+            rows.add(createTitleRow("==⏳ EN PROGRESO ⏳=="));
             inProgress.forEach(task -> {
                 KeyboardRow row = new KeyboardRow();
                 row.add(task.get("description") + " [ID: " + task.get("id") + "]");
@@ -230,7 +241,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     
         // Sección Completed
         if (!completed.isEmpty()) {
-            rows.add(createTitleRow("✅ COMPLETADAS"));
+            rows.add(createTitleRow("==✅ COMPLETADAS ✅=="));
             completed.forEach(task -> {
                 KeyboardRow row = new KeyboardRow();
                 row.add(task.get("description") + " [ID: " + task.get("id") + "]");
@@ -415,6 +426,15 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                     sendMsg(chatId, "Primero selecciona un sprint", false);
                 }
                 break;
+                
+            case "🏠 Main Menu":
+            case "Show Main Screen":  // Para mantener retrocompatibilidad
+                showMainMenu(chatId, state.loggedUser);
+                break;
+            case "Logout":
+            case "Logout 🚪":  // Agregar esta línea
+                logoutUser(chatId);
+                break;
             case "View Users":
                 if (isManager) viewUsers(chatId);
                 break;
@@ -592,7 +612,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
         // Opción: Logout
         KeyboardRow rowLogout = new KeyboardRow();
-        rowLogout.add("Logout");
+        rowLogout.add("Logout 🚪");
         rows.add(rowLogout);
 
         // Opciones de proyectos
@@ -849,36 +869,36 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             sendMsg(chatId, "No hay usuarios registrados.", false);
             return;
         }
-        StringBuilder sb = new StringBuilder("Usuarios:\n");
+        
+        StringBuilder sb = new StringBuilder("👥 *Usuarios registrados:*\n\n");
         for (OracleUser u : list) {
-            sb.append("ID: ").append(u.getIdUser())
-              .append(" | ").append(u.getName())
-              .append(" | Role: ").append(u.getRole())
-              .append(" | Skill: ").append(u.getSkill())
-              .append("\n");
+            sb.append("🆔 ID: ").append(u.getIdUser())
+              .append("\n👤 Nombre: ").append(u.getName())
+              .append("\n🎭 Rol: ").append(u.getRole())
+              .append("\n💡 Skill: ").append(u.getSkill())
+              .append("\n\n--------------------\n");
         }
-        sb.append("\nSi deseas editar el skill de un usuario, escribe: /editskill <id>\n");
-        sb.append("O escribe /menu para volver al menú.");
-
-        //Añadir usuario
-        ReplyKeyboardMarkup keyboar = new ReplyKeyboardMarkup();
-        keyboar.setResizeKeyboard(true);
+        sb.append("\nℹ️ Para editar un skill usa: /editskill [ID]");
+    
+        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+        keyboard.setResizeKeyboard(true);
         List<KeyboardRow> rows = new ArrayList<>();
-
-        KeyboardRow addUserRow = new KeyboardRow();
-        addUserRow.add("Add User");
-        rows.add(addUserRow);
-
-        KeyboardRow backRow = new KeyboardRow();
-        backRow.add("Show Main Screen");
-        rows.add(backRow);
-
-        keyboar.setKeyboard(rows);
-
+    
+        // Fila de botones
+        KeyboardRow firstRow = new KeyboardRow();
+        firstRow.add("➕ Add User");
+        firstRow.add("🏠 Main Menu");
+        
+        rows.add(firstRow);
+    
+        keyboard.setKeyboard(rows);
+    
         SendMessage msg = new SendMessage();
         msg.setChatId(chatId);
         msg.setText(sb.toString());
-        msg.setReplyMarkup(keyboar);
+        msg.setReplyMarkup(keyboard);
+        msg.enableMarkdown(true);
+        
         try {
             execute(msg);
         } catch (TelegramApiException e) {
@@ -905,16 +925,25 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     //  LOGOUT
     // --------------------------------------------------------------------------------
     private void logoutUser(long chatId) {
+        BotConversationState state = conversationStates.get(chatId);
+        if (state != null) {
+            // Resetear todo el estado
+            state.loggedUser = null;
+            state.currentProjectId = 0;
+            state.currentSprintId = 0;
+            resetFlow(state);
+        }
         conversationStates.remove(chatId);
+        
         SendMessage msg = new SendMessage();
         msg.setChatId(chatId);
-        msg.setText("Has cerrado sesión. Usa /start para iniciar de nuevo.");
+        msg.setText("🔒 Sesión cerrada exitosamente. Usa /start para ingresar de nuevo.");
         msg.setReplyMarkup(new ReplyKeyboardRemove(true));
-
+    
         try {
             execute(msg);
         } catch (TelegramApiException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Error al cerrar sesión: " + e.getMessage(), e);
         }
     }
 
