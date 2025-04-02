@@ -16,10 +16,10 @@ public class ProjectUser {
     @JoinColumn(name = "Id_Oracle_User", nullable = false)
     private OracleUser user;
 
-    // Relación ManyToOne con Project
+    // Renombramos de id_project a project para que coincida con el mappedBy en Projects
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_PROJECT", nullable = false)
-    private Projects id_project;
+    private Projects project;
 
     @Column(name = "ROLE_USER")
     private String role_user;
@@ -30,10 +30,10 @@ public class ProjectUser {
     public ProjectUser() {
     }
 
-    public ProjectUser(int id_project_user, OracleUser user, Projects id_project, String role_user, String status) {
+    public ProjectUser(int id_project_user, OracleUser user, Projects project, String role_user, String status) {
         this.id_project_user = id_project_user;
         this.user = user;
-        this.id_project = id_project;
+        this.project = project;
         this.role_user = role_user;
         this.status = status;
     }
@@ -55,11 +55,11 @@ public class ProjectUser {
     }
 
     public Projects getProject() {
-        return id_project;
+        return project;
     }
 
-    public void setProject(Projects id_project) {
-        this.id_project = id_project;
+    public void setProject(Projects project) {
+        this.project = project;
     }
 
     public String getRoleUser() {
@@ -81,9 +81,9 @@ public class ProjectUser {
     @Override
     public String toString() {
         return "ProjectUser{" +
-                "idProjectUser=" + id_project_user +
-                ", id_project=" + id_project + '\''+
-                ", roleUser='" + role_user + '\'' +
+                "id_project_user=" + id_project_user +
+                ", project=" + project +
+                ", role_user='" + role_user + '\'' +
                 ", status='" + status + '\'' +
                 '}';
     }

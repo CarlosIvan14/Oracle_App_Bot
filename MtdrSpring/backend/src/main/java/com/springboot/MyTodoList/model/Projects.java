@@ -25,9 +25,9 @@ public class Projects {
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    // Relación: Un proyecto puede tener varios usuarios (vía ProjectUser)
-    @OneToMany(mappedBy = "projects", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProjectUser> project_users;
+    // Un proyecto tiene muchos ProjectUser. Usamos mappedBy = "project"
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProjectUser> projectUsers;
 
     public Projects() {
     }
@@ -52,7 +52,7 @@ public class Projects {
         return creation_ts;
     }
 
-    public void setCreationTs(LocalDateTime creationTs) {
+    public void setCreationTs(LocalDateTime creation_ts) {
         this.creation_ts = creation_ts;
     }
 
@@ -81,19 +81,19 @@ public class Projects {
     }
 
     public List<ProjectUser> getProjectUsers() {
-        return project_users;
+        return projectUsers;
     }
 
-    public void setProjectUsers(List<ProjectUser> project_users) {
-        this.project_users = project_users;
+    public void setProjectUsers(List<ProjectUser> projectUsers) {
+        this.projectUsers = projectUsers;
     }
 
     @Override
     public String toString() {
-        return "Project{" +
-                "idProject=" + id_project +
-                ", creationTs=" + creation_ts +
-                ", deletedTs=" + deleted_ts +
+        return "Projects{" +
+                "id_project=" + id_project +
+                ", creation_ts=" + creation_ts +
+                ", deleted_ts=" + deleted_ts +
                 ", description='" + description + '\'' +
                 ", name='" + name + '\'' +
                 '}';

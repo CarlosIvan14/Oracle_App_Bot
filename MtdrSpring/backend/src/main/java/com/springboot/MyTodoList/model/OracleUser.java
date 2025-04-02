@@ -9,7 +9,7 @@ public class OracleUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_ORACLE_USER")
-    private int id_Oracle_User;
+    private int idUser;  // Renombrado de id_Oracle_User a idUser
 
     @Column(name = "NAME", nullable = false)
     private String name;
@@ -21,10 +21,10 @@ public class OracleUser {
     private String status;
 
     @Column(name = "ID_TELEGRAM")
-    private Long telegram_Id;
+    private Long telegramId;
 
     @Column(name = "PHONE_NUMBER")
-    private String phone_Number;
+    private String phoneNumber;
 
     @Column(name = "PASSWORD", nullable = false)
     private String password;
@@ -32,22 +32,22 @@ public class OracleUser {
     public OracleUser() {
     }
 
-    public OracleUser(int id_Oracle_User, String name, String email, String status, Long telegram_Id, String phone_Number, String password) {
-        this.id_Oracle_User = id_Oracle_User;
+    public OracleUser(int idUser, String name, String email, String status, Long telegramId, String phoneNumber, String password) {
+        this.idUser = idUser;
         this.name = name;
         this.email = email;
         this.status = status;
-        this.telegram_Id = telegram_Id;
-        this.phone_Number = phone_Number;
+        this.telegramId = telegramId;
+        this.phoneNumber = phoneNumber;
         this.password = password;
     }
 
     public int getIdUser() {
-        return id_Oracle_User;
+        return idUser;
     }
 
     public void setIdUser(int idUser) {
-        this.id_Oracle_User = idUser;
+        this.idUser = idUser;
     }
 
     public String getName() {
@@ -75,19 +75,19 @@ public class OracleUser {
     }
 
     public Long getTelegramId() {
-        return telegram_Id;
+        return telegramId;
     }
     
-    public void setTelegramId(Long telegram_Id) {
-        this.telegram_Id = telegram_Id;
+    public void setTelegramId(Long telegramId) {
+        this.telegramId = telegramId;
     }
 
     public String getPhoneNumber() {
-        return phone_Number;
+        return phoneNumber;
     }
     
-    public void setPhoneNumber(String phone_Number) {
-        this.phone_Number = phone_Number;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public String getPassword() {
@@ -101,12 +101,12 @@ public class OracleUser {
     @Override
     public String toString() {
         return "OracleUser{" +
-                "id_Oracle_User=" + id_Oracle_User +
+                "idUser=" + idUser +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", status='" + status + '\'' +
-                ", telegram_Id=" + telegram_Id +
-                ", phone_Number='" + phone_Number + '\'' +
+                ", telegramId=" + telegramId +
+                ", phoneNumber='" + phoneNumber + '\'' +
                 ", password='" + password + '\'' +
                 '}';
     }

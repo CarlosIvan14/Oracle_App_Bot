@@ -24,12 +24,14 @@ public class Sprint {
 
     @ManyToOne
     @JoinColumn(name = "ID_PROJECT", nullable = false)
-    private Projects id_project;
+    private Projects project; // Renombrado para claridad
 
     @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tasks> tasks;
 
-    // Getters and Setters
+    public Sprint() {
+    }
+
     public int getId() {
         return id_sprint;
     }
@@ -62,12 +64,12 @@ public class Sprint {
         this.name = name;
     }
 
-    public Projects getIdProject() {
-        return id_project;
+    public Projects getProject() {
+        return project;
     }
 
-    public void setIdProject(Projects id_project) {
-        this.id_project = id_project;
+    public void setProject(Projects project) {
+        this.project = project;
     }
 
     public List<Tasks> getTasks() {

@@ -2,7 +2,6 @@ package com.springboot.MyTodoList.model;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "TASKS")
@@ -28,9 +27,10 @@ public class Tasks {
     @Column(name = "STORY_POINTS")
     private Integer story_points;
 
+    // Renombramos la propiedad a 'sprint' para que coincida con el mappedBy en Sprint
     @ManyToOne
     @JoinColumn(name = "ID_SPRINT", nullable = false)
-    private Sprint id_sprint;
+    private Sprint sprint;
 
     @Column(name = "DEADLINE")
     private LocalDateTime deadline;
@@ -42,7 +42,6 @@ public class Tasks {
     private Double estimated_hours;
 
     // Getters and Setters
-
     public int getId() {
         return id_task;
     }
@@ -92,11 +91,11 @@ public class Tasks {
     }
 
     public Sprint getSprint() {
-        return id_sprint;
+        return sprint;
     }
 
-    public void setSprint(Sprint id_sprint) {
-        this.id_sprint = id_sprint;
+    public void setSprint(Sprint sprint) {
+        this.sprint = sprint;
     }
 
     public LocalDateTime getDeadline() {

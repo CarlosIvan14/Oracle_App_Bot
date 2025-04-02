@@ -12,10 +12,10 @@ public class TimeLogs {
     @Column(name = "ID_TIME_LOGS")
     private int id_time_logs;
 
-    // Relación ManyToOne con TaskAssignees (tabla TASK_ASSIGNEES)
+    // Relación ManyToOne con TaskAssignees
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_TASK_ASSIGNEES", nullable = false)
-    private TaskAssignees id_task_assignees;
+    private TaskAssignees taskAssignees;
 
     @Column(name = "START_TS")
     private LocalDateTime start_ts;
@@ -26,9 +26,9 @@ public class TimeLogs {
     public TimeLogs() {
     }
 
-    public TimeLogs(int id_time_logs, TaskAssignees id_task_assignees, LocalDateTime start_ts, LocalDateTime end_ts) {
+    public TimeLogs(int id_time_logs, TaskAssignees taskAssignees, LocalDateTime start_ts, LocalDateTime end_ts) {
         this.id_time_logs = id_time_logs;
-        this.id_task_assignees = id_task_assignees;
+        this.taskAssignees = taskAssignees;
         this.start_ts = start_ts;
         this.end_ts = end_ts;
     }
@@ -42,11 +42,11 @@ public class TimeLogs {
     }
 
     public TaskAssignees getTaskAssignees() {
-        return id_task_assignees;
+        return taskAssignees;
     }
 
-    public void setTaskAssignees(TaskAssignees id_task_assignees) {
-        this.id_task_assignees = id_task_assignees;
+    public void setTaskAssignees(TaskAssignees taskAssignees) {
+        this.taskAssignees = taskAssignees;
     }
 
     public LocalDateTime getStartTs() {
@@ -61,17 +61,17 @@ public class TimeLogs {
         return end_ts;
     }
 
-    public void setEndTs(LocalDateTime endTs) {
+    public void setEndTs(LocalDateTime end_ts) {
         this.end_ts = end_ts;
     }
 
     @Override
     public String toString() {
         return "TimeLogs{" +
-                "idTimeLogs=" + id_time_logs +
-                ", taskAssignees=" + id_task_assignees +
-                ", startTs=" + start_ts +
-                ", endTs=" + end_ts +
+                "id_time_logs=" + id_time_logs +
+                ", taskAssignees=" + taskAssignees +
+                ", start_ts=" + start_ts +
+                ", end_ts=" + end_ts +
                 '}';
     }
 }
