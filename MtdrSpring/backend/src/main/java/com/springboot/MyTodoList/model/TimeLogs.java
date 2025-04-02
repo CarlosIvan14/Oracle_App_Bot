@@ -69,7 +69,7 @@ public class TimeLogs {
     public String toString() {
         return "TimeLogs{" +
                 "id_time_logs=" + id_time_logs +
-                ", taskAssignees=" + taskAssignees +
+                ", taskAssignees=" + taskAssignees.getIdTaskAssignees() +
                 ", start_ts=" + start_ts +
                 ", end_ts=" + end_ts +
                 '}';

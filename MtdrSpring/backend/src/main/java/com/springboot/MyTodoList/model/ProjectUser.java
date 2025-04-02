@@ -1,7 +1,10 @@
 package com.springboot.MyTodoList.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import javax.persistence.*;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "PROJECT_USERS")
 public class ProjectUser {
@@ -11,14 +14,15 @@ public class ProjectUser {
     @Column(name = "ID_PROJECT_USER")
     private int id_project_user;
 
-    // Relación ManyToOne con OracleUser
+    // Relación ManyToOne con OracleUser (no es bidireccional, por lo que no se requiere anotación de manejo de ciclo)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_USER", nullable = false)
     private OracleUser user;
 
-    // Renombramos de id_project a project para que coincida con el mappedBy en Projects
+    // Relación ManyToOne con Projects.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_PROJECT", nullable = false)
+    @JsonBackReference  // Este es el lado "hijo" que se omite en la serialización para evitar recursión.
     private Projects project;
 
     @Column(name = "ROLE_USER")
@@ -80,9 +84,10 @@ public class ProjectUser {
 
     @Override
     public String toString() {
+        // Evitamos acceder directamente a project para no forzar su carga.
         return "ProjectUser{" +
                 "id_project_user=" + id_project_user +
-                ", project=" + project +
+                ", project=" + (project != null ? project.getIdProject() : null) +
                 ", role_user='" + role_user + '\'' +
                 ", status='" + status + '\'' +
                 '}';

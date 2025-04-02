@@ -1,7 +1,9 @@
 package com.springboot.MyTodoList.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "ORACLE_USERS")
 public class OracleUser {
@@ -9,7 +11,7 @@ public class OracleUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_ORACLE_USER")
-    private int idUser;  // Renombrado de id_Oracle_User a idUser
+    private int idUser;
 
     @Column(name = "NAME", nullable = false)
     private String name;

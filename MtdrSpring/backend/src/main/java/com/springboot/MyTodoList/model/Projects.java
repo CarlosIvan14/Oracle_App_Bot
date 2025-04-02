@@ -1,9 +1,12 @@
 package com.springboot.MyTodoList.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "PROJECTS")
 public class Projects {
@@ -25,8 +28,9 @@ public class Projects {
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    // Un proyecto tiene muchos ProjectUser. Usamos mappedBy = "project"
+    // Un proyecto tiene muchos ProjectUser.
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference  // Este es el lado "padre" de la relación.
     private List<ProjectUser> projectUsers;
 
     public Projects() {

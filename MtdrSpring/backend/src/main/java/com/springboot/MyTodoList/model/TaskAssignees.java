@@ -58,8 +58,8 @@ public class TaskAssignees {
     public String toString() {
         return "TaskAssignees{" +
                 "id_task_assignees=" + id_task_assignees +
-                ", projectUser=" + projectUser +
-                ", task=" + task +
+                ", projectUser=" + projectUser.getIdProjectUser() +
+                ", task=" + task.getId() +
                 '}';
     }
 }
