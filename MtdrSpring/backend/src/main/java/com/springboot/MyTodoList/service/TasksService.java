@@ -1,0 +1,51 @@
+package com.springboot.MyTodoList.service;
+
+import com.springboot.MyTodoList.model.Tasks;
+import com.springboot.MyTodoList.repository.TasksRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class TasksService {
+
+    @Autowired
+    private TasksRepository tasksRepository;
+
+    public Tasks addTask(Tasks task) {
+        return tasksRepository.save(task);
+    }
+
+    public List<Tasks> findAllTasks() {
+        return tasksRepository.findAll();
+    }
+
+    public Optional<Tasks> getTaskById(int id) {
+        return tasksRepository.findById(id);
+    }
+
+    public Tasks updateTask(int id, Tasks taskDetails) {
+        return tasksRepository.findById(id).map(task -> {
+            task.setCreationTs(taskDetails.getCreationTs());
+            task.setName(taskDetails.getName());
+            task.setStatus(taskDetails.getStatus());
+            task.setDescription(taskDetails.getDescription());
+            task.setStoryPoints(taskDetails.getStoryPoints());
+            task.setSprint(taskDetails.getSprint());
+            task.setDeadline(taskDetails.getDeadline());
+            task.setRealHours(taskDetails.getRealHours());
+            task.setEstimatedHours(taskDetails.getEstimatedHours());
+            return tasksRepository.save(task);
+        }).orElse(null);
+    }
+
+    public boolean deleteTask(int id) {
+        if (tasksRepository.existsById(id)) {
+            tasksRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+}

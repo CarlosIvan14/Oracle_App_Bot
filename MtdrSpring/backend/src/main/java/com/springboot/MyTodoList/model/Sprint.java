@@ -1,5 +1,7 @@
+// Sprint.java
 package com.springboot.MyTodoList.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,10 +26,13 @@ public class Sprint {
 
     @ManyToOne
     @JoinColumn(name = "ID_PROJECT", nullable = false)
-    private Projects project; // Renombrado para claridad
+    private Projects project; // Relación con Projects
 
     @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // Lado "padre" de la relación con Tasks
     private List<Tasks> tasks;
+
+    // Constructores, getters y setters
 
     public Sprint() {
     }

@@ -1,5 +1,7 @@
+// Tasks.java
 package com.springboot.MyTodoList.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -27,9 +29,9 @@ public class Tasks {
     @Column(name = "STORY_POINTS")
     private Integer story_points;
 
-    // Renombramos la propiedad a 'sprint' para que coincida con el mappedBy en Sprint
     @ManyToOne
     @JoinColumn(name = "ID_SPRINT", nullable = false)
+    @JsonBackReference // Lado "hijo" de la relación con Sprint
     private Sprint sprint;
 
     @Column(name = "DEADLINE")
@@ -41,7 +43,8 @@ public class Tasks {
     @Column(name = "ESTIMATED_HOURS")
     private Double estimated_hours;
 
-    // Getters and Setters
+    // Getters y Setters
+
     public int getId() {
         return id_task;
     }
