@@ -11,7 +11,7 @@ function UsersList() {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Lista de Usuarios (HARCODE)</h1>
+      <h1 className="text-3xl font-bold mb-4">Lista de Usuarios</h1>
       <table className="min-w-full bg-black bg-opacity-20">
         <thead>
           <tr>

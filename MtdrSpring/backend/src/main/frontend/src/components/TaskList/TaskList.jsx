@@ -3,7 +3,11 @@ import TaskListItem from './TaskListItem';
 
 function TaskList({ items, toggleDone, deleteItem }) {
   return (
+<<<<<<< Updated upstream
     <div id="maincontent" className="bg-customDark bg-opacity-50 p-4 rounded-lg">
+=======
+    <div id="maincontent" className="bg-gray-800 bg-opacity-50 p-4 rounded-lg">
+>>>>>>> Stashed changes
 
       {/* Tareas pendientes */}
       <h2 className="text-2xl font-semibold mb-2 text-white">
@@ -21,7 +25,11 @@ function TaskList({ items, toggleDone, deleteItem }) {
           mb-4
         "
       >
+<<<<<<< Updated upstream
         <tbody className="divide-y divide-customDarkligth">
+=======
+        <tbody className="divide-y divide-gray-700">
+>>>>>>> Stashed changes
           {items
             .filter(item => !item.done)
             .map(item => (
@@ -47,10 +55,17 @@ function TaskList({ items, toggleDone, deleteItem }) {
           w-full 
           break-words 
           divide-y 
+<<<<<<< Updated upstream
           divide-customDarkligth
         "
       >
         <tbody className="divide-y divide-customDarkligth">
+=======
+          divide-gray-700
+        "
+      >
+        <tbody className="divide-y divide-gray-700">
+>>>>>>> Stashed changes
           {items
             .filter(item => item.done)
             .map(item => (

@@ -160,26 +160,6 @@ function UserList() {
                   <td className="py-3 px-4">
                     <FaUser className="text-2xl" />
                   </td>
-      {/* Tabla de usuarios */}
-      <div className="max-w-5xl mx-auto bg-black bg-opacity-40 p-6 rounded-xl">
-        <table className="min-w-full table-auto text-white">
-          <thead>
-            <tr className="border-b border-customeDarkLight">
-              <th className="py-3 px-4 text-left">Usuario</th>
-              <th className="py-3 px-4 text-left">Nombre</th>
-              <th className="py-3 px-4 text-left">Skills</th>
-              <th className="py-3 px-4 text-left">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u) => (
-              <tr
-                key={u.idUser}
-                className="border-b border-customeDarkLigth hover:bg-customeDarkLigth">
-                {/* Ícono de usuario */}
-                <td className="py-3 px-4">
-                  <FaUser className="text-2xl" />
-                </td>
 
                   {/* Nombre del usuario */}
                   <td className="py-3 px-4">
@@ -241,65 +221,6 @@ function UserList() {
           </table>
         </div>
       )}
-                {/* Nombre del usuario */}
-                <td className="py-3 px-4">
-                  {u.name}
-                </td>
-                <td className="py-3 px-4">
-                  {editingUserId === u.idUser ? (
-                    <input
-                      type="text"
-                      className="bg-customeDark p-2 rounded w-full text-white"
-                      value={editedSkills}
-                      onChange={(e) => setEditedSkills(e.target.value)}
-                    />
-                  ) : (
-                    u.skill || "Sin skills"
-                  )}
-                </td>
-                <td className="py-3 px-4">
-                  {editingUserId === u.idUser ? (
-                    <button
-                      onClick={() => handleSaveClick(u.idUser)}
-                      className="
-                        inline-flex items-center
-                        bg-green-600
-                        text-white
-                        py-2 px-3
-                        rounded-full
-                        hover:bg-green-700
-                        transition
-                      "
-                    >
-                      <FaSave className="mr-1" />
-                      Guardar
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleEditClick(u.idUser, u.skill)}
-                      className="
-                        inline-flex items-center
-                        bg-transparent
-                        text-blue-400
-                        py-2 px-3
-                        rounded-full
-                        border
-                        border-blue-400
-                        hover:text-white
-                        hover:bg-blue-500
-                        transition
-                      "
-                    >
-                      <FaEdit className="mr-1" />
-                      Editar
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }

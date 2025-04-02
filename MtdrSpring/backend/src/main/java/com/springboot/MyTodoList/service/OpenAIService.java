@@ -30,9 +30,7 @@ public class OpenAIService {
         prompt.append("Lista de usuarios (ID, Role, Name, Skill):\n");
         for (OracleUser user : allUsers) {
             prompt.append("ID: ").append(user.getIdUser())
-                  .append(", Role: ").append(user.getRole())
                   .append(", Name: ").append(user.getName())
-                  .append(", Skill: ").append(user.getSkill())
                   .append("\n");
         }
         // Solicitar una salida precisa: una lista de IDs separados por coma sin texto adicional

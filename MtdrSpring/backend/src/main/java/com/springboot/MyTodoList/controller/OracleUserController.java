@@ -3,16 +3,15 @@ package com.springboot.MyTodoList.controller;
 import com.springboot.MyTodoList.model.LoginRequest;
 import com.springboot.MyTodoList.model.OracleUser;
 import com.springboot.MyTodoList.service.OracleUserService;
-
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
+
 @RestController
 @RequestMapping("/users")
 public class OracleUserController {
@@ -30,7 +29,6 @@ public class OracleUserController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     // Endpoint para obtener todos los usuarios
     @GetMapping
@@ -58,23 +56,23 @@ public class OracleUserController {
         }
     }
 
+    // Endpoint para login de usuario
     @PostMapping("/login")
-        public ResponseEntity<OracleUser> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
-            try {
-                // Find the user by name and password
-                Optional<OracleUser> user = oracleUserService.loginUser(loginRequest.getName(), loginRequest.getPassword());
-                if (user.isPresent()) {
-                    // If user exists, return the user data
-                    return new ResponseEntity<>(user.get(), HttpStatus.OK);
-                } else {
-                    // If user does not exist, return 404 Not Found
-                    return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-                }
-            } catch (Exception e) {
-                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<OracleUser> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+        try {
+            Optional<OracleUser> user = oracleUserService.loginUser(loginRequest.getName(), loginRequest.getPassword());
+            if (user.isPresent()) {
+                return new ResponseEntity<>(user.get(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
 
+    // Endpoint para actualizar un usuario
+    // Se pueden actualizar campos como email, status, telegramId, phoneNumber o password
     @PatchMapping("/{id}")
     public ResponseEntity<OracleUser> updateUser(@PathVariable int id, @RequestBody OracleUser userUpdates) {
         try {
@@ -89,5 +87,3 @@ public class OracleUserController {
         }
     }
 }
-
-

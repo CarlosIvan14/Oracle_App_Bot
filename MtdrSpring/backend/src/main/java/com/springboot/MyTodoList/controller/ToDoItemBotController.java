@@ -170,8 +170,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         OracleUser user = new OracleUser();
         user.setIdUser(id);
         user.setName(name);
-        user.setRole(role);
-        user.setSkill(skill);
         return user;
     }    
 
@@ -457,7 +455,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     
     private void handleMainMenuOptions(long chatId, String messageText, BotConversationState state) {
         OracleUser user = state.loggedUser;
-        boolean isManager = "manager".equalsIgnoreCase(user.getRole());
+        boolean isManager = true;
         
         switch (messageText) {
             case "List Tasks":
@@ -631,7 +629,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             return;
         }
 
-        boolean isManager = "manager".equalsIgnoreCase(user.getRole());
+        // Removed unused variable assignment
         ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
         keyboard.setResizeKeyboard(true);
         List<KeyboardRow> rows = new ArrayList<>();
@@ -792,8 +790,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                             OracleUser u = sorted.get(i);
                             sb.append((i + 1)).append(") ")
                               .append(u.getName())
-                              .append(" (ID: ").append(u.getIdUser()).append(") Skill: ")
-                              .append(u.getSkill()).append("\n");
+                              .append(" (ID: ").append(u.getIdUser()).append(") Skill: ");
+                              //.append(u.getSkill()).append("\n");
                         }
                         sb.append("\nIngresa el *número* del usuario al que deseas asignar esta tarea:");
                         state.step = 5;
@@ -874,10 +872,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                 OracleUser newUser = new OracleUser();
                 newUser.setName(state.newUserName);
                 newUser.setPassword(state.newUserPassword);
-                newUser.setRole("developer");
-                newUser.setSkill(state.newUserSkill);
                 newUser.setTelegramId(Long.parseLong(state.newUserTelegramId));
-                newUser.setTelegramUsername(state.newUserTelegramUsername);
+                
 
                 OracleUser created = doRegisterUser(newUser);
                 if (created != null && created.getIdUser() > 0) {
@@ -905,8 +901,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         for (OracleUser u : list) {
             sb.append("🆔 ID: ").append(u.getIdUser())
               .append("\n👤 Nombre: ").append(u.getName())
-              .append("\n🎭 Rol: ").append(u.getRole())
-              .append("\n💡 Skill: ").append(u.getSkill())
+              //.append("\n🎭 Rol: ").append(u.getRole())
+              //.append("\n💡 Skill: ").append(u.getSkill())
               .append("\n\n--------------------\n");
         }
         sb.append("\nℹ️ Para editar un skill usa: /editskill [ID]");
@@ -944,7 +940,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         String newSkill = messageText.trim();
         OracleUser updated = doPatchUserSkill(state.editUserId, newSkill);
         if (updated != null) {
-            sendMsg(chatId, "Skill actualizado. Nuevo valor: " + updated.getSkill(), false);
+            //sendMsg(chatId, "Skill actualizado. Nuevo valor: " + updated.getSkill(), false);
         } else {
             sendMsg(chatId, "Error al actualizar skill del usuario " + state.editUserId, false);
         }
@@ -1141,7 +1137,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         try {
             String url = baseUrl + "/users/" + userId;
             OracleUser userUpdates = new OracleUser();
-            userUpdates.setSkill(newSkill);
+            //userUpdates.setSkill(newSkill);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

@@ -1,54 +1,51 @@
 package com.springboot.MyTodoList.model;
 
 import javax.persistence.*;
-import java.util.List;
+
 @Entity
 @Table(name = "ORACLE_USERS")
 public class OracleUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_USER")
+    @Column(name = "ID_ORACLE_USER")
     private int idUser;
 
-    @Column(name = "NAME")
+    @Column(name = "NAME", nullable = false)
     private String name;
 
-    @Column(name = "PASSWORD")
-    private String password;
+    @Column(name = "EMAIL", nullable = false)
+    private String email;
 
-    @Column(name = "ROLE")
-    private String role;
+    @Column(name = "STATUS")
+    private String status;
 
-    @Column(name = "SKILL")
-    private String skill;
-
-    @Column(name = "TELEGRAM_ID")
+    @Column(name = "ID_TELEGRAM")
     private Long telegramId;
 
-    @Column(name = "TELEGRAM_USERNAME")
-    private String telegramUsername;
-    // OracleUser.java
-    @OneToMany(mappedBy = "assignedUser")
-    private List<ToDoItem> tasks;
-    // Constructors
-    public OracleUser() {}
+    @Column(name = "PHONE_NUMBER")
+    private String phoneNumber;
 
-    public OracleUser(int idUser, String name, String password, String role, String skill, Long telegramId, String telegramUsername) {
-        this.idUser = idUser;
-        this.name = name;
-        this.password = password;
-        this.role = role;
-        this.skill = skill;
-        this.telegramId = telegramId;
-        this.telegramUsername = telegramUsername;
+    @Column(name = "PASSWORD", nullable = false)
+    private String password;
+
+    public OracleUser() {
     }
 
-    // Getters and Setters
+    public OracleUser(int idUser, String name, String email, String status, Long telegramId, String phoneNumber, String password) {
+        this.idUser = idUser;
+        this.name = name;
+        this.email = email;
+        this.status = status;
+        this.telegramId = telegramId;
+        this.phoneNumber = phoneNumber;
+        this.password = password;
+    }
+
     public int getIdUser() {
         return idUser;
     }
-    
+
     public void setIdUser(int idUser) {
         this.idUser = idUser;
     }
@@ -61,44 +58,44 @@ public class OracleUser {
         this.name = name;
     }
 
-    public String getPassword() {
-        return password;
+    public String getEmail() {
+        return email;
+    }
+    
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public String getStatus() {
+        return status;
     }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public String getSkill() {
-        return skill;
-    }
-
-    public void setSkill(String skill) {
-        this.skill = skill;
+    
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public Long getTelegramId() {
         return telegramId;
     }
-
+    
     public void setTelegramId(Long telegramId) {
         this.telegramId = telegramId;
     }
 
-    public String getTelegramUsername() {
-        return telegramUsername;
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+    
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
-    public void setTelegramUsername(String telegramUsername) {
-        this.telegramUsername = telegramUsername;
+    public String getPassword() {
+        return password;
+    }
+    
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override
@@ -106,11 +103,11 @@ public class OracleUser {
         return "OracleUser{" +
                 "idUser=" + idUser +
                 ", name='" + name + '\'' +
-                ", password='" + password + '\'' +
-                ", role='" + role + '\'' +
-                ", skill='" + skill + '\'' +
+                ", email='" + email + '\'' +
+                ", status='" + status + '\'' +
                 ", telegramId=" + telegramId +
-                ", telegramUsername='" + telegramUsername + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", password='" + password + '\'' +
                 '}';
     }
 }
