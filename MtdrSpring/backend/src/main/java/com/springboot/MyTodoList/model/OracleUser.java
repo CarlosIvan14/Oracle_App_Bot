@@ -9,7 +9,7 @@ public class OracleUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_ORACLE_USER")
-    private int idUser;
+    private int id_Oracle_User;
 
     @Column(name = "NAME", nullable = false)
     private String name;
@@ -32,8 +32,8 @@ public class OracleUser {
     public OracleUser() {
     }
 
-    public OracleUser(int idUser, String name, String email, String status, Long telegram_Id, String phone_Number, String password) {
-        this.idUser = idUser;
+    public OracleUser(int id_Oracle_User, String name, String email, String status, Long telegram_Id, String phone_Number, String password) {
+        this.id_Oracle_User = id_Oracle_User;
         this.name = name;
         this.email = email;
         this.status = status;
@@ -43,11 +43,11 @@ public class OracleUser {
     }
 
     public int getIdUser() {
-        return idUser;
+        return id_Oracle_User;
     }
 
     public void setIdUser(int idUser) {
-        this.idUser = idUser;
+        this.id_Oracle_User = idUser;
     }
 
     public String getName() {
@@ -101,7 +101,7 @@ public class OracleUser {
     @Override
     public String toString() {
         return "OracleUser{" +
-                "idUser=" + idUser +
+                "id_Oracle_User=" + id_Oracle_User +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", status='" + status + '\'' +
