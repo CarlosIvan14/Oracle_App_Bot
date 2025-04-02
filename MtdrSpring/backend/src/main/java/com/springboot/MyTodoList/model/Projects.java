@@ -11,7 +11,7 @@ public class Projects {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_PROJECT")
-    private int id_project;
+    private int idProject;
 
     @Column(name = "CREATION_TS")
     private LocalDateTime creation_ts;
@@ -32,8 +32,8 @@ public class Projects {
     public Projects() {
     }
 
-    public Projects(int id_project, LocalDateTime creation_ts, LocalDateTime deleted_ts, String description, String name) {
-        this.id_project = id_project;
+    public Projects(int idProject, LocalDateTime creation_ts, LocalDateTime deleted_ts, String description, String name) {
+        this.idProject = idProject;
         this.creation_ts = creation_ts;
         this.deleted_ts = deleted_ts;
         this.description = description;
@@ -41,11 +41,11 @@ public class Projects {
     }
 
     public int getIdProject() {
-        return id_project;
+        return idProject;
     }
 
-    public void setIdProject(int id_project) {
-        this.id_project = id_project;
+    public void setIdProject(int idProject) {
+        this.idProject = idProject;
     }
 
     public LocalDateTime getCreationTs() {
@@ -91,7 +91,7 @@ public class Projects {
     @Override
     public String toString() {
         return "Projects{" +
-                "id_project=" + id_project +
+                "idProject=" + idProject +
                 ", creation_ts=" + creation_ts +
                 ", deleted_ts=" + deleted_ts +
                 ", description='" + description + '\'' +

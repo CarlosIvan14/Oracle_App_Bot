@@ -13,7 +13,7 @@ public class ProjectUser {
 
     // Relación ManyToOne con OracleUser
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Id_Oracle_User", nullable = false)
+    @JoinColumn(name = "ID_USER", nullable = false)
     private OracleUser user;
 
     // Renombramos de id_project a project para que coincida con el mappedBy en Projects
