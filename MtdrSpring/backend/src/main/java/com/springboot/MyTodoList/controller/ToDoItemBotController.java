@@ -146,6 +146,35 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         )));
     }
 
+    // Usuarios por proyecto harcodeados
+    // Usuarios asignados por proyecto (harcodeado)
+    private static final Map<Integer, List<OracleUser>> PROJECT_USERS = Map.of(
+        1, List.of(
+            createUser(1, "Luis", "developer", "SQL"),
+            createUser(2, "Ana", "developer", "Oracle")
+        ),
+        2, List.of(
+            createUser(3, "Carlos", "developer", "Java"),
+            createUser(4, "Laura", "developer", "Spring Boot")
+        ),
+        3, List.of(
+            createUser(5, "María", "developer", "React")
+        ),
+        4, List.of(
+            createUser(6, "Pablo", "developer", "Kotlin"),
+            createUser(7, "Sandra", "developer", "Android")
+        )
+    );
+    
+    private static OracleUser createUser(int id, String name, String role, String skill) {
+        OracleUser user = new OracleUser();
+        user.setIdUser(id);
+        user.setName(name);
+        user.setRole(role);
+        user.setSkill(skill);
+        return user;
+    }    
+
     private void startLoginFlow(long chatId, BotConversationState state) {
         state.flow = Flow.LOGIN;
         state.step = 1;
@@ -163,6 +192,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         KeyboardRow backRow = new KeyboardRow();
         backRow.add("⬅️ Volver a Proyectos");
         rows.add(backRow);
+
+        // Ver los usuarios dentro del proyecto
+        KeyboardRow viewUsers = new KeyboardRow();
+        viewUsers.add("👥 Ver usuarios del proyecto" + projectId);
+        rows.add(viewUsers);
 
         // Título
         KeyboardRow titleRow = new KeyboardRow();
@@ -303,30 +337,37 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         if (handleNavigation(chatId, messageText, state)) {
             return;
         }
+
+        // 3. Manejo de usuario por proyecto
+        if (messageText.startsWith("👥 Ver usuarios del proyecto")) {
+            int projectId = Integer.parseInt(messageText.replaceAll("\\D+", ""));
+            showUsersForProject(chatId, projectId);
+            return;
+        }
     
-        // 3. Si el usuario no está logueado, forzar login
+        // 4. Si el usuario no está logueado, forzar login
         if (state.loggedUser == null && state.flow != Flow.LOGIN) {
             startLoginFlow(chatId, state);
             return;
         }
     
-        // 4. Manejar flujos activos (login, agregar tarea/usuario)
+        // 5. Manejar flujos activos (login, agregar tarea/usuario)
         if (state.flow != Flow.NONE) {
             processFlow(chatId, messageText, state);
             return;
         }
     
-        // 5. Manejar acciones en tareas
+        // 6. Manejar acciones en tareas
         if (handleTaskActions(chatId, messageText, state)) {
             return;
         }
     
-        // 6. Manejar selección de proyectos
+        // 7. Manejar selección de proyectos
         if (handleProjectSelection(chatId, messageText, state)) {
             return;
         }
     
-        // 7. Opciones del menú principal
+        // 8. Opciones del menú principal
         handleMainMenuOptions(chatId, messageText, state);
     }
     
@@ -434,9 +475,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             case "Logout":
             case "Logout 🚪":  // Agregar esta línea
                 logoutUser(chatId);
-                break;
-            case "View Users":
-                if (isManager) viewUsers(chatId);
                 break;
             case "Add Task":
                 if (isManager) startAddTaskFlow(chatId);
@@ -602,13 +640,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         KeyboardRow row1 = new KeyboardRow();
         row1.add("List Tasks");
         rows.add(row1);
-
-        // Opciones especiales si es manager
-        if (isManager) {
-            KeyboardRow row2 = new KeyboardRow();
-            row2.add("View Users");
-            rows.add(row2);
-        }
 
         // Opción: Logout
         KeyboardRow rowLogout = new KeyboardRow();
@@ -863,9 +894,9 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     // --------------------------------------------------------------------------------
     //  VER / EDITAR USUARIOS (manager)
     // --------------------------------------------------------------------------------
-    private void viewUsers(long chatId) {
-        List<OracleUser> list = getAllUsers();
-        if (list == null || list.isEmpty()) {
+    private void showUsersForProject(long chatId, int projectId) {
+        List<OracleUser> list = PROJECT_USERS.getOrDefault(projectId, new ArrayList<>());
+        if (list.isEmpty()) {
             sendMsg(chatId, "No hay usuarios registrados.", false);
             return;
         }
