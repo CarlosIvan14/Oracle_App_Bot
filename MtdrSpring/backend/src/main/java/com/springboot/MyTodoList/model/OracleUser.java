@@ -21,10 +21,10 @@ public class OracleUser {
     private String status;
 
     @Column(name = "ID_TELEGRAM")
-    private Long telegramId;
+    private Long telegram_Id;
 
     @Column(name = "PHONE_NUMBER")
-    private String phoneNumber;
+    private String phone_Number;
 
     @Column(name = "PASSWORD", nullable = false)
     private String password;
@@ -32,13 +32,13 @@ public class OracleUser {
     public OracleUser() {
     }
 
-    public OracleUser(int idUser, String name, String email, String status, Long telegramId, String phoneNumber, String password) {
+    public OracleUser(int idUser, String name, String email, String status, Long telegram_Id, String phone_Number, String password) {
         this.idUser = idUser;
         this.name = name;
         this.email = email;
         this.status = status;
-        this.telegramId = telegramId;
-        this.phoneNumber = phoneNumber;
+        this.telegram_Id = telegram_Id;
+        this.phone_Number = phone_Number;
         this.password = password;
     }
 
@@ -75,19 +75,19 @@ public class OracleUser {
     }
 
     public Long getTelegramId() {
-        return telegramId;
+        return telegram_Id;
     }
     
-    public void setTelegramId(Long telegramId) {
-        this.telegramId = telegramId;
+    public void setTelegramId(Long telegram_Id) {
+        this.telegram_Id = telegram_Id;
     }
 
     public String getPhoneNumber() {
-        return phoneNumber;
+        return phone_Number;
     }
     
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setPhoneNumber(String phone_Number) {
+        this.phone_Number = phone_Number;
     }
 
     public String getPassword() {
@@ -105,8 +105,8 @@ public class OracleUser {
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", status='" + status + '\'' +
-                ", telegramId=" + telegramId +
-                ", phoneNumber='" + phoneNumber + '\'' +
+                ", telegram_Id=" + telegram_Id +
+                ", phone_Number='" + phone_Number + '\'' +
                 ", password='" + password + '\'' +
                 '}';
     }
