@@ -2,7 +2,11 @@ package com.springboot.MyTodoList.controller;
 
 import com.springboot.MyTodoList.model.LoginRequest;
 import com.springboot.MyTodoList.model.OracleUser;
+import com.springboot.MyTodoList.model.Projects;
+import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.model.ToDoItem;
+import com.springboot.MyTodoList.service.ProjectsServiceBot;
+import com.springboot.MyTodoList.service.SprintsServiceBot;
 import com.springboot.MyTodoList.service.ToDoItemService;
 import com.springboot.MyTodoList.util.BotCommands;
 import com.springboot.MyTodoList.util.BotHelper;
@@ -35,8 +39,13 @@ import java.util.stream.Collectors;
 public class ToDoItemBotController extends TelegramLongPollingBot {
 
     private static final Logger logger = LoggerFactory.getLogger(ToDoItemBotController.class);
+    //services
 
+    private final ProjectsServiceBot projectsServiceBot;
     private final ToDoItemService toDoItemService;
+    private final SprintsServiceBot sprintsServiceBot;
+
+
     private final String botName;
     private final String baseUrl; // e.g. "http://localhost:8081" para tus endpoints
     private final RestTemplate restTemplate;
@@ -89,15 +98,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
     // Mapa: chatId -> estado de conversación
     private final Map<Long, BotConversationState> conversationStates = new HashMap<>();
-
-    // Harcodeo de proyectos
-    // Proyectos con IDs simples (1,2,3...)
-    private static List<Map<String, Object>> PROJECTS = List.of(
-        Map.of("id", 1, "name", "Proyecto Oracle Migration"),
-        Map.of("id", 2, "name", "Proyecto Billing System"),
-        Map.of("id", 3, "name", "Proyecto Web Chatbot"),
-        Map.of("id", 4, "name", "Proyecto Mobile Banking")
-    );
 
     // Sprints con IDs en decenas según proyecto
     private static final Map<Integer, List<Map<String, Object>>> SPRINTS_DATA = new HashMap<>();
@@ -185,7 +185,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         sendMsg(chatId, "¡Bienvenido! Por favor, ingresa tu *nombre* de usuario:", true);
     }
 
-    private void showSprintsForProject(long chatId, int projectId) {
+    /* private void showSprintsForProject(long chatId, int projectId) {
         List<Map<String, Object>> sprints = SPRINTS_DATA.getOrDefault(projectId, new ArrayList<>());
         
         ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
@@ -233,7 +233,59 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             logger.error(e.getMessage(), e);
         }
+    } */
+
+    private void showSprintsForProject(long chatId, int projectId) {
+        // Fetch sprints from the API
+
+        List<Sprint> sprints = sprintsServiceBot.getSprintsByProjectId(projectId);
+
+        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+        keyboard.setResizeKeyboard(true);
+        List<KeyboardRow> rows = new ArrayList<>();
+
+        // Cabecera con botón de regreso
+        KeyboardRow backRow = new KeyboardRow();
+        backRow.add("⬅️ Volver a Proyectos");
+        rows.add(backRow);
+
+        // Ver los usuarios dentro del proyecto
+        KeyboardRow viewUsers = new KeyboardRow();
+        viewUsers.add("👥 Ver usuarios del proyecto " + projectId);
+        rows.add(viewUsers);
+
+        // Botón para añadir sprint
+        KeyboardRow addSprintRow = new KeyboardRow();
+        addSprintRow.add("➕ Add Sprint");
+        rows.add(addSprintRow);
+
+        // Título
+        KeyboardRow titleRow = new KeyboardRow();
+        titleRow.add("🔄 Tasks del Sprint " + projectId);
+        rows.add(titleRow);
+
+        // Lista de sprints obtenidos dinámicamente
+        for (Sprint sprint : sprints) {
+            KeyboardRow row = new KeyboardRow();
+            String statusIcon = "Activo".equals(sprint.getDescription()) ? "🟢" : "🔴"; // Adjust based on actual status field
+            row.add(statusIcon + " " + sprint.getName() + " (ID: " + sprint.getId() + ")");
+            rows.add(row);
+        }
+
+        keyboard.setKeyboard(rows);
+
+        SendMessage msg = new SendMessage();
+        msg.setChatId(chatId);
+        msg.setText("Selecciona un sprint:");
+        msg.setReplyMarkup(keyboard);
+
+        try {
+            execute(msg);
+        } catch (TelegramApiException e) {
+            logger.error(e.getMessage(), e);
+        }
     }
+
 
     private void listTasksForSprint(long chatId, int sprintId) {
         List<Map<String, Object>> tasks = SPRINT_TASKS.getOrDefault(sprintId, new ArrayList<>());
@@ -314,10 +366,12 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         }
     }
 
-    public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService) {
+    public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService, ProjectsServiceBot projectsServiceBot, SprintsServiceBot sprintsServiceBot) {
         super(botToken);
         this.botName = botName;
         this.toDoItemService = toDoItemService;
+        this.projectsServiceBot = projectsServiceBot;
+        this.sprintsServiceBot = sprintsServiceBot;
         this.baseUrl = "http://localhost:8081"; // Ajusta según tu backend
         this.restTemplate = new RestTemplate();
     }
@@ -657,44 +711,53 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             return;
         }
 
-        // Removed unused variable assignment
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-        keyboard.setResizeKeyboard(true);
-        List<KeyboardRow> rows = new ArrayList<>();
-
-        // Opción: Listar Tareas
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add("List Tasks");
-        rows.add(row1);
-
-        // Opción: Logout
-        KeyboardRow rowLogout = new KeyboardRow();
-        rowLogout.add("Logout 🚪");
-        rows.add(rowLogout);
-
-        // Opciones de proyectos
-        KeyboardRow titleRow = new KeyboardRow();
-        titleRow.add("==🚀 Proyectos Activos 🚀==");
-        rows.add(titleRow);
-
-        for (Map<String, Object> proj : PROJECTS) {
-            KeyboardRow row = new KeyboardRow();
-            row.add("📁 " + proj.get("name") + " (ID: " + proj.get("id") + ")");
-            rows.add(row);
-        }
-        
-        keyboard.setKeyboard(rows);
-        
-        SendMessage msg = new SendMessage();
-        msg.setChatId(chatId);
-        msg.setText("Menú principal:");
-        msg.setReplyMarkup(keyboard);
         try {
+            // Get real projects from API
+            List<Projects> userProjects = projectsServiceBot.getProjectsByUserId(user.getIdUser());
+            
+            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+            keyboard.setResizeKeyboard(true);
+            List<KeyboardRow> rows = new ArrayList<>();
+
+            // Add standard options
+            KeyboardRow row1 = new KeyboardRow();
+            row1.add("List Tasks");
+            rows.add(row1);
+
+            KeyboardRow rowLogout = new KeyboardRow();
+            rowLogout.add("Logout 🚪");
+            rows.add(rowLogout);
+
+            // Add projects section
+            if (!userProjects.isEmpty()) {
+                KeyboardRow titleRow = new KeyboardRow();
+                titleRow.add("==🚀 Proyectos Activos 🚀==");
+                rows.add(titleRow);
+
+                for (Projects project : userProjects) {
+                    KeyboardRow row = new KeyboardRow();
+                    row.add("📁 " + project.getName() + " (ID: " + project.getIdProject() + ")");
+                    rows.add(row);
+                }
+            } else {
+                KeyboardRow noProjectsRow = new KeyboardRow();
+                noProjectsRow.add("No tienes proyectos asignados");
+                rows.add(noProjectsRow);
+            }
+            
+            keyboard.setKeyboard(rows);
+            
+            SendMessage msg = new SendMessage();
+            msg.setChatId(chatId);
+            msg.setText("Menú principal:");
+            msg.setReplyMarkup(keyboard);
             execute(msg);
-        } catch (TelegramApiException e) {
-            logger.error(e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("Error showing main menu", e);
+            sendMsg(chatId, "Error al cargar los proyectos. Intenta más tarde.", false);
         }
     }
+
 
     // --------------------------------------------------------------------------------
     //  LISTAR TAREAS (Manager -> todas, Developer -> solo suyas)
