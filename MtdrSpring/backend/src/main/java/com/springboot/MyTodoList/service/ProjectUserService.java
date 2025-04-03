@@ -81,4 +81,8 @@ public class ProjectUserService {
     public List<OracleUser> getUsersByProjectId(int projectId) {
         return projectUserRepository.findUsersByProjectId(projectId);
     }
+
+    public List<Projects> getProjectsByUserId(int userId) {
+        return projectUserRepository.findProjectsByUserId(userId);
+    }
 }

@@ -2,6 +2,7 @@ package com.springboot.MyTodoList.controller;
 
 import com.springboot.MyTodoList.model.OracleUser;
 import com.springboot.MyTodoList.model.ProjectUser;
+import com.springboot.MyTodoList.model.Projects;
 import com.springboot.MyTodoList.service.ProjectUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -64,5 +65,11 @@ public class ProjectUserController {
     public ResponseEntity<List<OracleUser>> getUsersByProjectId(@PathVariable int projectId) {
         List<OracleUser> users = projectUserService.getUsersByProjectId(projectId);
         return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/user/{userId}/projects")
+    public ResponseEntity<List<Projects>> getProjectsByUserId(@PathVariable int userId) {
+        List<Projects> projects = projectUserService.getProjectsByUserId(userId);
+        return ResponseEntity.ok(projects);
     }
 }
