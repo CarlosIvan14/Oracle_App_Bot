@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -39,10 +40,20 @@ public class SprintController {
                      .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Actualizar Sprint
+    // Actualizar Sprint (PUT: actualiza todos los campos)
     @PutMapping("/{id}")
     public ResponseEntity<Sprint> updateSprint(@PathVariable int id, @RequestBody Sprint sprintDetails) {
         Sprint updatedSprint = sprintService.updateSprint(id, sprintDetails);
+        if (updatedSprint != null) {
+            return new ResponseEntity<>(updatedSprint, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    // Actualizar parcialmente Sprint (PATCH: actualiza solo los campos indicados)
+    @PatchMapping("/{id}")
+    public ResponseEntity<Sprint> patchSprint(@PathVariable int id, @RequestBody Map<String, Object> updates) {
+        Sprint updatedSprint = sprintService.patchSprint(id, updates);
         if (updatedSprint != null) {
             return new ResponseEntity<>(updatedSprint, HttpStatus.OK);
         }
@@ -57,5 +68,10 @@ public class SprintController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<List<Sprint>> getSprintsByProjectId(@PathVariable("projectId") int projectId) {
+        List<Sprint> sprints = sprintService.findSprintsByProjectId(projectId);
+        return new ResponseEntity<>(sprints, HttpStatus.OK);
     }
 }

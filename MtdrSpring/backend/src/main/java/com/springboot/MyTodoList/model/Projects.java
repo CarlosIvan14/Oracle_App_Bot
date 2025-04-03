@@ -2,6 +2,8 @@ package com.springboot.MyTodoList.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,6 +16,7 @@ public class Projects {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_PROJECT")
+    @JsonProperty("id_project") // Para que el JSON asigne este valor correctamente
     private int idProject;
 
     @Column(name = "CREATION_TS")

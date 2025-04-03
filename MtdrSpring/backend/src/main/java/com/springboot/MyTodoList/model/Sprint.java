@@ -1,4 +1,3 @@
-// Sprint.java
 package com.springboot.MyTodoList.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -32,11 +31,21 @@ public class Sprint {
     @JsonManagedReference // Lado "padre" de la relación con Tasks
     private List<Tasks> tasks;
 
-    // Constructores, getters y setters
-
+    // Constructor por defecto
     public Sprint() {
     }
 
+    // Constructor completo
+    public Sprint(int id_sprint, LocalDateTime creation_ts, String description, String name, Projects project, List<Tasks> tasks) {
+        this.id_sprint = id_sprint;
+        this.creation_ts = creation_ts;
+        this.description = description;
+        this.name = name;
+        this.project = project;
+        this.tasks = tasks;
+    }
+
+    // Getters y Setters
     public int getId() {
         return id_sprint;
     }

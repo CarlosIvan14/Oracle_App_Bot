@@ -87,7 +87,7 @@ public class ProjectUser {
         // Evitamos acceder directamente a project para no forzar su carga.
         return "ProjectUser{" +
                 "id_project_user=" + id_project_user +
-                ", project=" + (project != null ? project.getIdProject() : null) +
+                ", project=" +  project.getIdProject() +
                 ", role_user='" + role_user + '\'' +
                 ", status='" + status + '\'' +
                 '}';

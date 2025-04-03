@@ -2,8 +2,9 @@ package com.springboot.MyTodoList.repository;
 
 import com.springboot.MyTodoList.model.Sprint;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.util.List;
 
-@Repository
 public interface SprintRepository extends JpaRepository<Sprint, Integer> {
+    // Utilizamos "_" para indicar que se accede a la propiedad idProject del objeto project.
+    List<Sprint> findByProject_IdProject(int projectId);
 }
