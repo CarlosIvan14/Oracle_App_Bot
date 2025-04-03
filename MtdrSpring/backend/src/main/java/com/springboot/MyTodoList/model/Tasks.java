@@ -1,4 +1,3 @@
-// Tasks.java
 package com.springboot.MyTodoList.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -42,6 +41,24 @@ public class Tasks {
 
     @Column(name = "ESTIMATED_HOURS")
     private Double estimated_hours;
+
+    // Constructor por defecto
+    public Tasks() {
+    }
+
+    // Constructor con todos los campos (excepto id_task)
+    public Tasks(LocalDateTime creation_ts, String name, String status, String description, Integer story_points,
+                 Sprint sprint, LocalDateTime deadline, Double real_hours, Double estimated_hours) {
+        this.creation_ts = creation_ts;
+        this.name = name;
+        this.status = status;
+        this.description = description;
+        this.story_points = story_points;
+        this.sprint = sprint;
+        this.deadline = deadline;
+        this.real_hours = real_hours;
+        this.estimated_hours = estimated_hours;
+    }
 
     // Getters y Setters
 
