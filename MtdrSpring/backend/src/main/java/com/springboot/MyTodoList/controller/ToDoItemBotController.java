@@ -47,6 +47,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     private enum Flow {
         NONE,       // Sin flujo activo (menú principal)
         LOGIN,      // Flujo de login
+        ADD_SPRINT, // Flujo para agregar sprint
         ADD_TASK,   // Flujo para agregar tarea
         ADD_USER,   // Flujo para agregar usuario
         EDIT_SKILL  // Flujo para editar skill de un usuario
@@ -61,6 +62,9 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
         // Info de usuario logueado
         private OracleUser loggedUser;
+
+        // Datos para crear un sprint
+        private String newSprintName;
 
         // Datos para crear tarea
         private String taskDescription;
@@ -96,22 +100,24 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     );
 
     // Sprints con IDs en decenas según proyecto
-    private static final Map<Integer, List<Map<String, Object>>> SPRINTS_DATA = Map.of(
-        1, List.of( // Proyecto 1
+    private static final Map<Integer, List<Map<String, Object>>> SPRINTS_DATA = new HashMap<>();
+
+    static {
+        SPRINTS_DATA.put(1, new ArrayList<>(List.of(
             Map.of("id", 11, "name", "Sprint 1", "status", "Activo"),
             Map.of("id", 12, "name", "Sprint 2", "status", "Activo")
-        ),
-        2, List.of( // Proyecto 2
+        )));
+        SPRINTS_DATA.put(2, new ArrayList<>(List.of(
             Map.of("id", 21, "name", "Sprint Alpha", "status", "Cerrado"),
             Map.of("id", 22, "name", "Sprint Beta", "status", "Activo")
-        ),
-        3, List.of( // Proyecto 3
+        )));
+        SPRINTS_DATA.put(3, new ArrayList<>(List.of(
             Map.of("id", 31, "name", "Sprint Velocidad", "status", "Activo")
-        ),
-        4, List.of( // Proyecto 4
+        )));
+        SPRINTS_DATA.put(4, new ArrayList<>(List.of(
             Map.of("id", 41, "name", "Sprint Seguridad", "status", "Planificado")
-        )
-    );
+        )));
+    }    
 
     // Tareas organizadas por sprint (ID sprint + 2 dígitos)
     private static Map<Integer, List<Map<String, Object>>> SPRINT_TASKS = new HashMap<>();
@@ -196,6 +202,12 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         viewUsers.add("👥 Ver usuarios del proyecto" + projectId);
         rows.add(viewUsers);
 
+        // Botón para añadir sprint
+        KeyboardRow addSprintRow = new KeyboardRow();
+        addSprintRow.add("➕ Add Sprint");
+        rows.add(addSprintRow);
+
+
         // Título
         KeyboardRow titleRow = new KeyboardRow();
         titleRow.add("🔄 Tasks del Sprint " + projectId);
@@ -247,6 +259,12 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         KeyboardRow headerRow = new KeyboardRow();
         headerRow.add("⬅️ Volver a Sprints");
         rows.add(headerRow);
+
+        // Botón para añadir tarea
+        KeyboardRow addTaskRow = new KeyboardRow();
+        addTaskRow.add("➕ Add Task");
+        rows.add(addTaskRow);
+
     
         // Sección Assigned
         if (!assigned.isEmpty()) {
@@ -342,30 +360,36 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             showUsersForProject(chatId, projectId);
             return;
         }
+
+        // 4. Maneh¿jo de nuevo sprint
+        if (messageText.equals("➕ Add Sprint")) {
+            startAddSprintFlow(chatId);
+            return;
+        }        
     
-        // 4. Si el usuario no está logueado, forzar login
+        // 5. Si el usuario no está logueado, forzar login
         if (state.loggedUser == null && state.flow != Flow.LOGIN) {
             startLoginFlow(chatId, state);
             return;
         }
     
-        // 5. Manejar flujos activos (login, agregar tarea/usuario)
+        // 6. Manejar flujos activos (login, agregar tarea/usuario)
         if (state.flow != Flow.NONE) {
             processFlow(chatId, messageText, state);
             return;
         }
     
-        // 6. Manejar acciones en tareas
+        // 7. Manejar acciones en tareas
         if (handleTaskActions(chatId, messageText, state)) {
             return;
         }
     
-        // 7. Manejar selección de proyectos
+        // 8. Manejar selección de proyectos
         if (handleProjectSelection(chatId, messageText, state)) {
             return;
         }
     
-        // 8. Opciones del menú principal
+        // 9. Opciones del menú principal
         handleMainMenuOptions(chatId, messageText, state);
     }
     
@@ -474,6 +498,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             case "Logout 🚪":  // Agregar esta línea
                 logoutUser(chatId);
                 break;
+            case "➕ Add Task":
             case "Add Task":
                 if (isManager) startAddTaskFlow(chatId);
                 break;
@@ -578,6 +603,9 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         switch (state.flow) {
             case LOGIN:
                 processLoginFlow(chatId, messageText, state);
+                break;
+            case ADD_SPRINT:
+                processAddSprintFlow(chatId, messageText, state);
                 break;
             case ADD_TASK:
                 processAddTaskFlow(chatId, messageText, state);
@@ -742,6 +770,80 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         }
     }
  */
+
+    // --------------------------------------------------------------------------------
+    //  FLUJO: AÑADIR SPRINT (manager)
+    // --------------------------------------------------------------------------------
+
+    private void startAddSprintFlow(long chatId) {
+        BotConversationState state = conversationStates.get(chatId);
+        if (state.currentProjectId == 0) {
+            sendMsg(chatId, "Primero selecciona un proyecto.", false);
+            return;
+        }
+        state.flow = Flow.ADD_SPRINT;
+        state.step = 1;
+        state.newSprintName = null;
+        sendMsg(chatId, "🆕 Añadir nuevo sprint.\n1) Ingresa el *nombre* del sprint:", true);
+    }
+
+    private void processAddSprintFlow(long chatId, String messageText, BotConversationState state) {
+        // Para poder cancelar
+        if (messageText.equalsIgnoreCase("/cancel")) {
+            resetFlow(state);
+            sendMsg(chatId, "❌ Flujo cancelado.", false);
+            showSprintsForProject(chatId, state.currentProjectId);
+            return;
+        }
+
+        int projectId = state.currentProjectId;
+        List<Map<String, Object >> sprints = new ArrayList<>(SPRINTS_DATA.getOrDefault(projectId, new ArrayList<>()));
+
+        if (state.step == 1) {
+            String sprintName = messageText.trim();
+    
+            // Validar si ya existe un sprint con ese nombre
+            boolean exists = sprints.stream()
+                .anyMatch(s -> sprintName.equalsIgnoreCase((String) s.get("name")));
+    
+            if (exists) {
+                sendMsg(chatId, "⚠️ Ya existe un sprint con ese nombre. Intenta con otro:", false);
+                return;
+            }
+    
+            state.newSprintName = sprintName;
+            state.step = 2;
+            sendMsg(chatId, "📌 Confirmación:\nNombre del nuevo sprint: *" + sprintName + "*\n\nEscribe `/confirmar` para agregarlo o `/cancel` para cancelar.", true);
+        } else if (state.step == 2) {
+            if (!messageText.equalsIgnoreCase("/confirmar")) {
+                sendMsg(chatId, "❌ No confirmado. Escribe `/confirmar` o `/cancel` para cancelar.", false);
+                return;
+            }
+    
+            // Generar nuevo ID
+            int maxId = sprints.stream()
+                .mapToInt(s -> (int) s.get("id"))
+                .max()
+                .orElse(projectId * 10); // ejemplo: 1*10 = 10 → siguiente sería 11
+    
+            int newSprintId = maxId + 1;
+    
+            Map<String, Object> newSprint = Map.of(
+                "id", newSprintId,
+                "name", state.newSprintName,
+                "status", "Activo"
+            );
+    
+            sprints.add(newSprint);
+            SPRINTS_DATA.put(projectId, sprints);
+    
+            sendMsg(chatId, "✅ Sprint *" + state.newSprintName + "* agregado exitosamente (ID: " + newSprintId + ")", true);
+            resetFlow(state);
+            showSprintsForProject(chatId, projectId);
+        }
+    }
+    
+
     // --------------------------------------------------------------------------------
     //  FLUJO: AÑADIR TAREA (manager)
     // --------------------------------------------------------------------------------
@@ -980,6 +1082,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     private void resetFlow(BotConversationState state) {
         state.flow = Flow.NONE;
         state.step = 0;
+        state.newSprintName = null;
         state.taskDescription = null;
         state.taskDeadline = null;
         state.taskPriority = null;
