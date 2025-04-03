@@ -1,17 +1,22 @@
 package com.springboot.MyTodoList.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "SPRINTS")
 public class Sprint {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_SPRINT")
+    @JsonProperty("id_sprint")  // Para que el JSON asigne este valor correctamente
     private int id_sprint;
 
     @Column(name = "CREATION_TS")

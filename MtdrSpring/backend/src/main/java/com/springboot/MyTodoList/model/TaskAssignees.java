@@ -1,7 +1,9 @@
 package com.springboot.MyTodoList.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "TASK_ASSIGNEES")
 public class TaskAssignees {
@@ -11,15 +13,15 @@ public class TaskAssignees {
     @Column(name = "ID_TASK_ASSIGNEES")
     private int id_task_assignees;
 
-    // Relación ManyToOne con ProjectUser
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_PROJECT_USER", nullable = false)
     private ProjectUser projectUser;
 
-    // Relación ManyToOne con Tasks
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_TASK", nullable = false)
     private Tasks task;
+
+    // Constructor, getters y setters
 
     public TaskAssignees() {
     }
@@ -58,8 +60,8 @@ public class TaskAssignees {
     public String toString() {
         return "TaskAssignees{" +
                 "id_task_assignees=" + id_task_assignees +
-                ", projectUser=" + projectUser.getIdProjectUser() +
-                ", task=" + task.getId() +
+                ", projectUser=" + (projectUser != null ? projectUser.getIdProjectUser() : null) +
+                ", task=" + (task != null ? task.getId() : null) +
                 '}';
     }
 }

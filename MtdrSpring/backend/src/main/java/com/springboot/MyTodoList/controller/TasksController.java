@@ -1,5 +1,7 @@
+// TasksController.java
 package com.springboot.MyTodoList.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.springboot.MyTodoList.model.Tasks;
 import com.springboot.MyTodoList.service.TasksService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +41,22 @@ public class TasksController {
                    .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Actualizar Task
+    // Actualizar Task (PUT: reemplazo completo)
     @PutMapping("/{id}")
     public ResponseEntity<Tasks> updateTask(@PathVariable int id, @RequestBody Tasks taskDetails) {
         Tasks updatedTask = tasksService.updateTask(id, taskDetails);
         if (updatedTask != null) {
             return new ResponseEntity<>(updatedTask, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    // Actualizar parcialmente Task (PATCH)
+    @PatchMapping("/{id}")
+    public ResponseEntity<Tasks> patchTask(@PathVariable int id, @RequestBody JsonNode taskUpdates) {
+        Tasks patchedTask = tasksService.patchTask(id, taskUpdates);
+        if (patchedTask != null) {
+            return new ResponseEntity<>(patchedTask, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -57,5 +69,12 @@ public class TasksController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    // Obtener todas las tareas de un Sprint por id_sprint
+    @GetMapping("/sprint/{sprintId}")
+    public ResponseEntity<List<Tasks>> getTasksBySprint(@PathVariable int sprintId) {
+        List<Tasks> tasks = tasksService.getTasksBySprint(sprintId);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 }

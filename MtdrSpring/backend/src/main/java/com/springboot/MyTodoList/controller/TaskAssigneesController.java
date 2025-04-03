@@ -17,7 +17,7 @@ public class TaskAssigneesController {
     @Autowired
     private TaskAssigneesService taskAssigneesService;
 
-    // Crear TaskAssignee
+    // Crear TaskAssignee (asigna una tarea a un usuario)
     @PostMapping
     public ResponseEntity<TaskAssignees> createTaskAssignee(@RequestBody TaskAssignees taskAssignee) {
         TaskAssignees createdTaskAssignee = taskAssigneesService.addTaskAssignee(taskAssignee);
@@ -58,4 +58,18 @@ public class TaskAssigneesController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    // Obtener todas las asignaciones de tareas de un usuario (por id del OracleUser)
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<TaskAssignees>> getTaskAssigneesByUser(@PathVariable int userId) {
+        List<TaskAssignees> taskAssignees = taskAssigneesService.getTaskAssigneesByUser(userId);
+        return new ResponseEntity<>(taskAssignees, HttpStatus.OK);
+    }
+    @GetMapping("/user/{projectUserId}/sprint/{sprintId}")
+    public ResponseEntity<List<TaskAssignees>> getTaskAssigneesByUserAndSprint(
+            @PathVariable int projectUserId, @PathVariable int sprintId) {
+        List<TaskAssignees> taskAssignees = taskAssigneesService.getTaskAssigneesByUserAndSprint(projectUserId, sprintId);
+        return new ResponseEntity<>(taskAssignees, HttpStatus.OK);
+    }
+
 }
