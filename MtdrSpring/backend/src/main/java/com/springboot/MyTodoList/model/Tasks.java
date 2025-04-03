@@ -1,9 +1,11 @@
 package com.springboot.MyTodoList.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "TASKS")
 public class Tasks {
@@ -46,7 +48,7 @@ public class Tasks {
     public Tasks() {
     }
 
-    // Constructor con todos los campos (excepto id_task)
+    // Constructor completo (excepto id_task)
     public Tasks(LocalDateTime creation_ts, String name, String status, String description, Integer story_points,
                  Sprint sprint, LocalDateTime deadline, Double real_hours, Double estimated_hours) {
         this.creation_ts = creation_ts;

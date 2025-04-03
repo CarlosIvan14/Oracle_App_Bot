@@ -1,7 +1,7 @@
 package com.springboot.MyTodoList.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -12,42 +12,45 @@ public class ProjectUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_PROJECT_USER")
-    private int id_project_user;
+    private int idProjectUser;  // Renombrado de id_project_user a idProjectUser
 
-    // Relación ManyToOne con OracleUser (no es bidireccional, por lo que no se requiere anotación de manejo de ciclo)
+    // Relación ManyToOne con OracleUser (no es bidireccional)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_USER", nullable = false)
     private OracleUser user;
 
-    // Relación ManyToOne con Projects.
+    // Relación ManyToOne con Projects
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_PROJECT", nullable = false)
-    @JsonBackReference  // Este es el lado "hijo" que se omite en la serialización para evitar recursión.
+    @JsonBackReference // Evita recursividad en la serialización
     private Projects project;
 
     @Column(name = "ROLE_USER")
-    private String role_user;
+    private String roleUser;
 
     @Column(name = "STATUS")
     private String status;
 
+    // Constructor por defecto
     public ProjectUser() {
     }
 
-    public ProjectUser(int id_project_user, OracleUser user, Projects project, String role_user, String status) {
-        this.id_project_user = id_project_user;
+    // Constructor completo
+    public ProjectUser(int idProjectUser, OracleUser user, Projects project, String roleUser, String status) {
+        this.idProjectUser = idProjectUser;
         this.user = user;
         this.project = project;
-        this.role_user = role_user;
+        this.roleUser = roleUser;
         this.status = status;
     }
 
+    // Getters y Setters
     public int getIdProjectUser() {
-        return id_project_user;
+        return idProjectUser;
     }
 
-    public void setIdProjectUser(int id_project_user) {
-        this.id_project_user = id_project_user;
+    public void setIdProjectUser(int idProjectUser) {
+        this.idProjectUser = idProjectUser;
     }
 
     public OracleUser getUser() {
@@ -67,11 +70,11 @@ public class ProjectUser {
     }
 
     public String getRoleUser() {
-        return role_user;
+        return roleUser;
     }
 
     public void setRoleUser(String roleUser) {
-        this.role_user = roleUser;
+        this.roleUser = roleUser;
     }
 
     public String getStatus() {
@@ -84,11 +87,11 @@ public class ProjectUser {
 
     @Override
     public String toString() {
-        // Evitamos acceder directamente a project para no forzar su carga.
+        // Evita forzar la carga de project
         return "ProjectUser{" +
-                "id_project_user=" + id_project_user +
-                ", project=" +  project.getIdProject() +
-                ", role_user='" + role_user + '\'' +
+                "idProjectUser=" + idProjectUser +
+                ", project=" + (project != null ? project.getIdProject() : null) +
+                ", roleUser='" + roleUser + '\'' +
                 ", status='" + status + '\'' +
                 '}';
     }
