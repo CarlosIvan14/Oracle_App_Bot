@@ -1,5 +1,6 @@
 package com.springboot.MyTodoList.service;
 
+import com.springboot.MyTodoList.model.OracleUser;
 import com.springboot.MyTodoList.model.ProjectUser;
 import com.springboot.MyTodoList.model.Projects;
 import com.springboot.MyTodoList.repository.ProjectUserRepository;
@@ -75,5 +76,9 @@ public class ProjectUserService {
             return true;
         }
         return false;
+    }
+
+    public List<OracleUser> getUsersByProjectId(int projectId) {
+        return projectUserRepository.findUsersByProjectId(projectId);
     }
 }
