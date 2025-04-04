@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -67,7 +68,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         super(botToken);
         this.botToken = botToken;
         this.botName = botName;
-        this.restTemplate = new RestTemplate();
+        this.restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         this.projectsServiceBot = projectsServiceBot;
         this.sprintsServiceBot = sprintsServiceBot;
         this.taskServiceBot = taskServiceBot;
@@ -120,7 +121,16 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         if (messageText.equals("📊 Reports")) {
             showReports(chatId, state);
             return;
-        }        
+        }
+        if (messageText.startsWith("Deshabilitar-")) {
+            int sprintId = Integer.parseInt(messageText.replace("Deshabilitar-", ""));
+            updateSprintStatus(chatId, sprintId, "idle");
+            return;
+        } else if (messageText.startsWith("Habilitar-")) {
+            int sprintId = Integer.parseInt(messageText.replace("Habilitar-", ""));
+            updateSprintStatus(chatId, sprintId, "Active");
+            return;
+        }                
         // Navegación: volver a Proyectos o Sprints
         if (handleNavigation(chatId, messageText, state)) return;
 
@@ -140,7 +150,26 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         }
 
     }
-
+    private void updateSprintStatus(long chatId, int sprintId, String newStatus) {
+        try {
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("description", newStatus);
+            String url = baseUrl + "/api/sprints/" + sprintId;
+            ResponseEntity<Sprint> resp = restTemplate.exchange(url, HttpMethod.PATCH, new HttpEntity<>(updates), Sprint.class);
+            if (resp.getStatusCode() == HttpStatus.OK) {
+                sendMsg(chatId, "Sprint actualizado a: " + newStatus, false);
+            } else {
+                sendMsg(chatId, "Error al actualizar el sprint.", false);
+            }
+        } catch (Exception e) {
+            logger.error("Error updating sprint status", e);
+            sendMsg(chatId, "Error al actualizar el sprint.", false);
+        }
+        // Refrescar la lista de sprints
+        boolean isManager = isManager(conversationStates.get(chatId).loggedUser.getIdUser(), conversationStates.get(chatId).currentProjectId);
+        showSprintsForProject(chatId, conversationStates.get(chatId).currentProjectId, isManager);
+    }
+    
     private int extractProjectIdFromUsersCommand(String messageText) {
         try {
             String[] parts = messageText.split(" ");
@@ -340,12 +369,13 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
         keyboard.setResizeKeyboard(true);
         List<KeyboardRow> rows = new ArrayList<>();
-
+    
+        // Botón de navegación
         KeyboardRow backRow = new KeyboardRow();
         backRow.add("⬅️ Volver a Proyectos");
         rows.add(backRow);
-
-        // Solo si el usuario es manager se muestran los botones "Ver Usuarios" y "Añadir Sprint"
+    
+        // Botones solo para manager
         if (isManager) {
             KeyboardRow usersRow = new KeyboardRow();
             usersRow.add("👥 Ver Usuarios Proyecto " + projectId);
@@ -354,19 +384,30 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             addSprintRow.add("➕ Añadir Sprint");
             rows.add(addSprintRow);
         }
-
+    
+        // Título
         KeyboardRow titleRow = new KeyboardRow();
         titleRow.add("Sprints del Proyecto " + projectId);
         rows.add(titleRow);
-
+    
+        // Iteramos los sprints para mostrar cada uno con su botón de toggle
         for (Sprint sprint : sprints) {
             KeyboardRow row = new KeyboardRow();
-            String statusIcon = "Activo".equals(sprint.getDescription()) ? "🟢" : "🔴"; // Adjust based on actual status field
-            // Add a special tag like #SPRINT# to identify that this is a sprint
-            String sprintText = statusIcon + " " + sprint.getName() + " (ID: " + sprint.getId() + ") #SPRINT#";
-            row.add(sprintText);
+            // Se muestra un icono según el estado del sprint
+            String statusIcon = "Active".equalsIgnoreCase(sprint.getDescription()) ? "🟢" : "🔴";
+            String sprintLabel = statusIcon + " " + sprint.getName() + " (ID: " + sprint.getId() + ") #SPRINT#";
+            row.add(sprintLabel);
+            // Botón para cambiar estado:
+            String toggleButton;
+            if ("Active".equalsIgnoreCase(sprint.getDescription())) {
+                toggleButton = "Deshabilitar-" + sprint.getId();
+            } else {
+                toggleButton = "Habilitar-" + sprint.getId();
+            }
+            row.add(toggleButton);
             rows.add(row);
-}
+        }
+    
         keyboard.setKeyboard(rows);
         SendMessage msg = new SendMessage();
         msg.setChatId(chatId);
@@ -378,6 +419,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             logger.error("Error en showSprintsForProject", e);
         }
     }
+    
     private void listTasksForSprint(long chatId, int sprintId, int userId) {
         // Fetch TaskAssignees dynamically
         
@@ -528,7 +570,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             if (messageText.equalsIgnoreCase("/confirmar")) {
                 Sprint sprint = new Sprint();
                 sprint.setName(state.newSprintName);
-                sprint.setDescription("Activo");
+                sprint.setDescription("Active");
                 Projects p = new Projects();
                 p.setIdProject(state.currentProjectId);
                 sprint.setProject(p);

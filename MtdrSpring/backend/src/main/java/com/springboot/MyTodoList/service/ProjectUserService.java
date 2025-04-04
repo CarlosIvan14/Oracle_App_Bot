@@ -7,7 +7,7 @@ import com.springboot.MyTodoList.repository.ProjectUserRepository;
 import com.springboot.MyTodoList.repository.ProjectsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.util.Map;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,7 +67,49 @@ public class ProjectUserService {
         }
         return null;
     }
-
+    public ProjectUser patchProjectUser(int id, Map<String, Object> updates) {
+        Optional<ProjectUser> projectUserOpt = projectUserRepository.findById(id);
+        if (projectUserOpt.isPresent()) {
+            ProjectUser projectUser = projectUserOpt.get();
+            
+            // Actualizar el usuario si viene en el payload
+            if (updates.containsKey("user")) {
+                Map<String, Object> userMap = (Map<String, Object>) updates.get("user");
+                if (userMap.containsKey("idUser")) {
+                    int userId = (Integer) userMap.get("idUser");
+                    // Si se requiere validar que el usuario existe, se puede hacer una consulta adicional
+                    OracleUser user = new OracleUser();
+                    user.setIdUser(userId);
+                    projectUser.setUser(user);
+                }
+            }
+            
+            // Actualizar el proyecto si viene en el payload
+            if (updates.containsKey("project")) {
+                Map<String, Object> projectMap = (Map<String, Object>) updates.get("project");
+                if (projectMap.containsKey("idProject")) {
+                    int projectId = (Integer) projectMap.get("idProject");
+                    Projects managedProject = projectsRepository.findById(projectId)
+                        .orElseThrow(() -> new IllegalArgumentException("Proyecto con id " + projectId + " no existe"));
+                    projectUser.setProject(managedProject);
+                }
+            }
+            
+            // Actualizar roleUser
+            if (updates.containsKey("roleUser")) {
+                projectUser.setRoleUser((String) updates.get("roleUser"));
+            }
+            
+            // Actualizar status
+            if (updates.containsKey("status")) {
+                projectUser.setStatus((String) updates.get("status"));
+            }
+            
+            return projectUserRepository.save(projectUser);
+        }
+        return null;
+    }
+    
     // Eliminar un ProjectUser
     public boolean deleteProjectUser(int id) {
         Optional<ProjectUser> projectUserOpt = projectUserRepository.findById(id);

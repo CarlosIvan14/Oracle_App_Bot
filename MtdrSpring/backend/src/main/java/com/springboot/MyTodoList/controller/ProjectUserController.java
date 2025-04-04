@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.Map;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +42,15 @@ public class ProjectUserController {
     }
 
     // Actualizar un ProjectUser
+    @PatchMapping("/{id}")
+    public ResponseEntity<ProjectUser> patchProjectUser(@PathVariable int id, @RequestBody Map<String, Object> updates) {
+        ProjectUser patchedProjectUser = projectUserService.patchProjectUser(id, updates);
+        if (patchedProjectUser != null) {
+            return new ResponseEntity<>(patchedProjectUser, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ProjectUser> updateProjectUser(@PathVariable int id, @RequestBody ProjectUser projectUserDetails) {
         ProjectUser updatedProjectUser = projectUserService.updateProjectUser(id, projectUserDetails);
