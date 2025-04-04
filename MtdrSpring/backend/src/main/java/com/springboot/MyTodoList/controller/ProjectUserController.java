@@ -60,13 +60,13 @@ public class ProjectUserController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-
+ // Obtener todos los usuarios que pertenecen de  un proyecto
     @GetMapping("/project/{projectId}/users")
     public ResponseEntity<List<OracleUser>> getUsersByProjectId(@PathVariable int projectId) {
         List<OracleUser> users = projectUserService.getUsersByProjectId(projectId);
         return ResponseEntity.ok(users);
     }
-
+//Obtener todos los proyectos a los que pertenece un usuario
     @GetMapping("/user/{userId}/projects")
     public ResponseEntity<List<Projects>> getProjectsByUserId(@PathVariable int userId) {
         List<Projects> projects = projectUserService.getProjectsByUserId(userId);

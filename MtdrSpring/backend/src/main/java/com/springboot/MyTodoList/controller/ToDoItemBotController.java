@@ -1,17 +1,11 @@
 package com.springboot.MyTodoList.controller;
 
-import com.springboot.MyTodoList.model.LoginRequest;
-import com.springboot.MyTodoList.model.OracleUser;
-import com.springboot.MyTodoList.model.Projects;
-import com.springboot.MyTodoList.model.Sprint;
-import com.springboot.MyTodoList.model.ToDoItem;
+import com.springboot.MyTodoList.model.*;
 import com.springboot.MyTodoList.service.ProjectsServiceBot;
 import com.springboot.MyTodoList.service.SprintsServiceBot;
+import com.springboot.MyTodoList.service.TaskServiceBot;
 import com.springboot.MyTodoList.service.ToDoItemService;
-import com.springboot.MyTodoList.util.BotCommands;
-import com.springboot.MyTodoList.util.BotHelper;
-import com.springboot.MyTodoList.util.BotLabels;
-import com.springboot.MyTodoList.util.BotMessages;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
@@ -19,361 +13,64 @@ import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-
-/**
- * Bot que gestiona login de usuario, menú según rol (manager/developer),
- * y flujos para listar, crear, editar, borrar ToDoItems, así como
- * crear/editar usuarios.
- */
 public class ToDoItemBotController extends TelegramLongPollingBot {
 
     private static final Logger logger = LoggerFactory.getLogger(ToDoItemBotController.class);
     //services
 
     private final ProjectsServiceBot projectsServiceBot;
-    private final ToDoItemService toDoItemService;
     private final SprintsServiceBot sprintsServiceBot;
-
-
-    private final String botName;
-    private final String baseUrl; // e.g. "http://localhost:8081" para tus endpoints
+    private final TaskServiceBot taskServiceBot;
+    private final String baseUrl = "http://localhost:8081";
     private final RestTemplate restTemplate;
+    private final String botName;
+    private final String botToken;
 
-    /**
-     * Estados/Flows posibles en la conversación.
-     */
     private enum Flow {
-        NONE,       // Sin flujo activo (menú principal)
-        LOGIN,      // Flujo de login
-        ADD_SPRINT, // Flujo para agregar sprint
-        ADD_TASK,   // Flujo para agregar tarea
-        ADD_USER,   // Flujo para agregar usuario
-        EDIT_SKILL  // Flujo para editar skill de un usuario
+        NONE, LOGIN, ADD_SPRINT, ADD_TASK, ADD_USER, TASK_COMPLETE
     }
 
     /**
-     * Estructura que guarda el estado de la conversación por chat.
+     * Estado de la conversación por chat.
      */
     private static class BotConversationState {
-        private Flow flow = Flow.NONE;
-        private int step = 0;
-
-        // Info de usuario logueado
-        private OracleUser loggedUser;
-
-        // Datos para crear un sprint
-        private String newSprintName;
-
+        Flow flow = Flow.NONE;
+        int step = 0;
+        OracleUser loggedUser;
+        int currentProjectId;
+        int currentSprintId;
+        int currentTaskId;
+        // Datos para login
+        String newUserName;
+        String newUserPassword;
+        // Datos para crear sprint
+        String newSprintName;
         // Datos para crear tarea
-        private String taskDescription;
-        private LocalDate taskDeadline;
-        private Integer taskPriority;
-        private List<OracleUser> aiSortedUsers; // lista devuelta por la AI
-        private int chosenPosition; // índice elegido en la lista
-        private int currentProjectId;
-        private int currentSprintId;
-
-        // Datos para crear usuario
-        private String newUserName;
-        private String newUserPassword;
-        private String newUserSkill;
-        private String newUserTelegramId;
-        private String newUserTelegramUsername;
-
-        // Datos para editar skill
-        private int editUserId;
-        private String editNewSkill;
+        String taskDescription;
+        String taskDeadline; // formato "yyyy-MM-dd HH:mm" si lo requieres
+        Integer taskPriority;
+        // Datos para agregar usuario
+        List<OracleUser> allOracleUsers;
     }
 
-    // Mapa: chatId -> estado de conversación
     private final Map<Long, BotConversationState> conversationStates = new HashMap<>();
 
-    // Sprints con IDs en decenas según proyecto
-    private static final Map<Integer, List<Map<String, Object>>> SPRINTS_DATA = new HashMap<>();
-
-    static {
-        SPRINTS_DATA.put(1, new ArrayList<>(List.of(
-            Map.of("id", 11, "name", "Sprint 1", "status", "Activo"),
-            Map.of("id", 12, "name", "Sprint 2", "status", "Activo")
-        )));
-        SPRINTS_DATA.put(2, new ArrayList<>(List.of(
-            Map.of("id", 21, "name", "Sprint Alpha", "status", "Cerrado"),
-            Map.of("id", 22, "name", "Sprint Beta", "status", "Activo")
-        )));
-        SPRINTS_DATA.put(3, new ArrayList<>(List.of(
-            Map.of("id", 31, "name", "Sprint Velocidad", "status", "Activo")
-        )));
-        SPRINTS_DATA.put(4, new ArrayList<>(List.of(
-            Map.of("id", 41, "name", "Sprint Seguridad", "status", "Planificado")
-        )));
-    }    
-
-    // Tareas organizadas por sprint (ID sprint + 2 dígitos)
-    private static Map<Integer, List<Map<String, Object>>> SPRINT_TASKS = new HashMap<>();
-
-    // Inicializar tareas de ejemplo
-    static {
-        // Sprint 11 (Proyecto 1)
-        SPRINT_TASKS.put(11, new ArrayList<>(Arrays.asList(
-            Map.of("id", 1101, "description", "Migrar base de datos", "status", "ASSIGNED"),
-            Map.of("id", 1102, "description", "Configurar servidores Oracle", "status", "IN_PROGRESS"),
-            Map.of("id", 1103, "description", "Frontend Dev", "status", "ASSIGNED"),
-            Map.of("id", 1104, "description", "Conectar API´s", "status", "COMPLETED")
-        )));
-        
-        // Sprint 12 (Proyecto 1)
-        SPRINT_TASKS.put(12, new ArrayList<>(Arrays.asList(
-            Map.of("id", 1201, "description", "Optimizar consultas SQL", "status", "COMPLETED"),
-            Map.of("id", 1202, "description", "Migrar base de datos", "status", "ASSIGNED"),
-            Map.of("id", 1203, "description", "Configurar servidores Oracle", "status", "IN_PROGRESS"),
-            Map.of("id", 1204, "description", "Frontend Dev", "status", "ASSIGNED"),
-            Map.of("id", 1205, "description", "Conectar API´s", "status", "COMPLETED")
-        )));
-
-        // Sprint 21 (Proyecto 2)
-        SPRINT_TASKS.put(21, new ArrayList<>(Arrays.asList(
-            Map.of("id", 2101, "description", "Diseñar módulo facturación", "status", "ASSIGNED"),
-            Map.of("id", 2102, "description", "Implementar API de pagos", "status", "IN_PROGRESS"),
-            Map.of("id", 2103, "description", "Crear interfaz de usuario", "status", "COMPLETED"),
-            Map.of("id", 2104, "description", "Integrar con sistema de terceros", "status", "ASSIGNED"),
-            Map.of("id", 2105, "description", "Realizar pruebas de integración", "status", "COMPLETED")
-
-        )));
-    }
-
-    // Usuarios por proyecto harcodeados
-    // Usuarios asignados por proyecto (harcodeado)
-    private static final Map<Integer, List<OracleUser>> PROJECT_USERS = Map.of(
-        1, List.of(
-            createUser(1, "Luis", "developer", "SQL"),
-            createUser(2, "Ana", "developer", "Oracle")
-        ),
-        2, List.of(
-            createUser(3, "Carlos", "developer", "Java"),
-            createUser(4, "Laura", "developer", "Spring Boot")
-        ),
-        3, List.of(
-            createUser(5, "María", "developer", "React")
-        ),
-        4, List.of(
-            createUser(6, "Pablo", "developer", "Kotlin"),
-            createUser(7, "Sandra", "developer", "Android")
-        )
-    );
-    
-    private static OracleUser createUser(int id, String name, String role, String skill) {
-        OracleUser user = new OracleUser();
-        user.setIdUser(id);
-        user.setName(name);
-        return user;
-    }    
-
-    private void startLoginFlow(long chatId, BotConversationState state) {
-        state.flow = Flow.LOGIN;
-        state.step = 1;
-        sendMsg(chatId, "¡Bienvenido! Por favor, ingresa tu *nombre* de usuario:", true);
-    }
-
-    /* private void showSprintsForProject(long chatId, int projectId) {
-        List<Map<String, Object>> sprints = SPRINTS_DATA.getOrDefault(projectId, new ArrayList<>());
-        
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-        keyboard.setResizeKeyboard(true);
-        List<KeyboardRow> rows = new ArrayList<>();
-
-        // Cabecera con botón de regreso
-        KeyboardRow backRow = new KeyboardRow();
-        backRow.add("⬅️ Volver a Proyectos");
-        rows.add(backRow);
-
-        // Ver los usuarios dentro del proyecto
-        KeyboardRow viewUsers = new KeyboardRow();
-        viewUsers.add("👥 Ver usuarios del proyecto" + projectId);
-        rows.add(viewUsers);
-
-        // Botón para añadir sprint
-        KeyboardRow addSprintRow = new KeyboardRow();
-        addSprintRow.add("➕ Add Sprint");
-        rows.add(addSprintRow);
-
-
-        // Título
-        KeyboardRow titleRow = new KeyboardRow();
-        titleRow.add("🔄 Tasks del Sprint " + projectId);
-        rows.add(titleRow);
-
-        // Lista de sprints
-        for (Map<String, Object> sprint : sprints) {
-            KeyboardRow row = new KeyboardRow();
-            String statusIcon = "Activo".equals(sprint.get("status")) ? "🟢" : "🔴";
-            row.add(statusIcon + " " + sprint.get("name") + " (ID: " + sprint.get("id") + ")");
-            rows.add(row);
-        }
-
-        keyboard.setKeyboard(rows);
-        
-        SendMessage msg = new SendMessage();
-        msg.setChatId(chatId);
-        msg.setText("Selecciona un sprint:");
-        msg.setReplyMarkup(keyboard);
-        
-        try {
-            execute(msg);
-        } catch (TelegramApiException e) {
-            logger.error(e.getMessage(), e);
-        }
-    } */
-
-    private void showSprintsForProject(long chatId, int projectId) {
-        // Fetch sprints from the API
-
-        List<Sprint> sprints = sprintsServiceBot.getSprintsByProjectId(projectId);
-
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-        keyboard.setResizeKeyboard(true);
-        List<KeyboardRow> rows = new ArrayList<>();
-
-        // Cabecera con botón de regreso
-        KeyboardRow backRow = new KeyboardRow();
-        backRow.add("⬅️ Volver a Proyectos");
-        rows.add(backRow);
-
-        // Ver los usuarios dentro del proyecto
-        KeyboardRow viewUsers = new KeyboardRow();
-        viewUsers.add("👥 Ver usuarios del proyecto " + projectId);
-        rows.add(viewUsers);
-
-        // Botón para añadir sprint
-        KeyboardRow addSprintRow = new KeyboardRow();
-        addSprintRow.add("➕ Add Sprint");
-        rows.add(addSprintRow);
-
-        // Título
-        KeyboardRow titleRow = new KeyboardRow();
-        titleRow.add("🔄 Tasks del Sprint " + projectId);
-        rows.add(titleRow);
-
-        // Lista de sprints obtenidos dinámicamente
-        for (Sprint sprint : sprints) {
-            KeyboardRow row = new KeyboardRow();
-            String statusIcon = "Activo".equals(sprint.getDescription()) ? "🟢" : "🔴"; // Adjust based on actual status field
-            row.add(statusIcon + " " + sprint.getName() + " (ID: " + sprint.getId() + ")");
-            rows.add(row);
-        }
-
-        keyboard.setKeyboard(rows);
-
-        SendMessage msg = new SendMessage();
-        msg.setChatId(chatId);
-        msg.setText("Selecciona un sprint:");
-        msg.setReplyMarkup(keyboard);
-
-        try {
-            execute(msg);
-        } catch (TelegramApiException e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
-
-
-    private void listTasksForSprint(long chatId, int sprintId) {
-        List<Map<String, Object>> tasks = SPRINT_TASKS.getOrDefault(sprintId, new ArrayList<>());
-        
-        // Filtrar por estado
-        List<Map<String, Object>> assigned = tasks.stream()
-            .filter(t -> "ASSIGNED".equals(t.get("status")))
-            .collect(Collectors.toList());
-        
-        List<Map<String, Object>> inProgress = tasks.stream()
-            .filter(t -> "IN_PROGRESS".equals(t.get("status")))
-            .collect(Collectors.toList());
-        
-        List<Map<String, Object>> completed = tasks.stream()
-            .filter(t -> "COMPLETED".equals(t.get("status")))
-            .collect(Collectors.toList());
-    
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-        keyboard.setResizeKeyboard(true);
-        List<KeyboardRow> rows = new ArrayList<>();
-    
-        // Botones de navegación
-        KeyboardRow headerRow = new KeyboardRow();
-        headerRow.add("⬅️ Volver a Sprints");
-        rows.add(headerRow);
-
-        // Botón para añadir tarea
-        KeyboardRow addTaskRow = new KeyboardRow();
-        addTaskRow.add("➕ Add Task");
-        rows.add(addTaskRow);
-
-    
-        // Sección Assigned
-        if (!assigned.isEmpty()) {
-            rows.add(createTitleRow("==📥 ASIGNADAS 📥=="));
-            assigned.forEach(task -> {
-                KeyboardRow row = new KeyboardRow();
-                row.add(task.get("description") + " [ID: " + task.get("id") + "]");
-                row.add("▶️ START-" + task.get("id"));
-                rows.add(row);
-            });
-        }
-    
-        // Sección In Progress
-        if (!inProgress.isEmpty()) {
-            rows.add(createTitleRow("==⏳ EN PROGRESO ⏳=="));
-            inProgress.forEach(task -> {
-                KeyboardRow row = new KeyboardRow();
-                row.add(task.get("description") + " [ID: " + task.get("id") + "]");
-                row.add("❌ CANCEL-" + task.get("id"));
-                row.add("✅ DONE-" + task.get("id"));
-                rows.add(row);
-            });
-        }
-    
-        // Sección Completed
-        if (!completed.isEmpty()) {
-            rows.add(createTitleRow("==✅ COMPLETADAS ✅=="));
-            completed.forEach(task -> {
-                KeyboardRow row = new KeyboardRow();
-                row.add(task.get("description") + " [ID: " + task.get("id") + "]");
-                row.add("↩️ UNDO-" + task.get("id"));
-                rows.add(row);
-            });
-        }
-    
-        keyboard.setKeyboard(rows);
-        
-        SendMessage msg = new SendMessage();
-        msg.setChatId(chatId);
-        msg.setText("Tablero del Sprint " + sprintId);
-        msg.setReplyMarkup(keyboard);
-        
-        try {
-            execute(msg);
-        } catch (TelegramApiException e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
-
-    public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService, ProjectsServiceBot projectsServiceBot, SprintsServiceBot sprintsServiceBot) {
+    public ToDoItemBotController(String botToken, String botName, ProjectsServiceBot projectsServiceBot, SprintsServiceBot sprintsServiceBot, TaskServiceBot taskServiceBot) {
         super(botToken);
+        this.botToken = botToken;
         this.botName = botName;
-        this.toDoItemService = toDoItemService;
+        this.restTemplate = new RestTemplate();
         this.projectsServiceBot = projectsServiceBot;
         this.sprintsServiceBot = sprintsServiceBot;
-        this.baseUrl = "http://localhost:8081"; // Ajusta según tu backend
-        this.restTemplate = new RestTemplate();
+        this.taskServiceBot = taskServiceBot;
     }
 
     @Override
@@ -383,276 +80,82 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (!update.hasMessage() || !update.getMessage().hasText()) {
+        if (!update.hasMessage() || !update.getMessage().hasText()) return;
+        long chatId = update.getMessage().getChatId();
+        String messageText = update.getMessage().getText().trim();
+        BotConversationState state = conversationStates.computeIfAbsent(chatId, k -> new BotConversationState());
+
+        // Comandos especiales
+        if (messageText.equalsIgnoreCase("/start")) {
+            startLoginFlow(chatId, state);
             return;
         }
-        
-        String messageText = update.getMessage().getText().trim();
-        long chatId = update.getMessage().getChatId();
-        BotConversationState state = conversationStates.computeIfAbsent(chatId, k -> new BotConversationState());
-    
-        // 1. Manejar comandos especiales
-        if (messageText.equalsIgnoreCase("/start")) {
-            handleStartCommand(chatId, state);
-            return;
-        } else if (messageText.equalsIgnoreCase("/menu")) {
-            handleMenuCommand(chatId, state);
-            return;
-        } else if (messageText.equalsIgnoreCase("/logout")) {
+        if (messageText.equalsIgnoreCase("/logout") || messageText.equalsIgnoreCase("Logout 🚪")) {
             logoutUser(chatId);
             return;
         }
-    
-        // 2. Manejar navegación entre proyectos y sprints
-        if (handleNavigation(chatId, messageText, state)) {
+        if (messageText.equalsIgnoreCase("/menu")) {
+            if (state.loggedUser != null) {
+                showMainMenu(chatId, state.loggedUser);
+            } else {
+                sendMsg(chatId, "No hay sesión activa. Usa /start para loguearte.", false);
+            }
             return;
         }
-
-        // 3. Manejo de usuario por proyecto
-        if (messageText.startsWith("👥 Ver usuarios del proyecto")) {
-            int projectId = Integer.parseInt(messageText.replaceAll("\\D+", ""));
-            showUsersForProject(chatId, projectId);
+        // Flujo para ver usuarios
+        if (messageText.startsWith("👥 Ver Usuarios Proyecto")) {
+            int projectId = extractProjectIdFromUsersCommand(messageText);
+            if (projectId != -1) {
+                showUsersForProject(chatId, projectId);
+                return;
+            }
+        }
+        // Flujo para agregar usuario
+        if (messageText.equalsIgnoreCase("➕ Agregar Usuario")) {
+            state.flow = Flow.ADD_USER;
+            state.step = 1;
+            fetchAndShowAllOracleUsers(chatId, state);
             return;
         }
+        // Navegación: volver a Proyectos o Sprints
+        if (handleNavigation(chatId, messageText, state)) return;
 
-        // 4. Maneh¿jo de nuevo sprint
-        if (messageText.equals("➕ Add Sprint")) {
-            startAddSprintFlow(chatId);
-            return;
-        }        
-    
-        // 5. Si el usuario no está logueado, forzar login
         if (state.loggedUser == null && state.flow != Flow.LOGIN) {
             startLoginFlow(chatId, state);
             return;
         }
-    
-        // 6. Manejar flujos activos (login, agregar tarea/usuario)
         if (state.flow != Flow.NONE) {
             processFlow(chatId, messageText, state);
             return;
         }
-    
-        // 7. Manejar acciones en tareas
-        if (handleTaskActions(chatId, messageText, state)) {
-            return;
+        if (handleSprintSelection(chatId, messageText, state)) return;
+        if (handleProjectSelection(chatId, messageText, state)) return;
+        // 10. Handle task status updates
+        if (handleTaskStatusUpdates(chatId, messageText, state)){
+
         }
-    
-        // 8. Manejar selección de proyectos
-        if (handleProjectSelection(chatId, messageText, state)) {
-            return;
-        }
-    
-        // 9. Opciones del menú principal
-        handleMainMenuOptions(chatId, messageText, state);
-    }
-    
-    // Métodos auxiliares nuevos
-    private void handleStartCommand(long chatId, BotConversationState state) {
-        state.flow = Flow.LOGIN;
-        state.step = 1;
-        sendMsg(chatId, "¡Bienvenido! Por favor, ingresa tu *nombre* de usuario:", true);
-    }
-    
-    private void handleMenuCommand(long chatId, BotConversationState state) {
-        resetFlow(state);
-        if (state.loggedUser != null) {
-            showMainMenu(chatId, state.loggedUser);
-        } else {
-            sendMsg(chatId, "No hay sesión activa. Usa /start para loguearte.", false);
-        }
-    }
-    
-    private boolean handleNavigation(long chatId, String messageText, BotConversationState state) {
-        if (messageText.equals("⬅️ Volver a Proyectos")) {
-            showMainMenu(chatId, state.loggedUser);
-            return true;
-        } else if (messageText.equals("⬅️ Volver a Sprints")) {
-            if (state.currentProjectId != 0) {
-                showSprintsForProject(chatId, state.currentProjectId);
-            } else {
-                showMainMenu(chatId, state.loggedUser);
-            }
-            return true;
-        }
-        return false;
-    }
-    
-    private boolean handleProjectSelection(long chatId, String messageText, BotConversationState state) {
-        Matcher projectMatcher = Pattern.compile(".*\\(ID: (\\d+)\\)").matcher(messageText);
-        if (projectMatcher.find()) {
-            int projectId = Integer.parseInt(projectMatcher.group(1));
-            state.currentProjectId = projectId;
-            showSprintsForProject(chatId, projectId);
-            return true;
-        }
-        return false;
-    }
-    
-    private boolean handleTaskActions(long chatId, String messageText, BotConversationState state) {
-        String[] actionParts = messageText.split("-");
-        if (actionParts.length == 2) {
-            String action = actionParts[1];
-            if (Arrays.asList("START", "CANCEL", "DONE", "UNDO").contains(action)) {
-                try {
-                    int taskId = Integer.parseInt(actionParts[0].replaceAll("[^\\d]", ""));
-                    int sprintId = taskId / 100; // Obtener ID de sprint de los primeros dígitos
-                    
-                    List<Map<String, Object>> tasks = SPRINT_TASKS.getOrDefault(sprintId, new ArrayList<>());
-                    Optional<Map<String, Object>> task = tasks.stream()
-                        .filter(t -> (int) t.get("id") == taskId)
-                        .findFirst();
-                    
-                    if (task.isPresent()) {
-                        switch(action) {
-                            case "START":
-                                task.get().put("status", "IN_PROGRESS");
-                                break;
-                            case "CANCEL":
-                                task.get().put("status", "ASSIGNED");
-                                break;
-                            case "DONE":
-                                task.get().put("status", "COMPLETED");
-                                break;
-                            case "UNDO":
-                                task.get().put("status", "IN_PROGRESS");
-                                break;
-                        }
-                        listTasksForSprint(chatId, sprintId);
-                    } else {
-                        sendMsg(chatId, "⚠️ Tarea no encontrada", false);
-                    }
-                } catch (NumberFormatException e) {
-                    sendMsg(chatId, "❌ ID de tarea inválido", false);
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    private void handleMainMenuOptions(long chatId, String messageText, BotConversationState state) {
-        OracleUser user = state.loggedUser;
-        boolean isManager = true;
-        
-        switch (messageText) {
-            case "List Tasks":
-                if (state.currentSprintId != 0) {
-                    listTasksForSprint(chatId, state.currentSprintId);
-                } else {
-                    sendMsg(chatId, "Primero selecciona un sprint", false);
-                }
-                break;
-                
-            case "🏠 Main Menu":
-            case "Show Main Screen":  // Para mantener retrocompatibilidad
-                showMainMenu(chatId, state.loggedUser);
-                break;
-            case "Logout":
-            case "Logout 🚪":  // Agregar esta línea
-                logoutUser(chatId);
-                break;
-            case "➕ Add Task":
-            case "Add Task":
-                if (isManager) startAddTaskFlow(chatId);
-                break;
-            case "Add User":
-                if (isManager) startAddUserFlow(chatId);
-                break;
-            default:
-                // Manejar selección de sprint
-                Optional<Map<String, Object>> selectedSprint = SPRINTS_DATA.values().stream()
-                    .flatMap(List::stream)
-                    .filter(s -> messageText.contains(String.valueOf(s.get("id"))))
-                    .findFirst();
-                
-                if (selectedSprint.isPresent()) {
-                    state.currentSprintId = (int) selectedSprint.get().get("id");
-                    listTasksForSprint(chatId, state.currentSprintId);
-                } else {
-                    sendMsg(chatId, "Opción no reconocida. Usa el menú.", false);
-                }
-                break;
-        }
+
     }
 
-    // --------------------------------------------------------------------------------
-    //  Manejo de DONE, UNDO, DELETE
-    // --------------------------------------------------------------------------------
-
-    // --------------------------------------------------------------------------------
-    //  Handlers de Acciones de Tareas
-    // --------------------------------------------------------------------------------
-
-    private void handleStartAction(long chatId, String text) {
-        int taskId = extractId(text, "-START");
-        int sprintId = taskId / 100;
-        
-        List<Map<String, Object>> tasks = SPRINT_TASKS.getOrDefault(sprintId, new ArrayList<>());
-        tasks.stream()
-            .filter(t -> (int) t.get("id") == taskId)
-            .findFirst()
-            .ifPresent(t -> t.put("status", "IN_PROGRESS"));
-        
-        sendMsg(chatId, "▶️ Tarea en progreso: " + taskId, false);
-        listTasksForSprint(chatId, sprintId);
-    }
-
-    private void handleCancelAction(long chatId, String text) {
-        int taskId = extractId(text, "-CANCEL");
-        int sprintId = taskId / 100;
-        
-        List<Map<String, Object>> tasks = SPRINT_TASKS.getOrDefault(sprintId, new ArrayList<>());
-        tasks.stream()
-            .filter(t -> (int) t.get("id") == taskId)
-            .findFirst()
-            .ifPresent(t -> t.put("status", "ASSIGNED"));
-        
-        sendMsg(chatId, "⏮️ Tarea devuelta a asignadas: " + taskId, false);
-        listTasksForSprint(chatId, sprintId);
-    }
-
-    private void handleDoneAction(long chatId, String text) {
-        int taskId = extractId(text, "-DONE");
-        int sprintId = taskId / 100;
-        
-        List<Map<String, Object>> tasks = SPRINT_TASKS.getOrDefault(sprintId, new ArrayList<>());
-        tasks.stream()
-            .filter(t -> (int) t.get("id") == taskId)
-            .findFirst()
-            .ifPresent(t -> t.put("status", "COMPLETED"));
-        
-        sendMsg(chatId, "✅ Tarea completada: " + taskId, false);
-        listTasksForSprint(chatId, sprintId);
-    }
-
-    private void handleUndoAction(long chatId, String text) {
-        int taskId = extractId(text, "-UNDO");
-        int sprintId = taskId / 100;
-        
-        List<Map<String, Object>> tasks = SPRINT_TASKS.getOrDefault(sprintId, new ArrayList<>());
-        tasks.stream()
-            .filter(t -> (int) t.get("id") == taskId)
-            .findFirst()
-            .ifPresent(t -> t.put("status", "IN_PROGRESS"));
-        
-        sendMsg(chatId, "↩️ Tarea devuelta a en progreso: " + taskId, false);
-        listTasksForSprint(chatId, sprintId);
-    }
-
-    private int extractId(String text, String command) {
+    private int extractProjectIdFromUsersCommand(String messageText) {
         try {
-            return Integer.parseInt(text.replace(command, "").replaceAll("[^\\d]", ""));
-        } catch (NumberFormatException e) {
-            logger.error("Error extrayendo ID: " + e.getMessage());
+            String[] parts = messageText.split(" ");
+            String idStr = parts[parts.length - 1];
+            return Integer.parseInt(idStr);
+        } catch (Exception e) {
+            logger.error("Error extrayendo projectId de comando 'Ver Usuarios Proyecto'", e);
             return -1;
         }
     }
 
-
-    // --------------------------------------------------------------------------------
-    //  Procesos de Flujo
-    // --------------------------------------------------------------------------------
+    // --------------------------
+    // Flujo de Login
+    // --------------------------
+    private void startLoginFlow(long chatId, BotConversationState state) {
+        state.flow = Flow.LOGIN;
+        state.step = 1;
+        sendMsg(chatId, "¡Bienvenido! Ingresa tu *nombre de usuario*:", true);
+    }
     private void processFlow(long chatId, String messageText, BotConversationState state) {
         switch (state.flow) {
             case LOGIN:
@@ -662,486 +165,454 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                 processAddSprintFlow(chatId, messageText, state);
                 break;
             case ADD_TASK:
-                processAddTaskFlow(chatId, messageText, state);
+                //processAddTaskFlow(chatId, messageText, state);
+                break;
+            case TASK_COMPLETE:
+                if (state.step == 1) {
+                    try {
+                        double hours = Double.parseDouble(messageText);
+                        Map<String, Object> updates = new HashMap<>();
+                        updates.put("status", "COMPLETED");
+                        updates.put("realHours", hours);
+                        
+                        taskServiceBot.updateTask(state.currentTaskId, updates);
+                        listTasksForSprint(chatId, state.currentSprintId, state.loggedUser.getIdUser());
+                        resetFlow(state);
+                    } catch (NumberFormatException e) {
+                        sendMsg(chatId, "⚠ Por favor ingresa un número válido (ej. 2.5)", false);
+                    }
+                }
                 break;
             case ADD_USER:
                 processAddUserFlow(chatId, messageText, state);
-                break;
-            case EDIT_SKILL:
-                processEditSkillFlow(chatId, messageText, state);
                 break;
             default:
                 break;
         }
     }
-
-    // --------------------------------------------------------------------------------
-    //  FLUJO DE LOGIN
-    // --------------------------------------------------------------------------------
     private void processLoginFlow(long chatId, String messageText, BotConversationState state) {
-        switch (state.step) {
-            case 1:
-                state.newUserName = messageText.trim();
-                state.step = 2;
-                sendMsg(chatId, "Ahora ingresa tu *password*:", true);
-                break;
-            case 2:
-                state.newUserPassword = messageText.trim();
-                OracleUser logged = doLogin(state.newUserName, state.newUserPassword);
-                if (logged == null) {
-                    sendMsg(chatId, "Login fallido. Intenta de nuevo con /start", false);
-                    conversationStates.remove(chatId);
-                } else {
-                    state.loggedUser = logged;
-                    state.flow = Flow.NONE;
-                    state.step = 0;
-                    sendMsg(chatId, "¡Login exitoso! Bienvenido, " + logged.getName(), false);
-                    showMainMenu(chatId, logged);
-                }
-                break;
+        if (state.step == 1) {
+            state.newUserName = messageText;
+            state.step = 2;
+            sendMsg(chatId, "Ahora ingresa tu *password*:", true);
+        } else if (state.step == 2) {
+            state.newUserPassword = messageText;
+            OracleUser user = doLogin(state.newUserName, state.newUserPassword);
+            if (user == null) {
+                sendMsg(chatId, "Login fallido. Intenta nuevamente con /start.", false);
+                conversationStates.remove(chatId);
+            } else {
+                state.loggedUser = user;
+                resetFlow(state);
+                sendMsg(chatId, "¡Login exitoso! Bienvenido, " + user.getName(), false);
+                showMainMenu(chatId, user);
+            }
         }
     }
 
-    // --------------------------------------------------------------------------------
-    //  MENÚ PRINCIPAL
-    // --------------------------------------------------------------------------------
+    // --------------------------
+    // Menú Principal: Proyectos
+    // --------------------------
     private void showMainMenu(long chatId, OracleUser user) {
-        if (user == null) {
-            sendMsg(chatId, "No tienes sesion activa. Usa /start para loguearte.", false);
-            return;
+        List<Projects> projects = getProjectsForUser(user.getIdUser());
+        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+        keyboard.setResizeKeyboard(true);
+        List<KeyboardRow> rows = new ArrayList<>();
+
+        KeyboardRow titleRow = new KeyboardRow();
+        titleRow.add("== Proyectos Asignados ==");
+        rows.add(titleRow);
+
+        if (projects.isEmpty()) {
+            KeyboardRow row = new KeyboardRow();
+            row.add("No tienes proyectos asignados");
+            rows.add(row);
+        } else {
+            for (Projects p : projects) {
+                KeyboardRow row = new KeyboardRow();
+                row.add("📁 " + p.getName() + " (ID: " + p.getIdProject() + ")");
+                rows.add(row);
+            }
+        }
+        KeyboardRow logoutRow = new KeyboardRow();
+        logoutRow.add("Logout 🚪");
+        rows.add(logoutRow);
+
+        keyboard.setKeyboard(rows);
+        SendMessage msg = new SendMessage();
+        msg.setChatId(chatId);
+        msg.setText("Menú Principal:");
+        msg.setReplyMarkup(keyboard);
+        try {
+            execute(msg);
+        } catch (TelegramApiException e) {
+            logger.error("Error en showMainMenu", e);
+        }
+    }
+
+    private boolean handleProjectSelection(long chatId, String messageText, BotConversationState state) {
+        Pattern pattern = Pattern.compile("\\(ID: (\\d+)\\)");
+        Matcher matcher = pattern.matcher(messageText);
+        if (matcher.find()) {
+            int projectId = Integer.parseInt(matcher.group(1));
+            state.currentProjectId = projectId;
+            boolean isManager = isManager(state.loggedUser.getIdUser(), projectId);
+            showSprintsForProject(chatId, projectId, isManager);
+            return true;
+        }
+        return false;
+    }
+    private boolean handleSprintSelection(long chatId, String messageText, BotConversationState state) {
+        // Check if the message contains #SPRINT#
+        if (messageText.contains("#SPRINT#")) {
+            // Extract the sprint ID from the message (using regex to find (ID: <number>))
+            Matcher sprintMatcher = Pattern.compile(".*\\(ID: (\\d+)\\) #SPRINT#").matcher(messageText);
+            if (sprintMatcher.find()) {
+                int sprintId = Integer.parseInt(sprintMatcher.group(1));
+                state.currentSprintId = sprintId; // Set the selected sprint ID in the conversation state
+                listTasksForSprint(chatId, sprintId, state.loggedUser.getIdUser()); // Call the function to show tasks related to the sprint
+                return true;
+            }
+        }
+        return false;
+    }
+    private boolean handleTaskStatusUpdates(long chatId, String messageText, BotConversationState state) {
+        // Check for START (Assigned → In Progress)
+        if (messageText.startsWith("▶ START-")) {
+            int taskId = Integer.parseInt(messageText.replace("▶ START-", ""));
+            updateTaskStatus(chatId, taskId, "IN_PROGRESS", state.currentSprintId);
+            return true;
+        }
+        // Check for DONE (In Progress → Completed)
+        else if (messageText.startsWith("✅ DONE-")) {
+            int taskId = Integer.parseInt(messageText.replace("✅ DONE-", ""));
+            state.flow = Flow.TASK_COMPLETE;
+            state.step = 1;
+            state.currentTaskId = taskId;
+            sendMsg(chatId, "⌛ Por favor ingresa las horas trabajadas (ej. 2.5):", false);
+            return true;
+        }
+        // Check for CANCEL (In Progress → Assigned)
+        else if (messageText.startsWith("❌ CANCEL-")) {
+            int taskId = Integer.parseInt(messageText.replace("❌ CANCEL-", ""));
+            updateTaskStatus(chatId, taskId, "ASSIGNED", state.currentSprintId);
+            return true;
+        }
+        // Check for UNDO (Completed → In Progress) 
+        else if (messageText.startsWith("↩ UNDO-")) {
+            int taskId = Integer.parseInt(messageText.replace("↩ UNDO-", ""));
+            updateTaskStatus(chatId, taskId, "IN_PROGRESS", state.currentSprintId);
+            return true;
+        }
+        return false;
+    }
+    private void updateTaskStatus(long chatId, int taskId, String newStatus, int sprintId) {
+        try {
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("status", newStatus);
+            
+            // Add realHours if completing the task
+            if ("COMPLETED".equals(newStatus)) {
+                // You might want to ask for hours worked here
+                updates.put("realHours", 0.0); // Default or prompt user
+            }
+            
+            taskServiceBot.updateTask(taskId, updates);
+            
+            // Refresh the task list
+            listTasksForSprint(chatId, sprintId, conversationStates.get(chatId).loggedUser.getIdUser());
+            
+            sendMsg(chatId, "✅ Estado de tarea actualizado a: " + newStatus, false);
+        } catch (Exception e) {
+            logger.error("Error updating task status", e);
+            sendMsg(chatId, "❌ Error al actualizar la tarea", false);
+        }
+    }
+    // --------------------------
+    // Mostrar Sprints de un Proyecto
+    // --------------------------
+    private void showSprintsForProject(long chatId, int projectId, boolean isManager) {
+        List<Sprint> sprints = sprintsServiceBot.getSprintsByProjectId(projectId);
+        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+        keyboard.setResizeKeyboard(true);
+        List<KeyboardRow> rows = new ArrayList<>();
+
+        KeyboardRow backRow = new KeyboardRow();
+        backRow.add("⬅️ Volver a Proyectos");
+        rows.add(backRow);
+
+        // Solo si el usuario es manager se muestran los botones "Ver Usuarios" y "Añadir Sprint"
+        if (isManager) {
+            KeyboardRow usersRow = new KeyboardRow();
+            usersRow.add("👥 Ver Usuarios Proyecto " + projectId);
+            rows.add(usersRow);
+            KeyboardRow addSprintRow = new KeyboardRow();
+            addSprintRow.add("➕ Añadir Sprint");
+            rows.add(addSprintRow);
         }
 
+        KeyboardRow titleRow = new KeyboardRow();
+        titleRow.add("Sprints del Proyecto " + projectId);
+        rows.add(titleRow);
+
+        for (Sprint sprint : sprints) {
+            KeyboardRow row = new KeyboardRow();
+            String statusIcon = "Activo".equals(sprint.getDescription()) ? "🟢" : "🔴"; // Adjust based on actual status field
+            // Add a special tag like #SPRINT# to identify that this is a sprint
+            String sprintText = statusIcon + " " + sprint.getName() + " (ID: " + sprint.getId() + ") #SPRINT#";
+            row.add(sprintText);
+            rows.add(row);
+}
+        keyboard.setKeyboard(rows);
+        SendMessage msg = new SendMessage();
+        msg.setChatId(chatId);
+        msg.setText("Selecciona un sprint:");
+        msg.setReplyMarkup(keyboard);
         try {
-            // Get real projects from API
-            List<Projects> userProjects = projectsServiceBot.getProjectsByUserId(user.getIdUser());
-            
+            execute(msg);
+        } catch (TelegramApiException e) {
+            logger.error("Error en showSprintsForProject", e);
+        }
+    }
+    private void listTasksForSprint(long chatId, int sprintId, int userId) {
+        // Fetch TaskAssignees dynamically
+        List<TaskAssignees> taskAssignments = taskServiceBot.getUserTaskAssignments(sprintId, userId);
+    
+        List<Tasks> tasks = taskAssignments.stream()
+        .map(TaskAssignees::getTask)
+        .collect(Collectors.toList());
+    
+        // Filtrar tareas por estado
+        List<Tasks> assigned = tasks.stream()
+                .filter(t -> "ASSIGNED".equalsIgnoreCase(t.getStatus()))
+                .collect(Collectors.toList());
+        List<Tasks> inProgress = tasks.stream()
+                .filter(t -> "IN_PROGRESS".equalsIgnoreCase(t.getStatus()))
+                .collect(Collectors.toList());
+        List<Tasks> completed = tasks.stream()
+                .filter(t -> "COMPLETED".equalsIgnoreCase(t.getStatus()))
+                .collect(Collectors.toList());
+    
+        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+        keyboard.setResizeKeyboard(true);
+        List<KeyboardRow> rows = new ArrayList<>();
+    
+        // Navigation buttons
+        KeyboardRow headerRow = new KeyboardRow();
+        headerRow.add("⬅ Volver a Sprints");
+        rows.add(headerRow);
+    
+        // Button to add a new task
+        KeyboardRow addTaskRow = new KeyboardRow();
+        addTaskRow.add("➕ Add Task");
+        rows.add(addTaskRow);
+    
+        // Assigned Section
+        if (!assigned.isEmpty()) {
+            rows.add(createTitleRow("==📥 ASIGNADAS 📥=="));
+            assigned.forEach(task -> {
+                KeyboardRow row = new KeyboardRow();
+                row.add(task.getDescription() + " [ID: " + task.getId() + "]");
+                row.add("▶ START-" + task.getId());
+                rows.add(row);
+            });
+        }
+    
+        // In Progress Section
+        if (!inProgress.isEmpty()) {
+            rows.add(createTitleRow("==⏳ EN PROGRESO ⏳=="));
+            inProgress.forEach(task -> {
+                KeyboardRow row = new KeyboardRow();
+                row.add(task.getDescription() + " [ID: " + task.getId() + "]");
+                row.add("❌ CANCEL-" + task.getId());
+                row.add("✅ DONE-" + task.getId());
+                rows.add(row);
+            });
+        }
+    
+        // Completed Section
+        if (!completed.isEmpty()) {
+            rows.add(createTitleRow("==✅ COMPLETADAS ✅=="));
+            completed.forEach(task -> {
+                KeyboardRow row = new KeyboardRow();
+                row.add(task.getDescription() + " [ID: " + task.getId() + "]");
+                row.add("↩ UNDO-" + task.getId());
+                rows.add(row);
+            });
+        }
+    
+        keyboard.setKeyboard(rows);
+    
+        SendMessage msg = new SendMessage();
+        msg.setChatId(chatId);
+        msg.setText("Tablero del Sprint " + sprintId);
+        msg.setReplyMarkup(keyboard);
+    
+        try {
+            execute(msg);
+        } catch (TelegramApiException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+    // --------------------------
+    // Listar Tareas del Sprint
+    // --------------------------
+    private KeyboardRow createTitleRow(String title) {
+        KeyboardRow row = new KeyboardRow();
+        row.add(title);
+        return row;
+    }
+    
+
+    // --------------------------
+    // Flujo: Crear Sprint
+    // --------------------------
+    private void processAddSprintFlow(long chatId, String messageText, BotConversationState state) {
+        if (state.step == 1) {
+            state.newSprintName = messageText;
+            state.step = 2;
+            sendMsg(chatId, "Confirma el nuevo sprint con el nombre: *" + state.newSprintName + "*.\n" +
+                    "Escribe `/confirmar` para proceder o `/cancel` para cancelar.", true);
+        } else if (state.step == 2) {
+            if (messageText.equalsIgnoreCase("/confirmar")) {
+                Sprint sprint = new Sprint();
+                sprint.setName(state.newSprintName);
+                sprint.setDescription("Activo");
+                Projects p = new Projects();
+                p.setIdProject(state.currentProjectId);
+                sprint.setProject(p);
+                Sprint created = createSprint(sprint);
+                if (created != null) {
+                    sendMsg(chatId, "Sprint creado: " + created.getName() + " (ID: " + created.getId() + ")", false);
+                } else {
+                    sendMsg(chatId, "Error al crear el sprint.", false);
+                }
+                resetFlow(state);
+                boolean isManager = isManager(state.loggedUser.getIdUser(), state.currentProjectId);
+                showSprintsForProject(chatId, state.currentProjectId, isManager);
+            } else if (messageText.equalsIgnoreCase("/cancel")) {
+                sendMsg(chatId, "Creación de sprint cancelada.", false);
+                resetFlow(state);
+                boolean isManager = isManager(state.loggedUser.getIdUser(), state.currentProjectId);
+                showSprintsForProject(chatId, state.currentProjectId, isManager);
+            }
+        }
+    }
+
+    
+    // --------------------------
+    // Flujo: Agregar Usuario al Proyecto
+    // --------------------------
+    private void fetchAndShowAllOracleUsers(long chatId, BotConversationState state) {
+        List<OracleUser> allUsers = getAllOracleUsers();
+        state.allOracleUsers = allUsers;
+        StringBuilder sb = new StringBuilder("*Lista de Usuarios Disponibles:*\n\n");
+        for (int i = 0; i < allUsers.size(); i++) {
+            OracleUser u = allUsers.get(i);
+            sb.append(i + 1).append(") ").append(u.getName()).append(" (ID: ").append(u.getIdUser()).append(")\n");
+        }
+        sb.append("\nIngresa el número del usuario que deseas agregar al proyecto.");
+        sendMsg(chatId, sb.toString(), true);
+    }
+    
+    private void processAddUserFlow(long chatId, String messageText, BotConversationState state) {
+        try {
+            int index = Integer.parseInt(messageText.trim());
+            if (state.allOracleUsers != null && index > 0 && index <= state.allOracleUsers.size()) {
+                OracleUser selected = state.allOracleUsers.get(index - 1);
+                // Construir payload con la estructura requerida:
+                Map<String, Object> payload = new HashMap<>();
+                Map<String, Object> projectMap = new HashMap<>();
+                projectMap.put("id_project", state.currentProjectId);
+                payload.put("project", projectMap);
+                payload.put("roleUser", "developer"); // Se crea como developer
+                payload.put("status", "active");
+                Map<String, Object> userMap = new HashMap<>();
+                userMap.put("idUser", selected.getIdUser());
+                payload.put("user", userMap);
+
+                addUserToProject(payload);
+                sendMsg(chatId, "Usuario agregado exitosamente.", false);
+                showUsersForProject(chatId, state.currentProjectId);
+                resetFlow(state);
+            } else {
+                sendMsg(chatId, "Número inválido. Intenta nuevamente:", false);
+            }
+        } catch (NumberFormatException e) {
+            sendMsg(chatId, "Entrada inválida. Ingresa el número del usuario que deseas agregar:", false);
+        }
+    }
+
+    // --------------------------
+    // Mostrar Usuarios del Proyecto
+    // --------------------------
+    private void showUsersForProject(long chatId, int projectId) {
+        try {
+            String url = baseUrl + "/api/project-users/project/" + projectId + "/users";
+            ResponseEntity<OracleUser[]> resp = restTemplate.getForEntity(url, OracleUser[].class);
+            OracleUser[] users = resp.getBody();
+            StringBuilder sb = new StringBuilder("*Usuarios en el Proyecto " + projectId + ":*\n\n");
+            if (users != null && users.length > 0) {
+                for (OracleUser u : users) {
+                    sb.append("🆔 ").append(u.getIdUser()).append(" - ").append(u.getName()).append("\n");
+                }
+            } else {
+                sb.append("No hay usuarios asignados al proyecto.");
+            }
+            // Solo si el usuario es manager se muestra "➕ Agregar Usuario"
+            boolean isManager = isManager(conversationStates.get(chatId).loggedUser.getIdUser(), projectId);
             ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
             keyboard.setResizeKeyboard(true);
             List<KeyboardRow> rows = new ArrayList<>();
-
-            // Add standard options
-            KeyboardRow row1 = new KeyboardRow();
-            row1.add("List Tasks");
-            rows.add(row1);
-
-            KeyboardRow rowLogout = new KeyboardRow();
-            rowLogout.add("Logout 🚪");
-            rows.add(rowLogout);
-
-            // Add projects section
-            if (!userProjects.isEmpty()) {
-                KeyboardRow titleRow = new KeyboardRow();
-                titleRow.add("==🚀 Proyectos Activos 🚀==");
-                rows.add(titleRow);
-
-                for (Projects project : userProjects) {
-                    KeyboardRow row = new KeyboardRow();
-                    row.add("📁 " + project.getName() + " (ID: " + project.getIdProject() + ")");
-                    rows.add(row);
-                }
-            } else {
-                KeyboardRow noProjectsRow = new KeyboardRow();
-                noProjectsRow.add("No tienes proyectos asignados");
-                rows.add(noProjectsRow);
+            if (isManager) {
+                KeyboardRow addUserRow = new KeyboardRow();
+                addUserRow.add("➕ Agregar Usuario");
+                rows.add(addUserRow);
             }
-            
+            KeyboardRow backRow = new KeyboardRow();
+            backRow.add("⬅️ Volver a Sprints");
+            rows.add(backRow);
             keyboard.setKeyboard(rows);
-            
             SendMessage msg = new SendMessage();
             msg.setChatId(chatId);
-            msg.setText("Menú principal:");
+            msg.setText(sb.toString());
             msg.setReplyMarkup(keyboard);
+            msg.enableMarkdown(true);
             execute(msg);
         } catch (Exception e) {
-            logger.error("Error showing main menu", e);
-            sendMsg(chatId, "Error al cargar los proyectos. Intenta más tarde.", false);
+            logger.error("Error en showUsersForProject", e);
+            sendMsg(chatId, "Error al obtener usuarios.", false);
         }
     }
 
-
-    // --------------------------------------------------------------------------------
-    //  LISTAR TAREAS (Manager -> todas, Developer -> solo suyas)
-    // --------------------------------------------------------------------------------
-    /* private void listTasksForUser(long chatId, OracleUser user) {
-        // Filtrar tareas por estado
-        List<Map<String, Object>> assignedTasks = SPRINT_TASKS.stream()
-                .filter(t -> "ASSIGNED".equalsIgnoreCase((String) t.get("status")))
-                .collect(Collectors.toList());
-        
-        List<Map<String, Object>> inProgressTasks = SPRINT_TASKS.stream()
-                .filter(t -> "IN_PROGRESS".equalsIgnoreCase((String) t.get("status")))
-                .collect(Collectors.toList());
-        
-        List<Map<String, Object>> completedTasks = SPRINT_TASKS.stream()
-                .filter(t -> "COMPLETED".equalsIgnoreCase((String) t.get("status")))
-                .collect(Collectors.toList());
-    
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-        keyboard.setResizeKeyboard(true);
-        List<KeyboardRow> rows = new ArrayList<>();
-    
-        // Botón para volver al menú principal
-        KeyboardRow headerRow = new KeyboardRow();
-        headerRow.add("Show Main Screen");
-        rows.add(headerRow);
-    
-        // Sección Assigned
-        if (!assignedTasks.isEmpty()) {
-            rows.add(createTitleRow("=== ASSIGNED ==="));
-            for (Map<String, Object> task : assignedTasks) {
-                KeyboardRow row = new KeyboardRow();
-                row.add((String) task.get("description"));
-                row.add("VIEW +");
-                row.add(task.get("id") + "-START");
-                rows.add(row);
-            }
-        }
-    
-        // Sección In Progress
-        if (!inProgressTasks.isEmpty()) {
-            rows.add(createTitleRow("=== IN PROGRESS ==="));
-            for (Map<String, Object> task : inProgressTasks) {
-                KeyboardRow row = new KeyboardRow();
-                row.add((String) task.get("description"));
-                row.add("VIEW +");
-                row.add(task.get("id") + "-CANCEL");
-                row.add(task.get("id") + "-DONE");
-                rows.add(row);
-            }
-        }
-    
-        // Sección Completed
-        if (!completedTasks.isEmpty()) {
-            rows.add(createTitleRow("=== COMPLETED ==="));
-            for (Map<String, Object> task : completedTasks) {
-                KeyboardRow row = new KeyboardRow();
-                row.add((String) task.get("description"));
-                row.add(task.get("id") + "-UNDO");
-                rows.add(row);
-            }
-        }
-    
-        keyboard.setKeyboard(rows);
-        SendMessage msg = new SendMessage();
-        msg.setChatId(chatId);
-        msg.setText("Tablero Kanban:");
-        msg.setReplyMarkup(keyboard);
-        try {
-            execute(msg);
-        } catch (TelegramApiException e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
- */
-
-    // --------------------------------------------------------------------------------
-    //  FLUJO: AÑADIR SPRINT (manager)
-    // --------------------------------------------------------------------------------
-
-    private void startAddSprintFlow(long chatId) {
-        BotConversationState state = conversationStates.get(chatId);
-        if (state.currentProjectId == 0) {
-            sendMsg(chatId, "Primero selecciona un proyecto.", false);
-            return;
-        }
-        state.flow = Flow.ADD_SPRINT;
-        state.step = 1;
-        state.newSprintName = null;
-        sendMsg(chatId, "🆕 Añadir nuevo sprint.\n1) Ingresa el *nombre* del sprint:", true);
-    }
-
-    private void processAddSprintFlow(long chatId, String messageText, BotConversationState state) {
-        // Para poder cancelar
-        if (messageText.equalsIgnoreCase("/cancel")) {
-            resetFlow(state);
-            sendMsg(chatId, "❌ Flujo cancelado.", false);
-            showSprintsForProject(chatId, state.currentProjectId);
-            return;
-        }
-
-        int projectId = state.currentProjectId;
-        List<Map<String, Object >> sprints = new ArrayList<>(SPRINTS_DATA.getOrDefault(projectId, new ArrayList<>()));
-
-        if (state.step == 1) {
-            String sprintName = messageText.trim();
-    
-            // Validar si ya existe un sprint con ese nombre
-            boolean exists = sprints.stream()
-                .anyMatch(s -> sprintName.equalsIgnoreCase((String) s.get("name")));
-    
-            if (exists) {
-                sendMsg(chatId, "⚠️ Ya existe un sprint con ese nombre. Intenta con otro:", false);
-                return;
-            }
-    
-            state.newSprintName = sprintName;
-            state.step = 2;
-            sendMsg(chatId, "📌 Confirmación:\nNombre del nuevo sprint: *" + sprintName + "*\n\nEscribe `/confirmar` para agregarlo o `/cancel` para cancelar.", true);
-        } else if (state.step == 2) {
-            if (!messageText.equalsIgnoreCase("/confirmar")) {
-                sendMsg(chatId, "❌ No confirmado. Escribe `/confirmar` o `/cancel` para cancelar.", false);
-                return;
-            }
-    
-            // Generar nuevo ID
-            int maxId = sprints.stream()
-                .mapToInt(s -> (int) s.get("id"))
-                .max()
-                .orElse(projectId * 10); // ejemplo: 1*10 = 10 → siguiente sería 11
-    
-            int newSprintId = maxId + 1;
-    
-            Map<String, Object> newSprint = Map.of(
-                "id", newSprintId,
-                "name", state.newSprintName,
-                "status", "Activo"
-            );
-    
-            sprints.add(newSprint);
-            SPRINTS_DATA.put(projectId, sprints);
-    
-            sendMsg(chatId, "✅ Sprint *" + state.newSprintName + "* agregado exitosamente (ID: " + newSprintId + ")", true);
-            resetFlow(state);
-            showSprintsForProject(chatId, projectId);
-        }
-    }
-    
-
-    // --------------------------------------------------------------------------------
-    //  FLUJO: AÑADIR TAREA (manager)
-    // --------------------------------------------------------------------------------
-    private void startAddTaskFlow(long chatId) {
-        BotConversationState state = conversationStates.get(chatId);
-        state.flow = Flow.ADD_TASK;
-        state.step = 1;
-        sendMsg(chatId, "Vamos a crear una nueva tarea.\n1) Ingresa la descripción:", false);
-    }
-
-    private void processAddTaskFlow(long chatId, String messageText, BotConversationState state) {
-        switch (state.step) {
-            case 1:
-                state.taskDescription = messageText;
-                state.step = 2;
-                sendMsg(chatId, "2) Ingresa la fecha límite (YYYY-MM-DD):", false);
-                break;
-            case 2:
-                try {
-                    LocalDate date = LocalDate.parse(messageText.trim());
-                    state.taskDeadline = date;
-                    state.step = 3;
-                    sendMsg(chatId, "3) Ingresa la prioridad (1=Alta, 2=Media, 3=Baja):", false);
-                } catch (Exception e) {
-                    sendMsg(chatId, "Formato de fecha inválido. Intenta de nuevo (YYYY-MM-DD):", false);
-                }
-                break;
-            case 3:
-                try {
-                    int p = Integer.parseInt(messageText.trim());
-                    if (p < 1 || p > 3) {
-                        throw new NumberFormatException();
-                    }
-                    state.taskPriority = p;
-                    state.step = 4;
-                    sendMsg(chatId, "4) Llamando a la AI para asignar usuarios... un momento.", false);
-
-                    List<OracleUser> sorted = callAiForAssignment(state.taskDescription);
-                    state.aiSortedUsers = sorted;
-                    if (sorted.isEmpty()) {
-                        sendMsg(chatId, "No se encontraron usuarios. Cancelo flujo.", false);
-                        resetFlow(state);
-                    } else {
-                        StringBuilder sb = new StringBuilder("Usuarios ordenados:\n");
-                        for (int i = 0; i < sorted.size(); i++) {
-                            OracleUser u = sorted.get(i);
-                            sb.append((i + 1)).append(") ")
-                              .append(u.getName())
-                              .append(" (ID: ").append(u.getIdUser()).append(") Skill: ");
-                              //.append(u.getSkill()).append("\n");
-                        }
-                        sb.append("\nIngresa el *número* del usuario al que deseas asignar esta tarea:");
-                        state.step = 5;
-                        sendMsg(chatId, sb.toString(), false);
-                    }
-                } catch (NumberFormatException e) {
-                    sendMsg(chatId, "Prioridad inválida. Ingresa 1, 2 o 3:", false);
-                }
-                break;
-                case 5:
-                    try {
-                        int pos = Integer.parseInt(messageText.trim());
-                        int currentSprintId = state.currentSprintId;
-                        
-                        // Verificar si el sprint tiene lista de tareas
-                        if (!SPRINT_TASKS.containsKey(currentSprintId)) {
-                            SPRINT_TASKS.put(currentSprintId, new ArrayList<>());
-                        }
-                        
-                        // Generar nuevo ID
-                        int newTaskId = currentSprintId * 100 + SPRINT_TASKS.get(currentSprintId).size() + 1;
-                        
-                        Map<String, Object> newTask = new HashMap<>();
-                        newTask.put("id", newTaskId);
-                        newTask.put("description", state.taskDescription);
-                        newTask.put("deadline", state.taskDeadline);
-                        newTask.put("priority", state.taskPriority);
-                        newTask.put("status", "ASSIGNED");
-                        
-                        SPRINT_TASKS.get(currentSprintId).add(newTask);
-                        
-                        sendMsg(chatId, "✅ Tarea creada!", false);
-                        resetFlow(state);
-                        listTasksForSprint(chatId, currentSprintId);
-                        
-                    } catch (Exception e) {
-                        logger.error("Error al crear tarea: " + e.getMessage());
-                        sendMsg(chatId, "❌ Error al crear la tarea", false);
-                    }
-                    break;
-            }
-    }
-
-    // --------------------------------------------------------------------------------
-    //  FLUJO: AÑADIR USUARIO (manager)
-    // --------------------------------------------------------------------------------
-    private void startAddUserFlow(long chatId) {
-        BotConversationState state = conversationStates.get(chatId);
-        state.flow = Flow.ADD_USER;
-        state.step = 1;
-        sendMsg(chatId, "Crearemos un nuevo usuario (role=developer).\n1) Ingresa el *nombre*:", false);
-    }
-
-    private void processAddUserFlow(long chatId, String messageText, BotConversationState state) {
-        switch (state.step) {
-            case 1:
-                state.newUserName = messageText.trim();
-                state.step = 2;
-                sendMsg(chatId, "2) Ingresa la *password*:", false);
-                break;
-            case 2:
-                state.newUserPassword = messageText.trim();
-                state.step = 3;
-                sendMsg(chatId, "3) Ingresa la *skill*:", false);
-                break;
-            case 3:
-                state.newUserSkill = messageText.trim();
-                state.step = 4;
-                sendMsg(chatId, "4) Ingresa el *Telegram ID*:", false);
-                break;
-            case 4:
-                state.newUserTelegramId = messageText.trim();
-                state.step = 5;
-                sendMsg(chatId, "5) Ingresa el *Telegram Username* (sin @):", false);
-                break;
-            case 5:
-                state.newUserTelegramUsername = messageText.trim();
-                OracleUser newUser = new OracleUser();
-                newUser.setName(state.newUserName);
-                newUser.setPassword(state.newUserPassword);
-                newUser.setTelegramId(Long.parseLong(state.newUserTelegramId));
-                
-
-                OracleUser created = doRegisterUser(newUser);
-                if (created != null && created.getIdUser() > 0) {
-                    sendMsg(chatId, "¡Usuario creado exitosamente! ID=" + created.getIdUser(), false);
-                } else {
-                    sendMsg(chatId, "Error al crear usuario.", false);
-                }
-                resetFlow(state);
-                showMainMenu(chatId, state.loggedUser);
-                break;
-        }
-    }
-
-    // --------------------------------------------------------------------------------
-    //  VER / EDITAR USUARIOS (manager)
-    // --------------------------------------------------------------------------------
-    private void showUsersForProject(long chatId, int projectId) {
-        List<OracleUser> list = PROJECT_USERS.getOrDefault(projectId, new ArrayList<>());
-        if (list.isEmpty()) {
-            sendMsg(chatId, "No hay usuarios registrados.", false);
-            return;
-        }
-        
-        StringBuilder sb = new StringBuilder("👥 *Usuarios registrados:*\n\n");
-        for (OracleUser u : list) {
-            sb.append("🆔 ID: ").append(u.getIdUser())
-              .append("\n👤 Nombre: ").append(u.getName())
-              //.append("\n🎭 Rol: ").append(u.getRole())
-              //.append("\n💡 Skill: ").append(u.getSkill())
-              .append("\n\n--------------------\n");
-        }
-        sb.append("\nℹ️ Para editar un skill usa: /editskill [ID]");
-    
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-        keyboard.setResizeKeyboard(true);
-        List<KeyboardRow> rows = new ArrayList<>();
-    
-        // Fila de botones
-        KeyboardRow firstRow = new KeyboardRow();
-        firstRow.add("➕ Add User");
-        firstRow.add("🏠 Main Menu");
-        
-        rows.add(firstRow);
-    
-        keyboard.setKeyboard(rows);
-    
-        SendMessage msg = new SendMessage();
-        msg.setChatId(chatId);
-        msg.setText(sb.toString());
-        msg.setReplyMarkup(keyboard);
-        msg.enableMarkdown(true);
-        
-        try {
-            execute(msg);
-        } catch (TelegramApiException e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
-
-    // ------------------------------------------------------------------
-    // EDICIÓN DE SKILL (manager)
-    // ------------------------------------------------------------------
-    private void processEditSkillFlow(long chatId, String messageText, BotConversationState state) {
-        String newSkill = messageText.trim();
-        OracleUser updated = doPatchUserSkill(state.editUserId, newSkill);
-        if (updated != null) {
-            //sendMsg(chatId, "Skill actualizado. Nuevo valor: " + updated.getSkill(), false);
-        } else {
-            sendMsg(chatId, "Error al actualizar skill del usuario " + state.editUserId, false);
-        }
-        resetFlow(state);
-        showMainMenu(chatId, state.loggedUser);
-    }
-
-    // --------------------------------------------------------------------------------
-    //  LOGOUT
-    // --------------------------------------------------------------------------------
+    // --------------------------
+    // LOGOUT y Navegación
+    // --------------------------
     private void logoutUser(long chatId) {
-        BotConversationState state = conversationStates.get(chatId);
-        if (state != null) {
-            // Resetear todo el estado
-            state.loggedUser = null;
-            state.currentProjectId = 0;
-            state.currentSprintId = 0;
-            resetFlow(state);
-        }
         conversationStates.remove(chatId);
-        
         SendMessage msg = new SendMessage();
         msg.setChatId(chatId);
-        msg.setText("🔒 Sesión cerrada exitosamente. Usa /start para ingresar de nuevo.");
+        msg.setText("Sesión cerrada. Usa /start para ingresar de nuevo.");
         msg.setReplyMarkup(new ReplyKeyboardRemove(true));
-    
         try {
             execute(msg);
         } catch (TelegramApiException e) {
-            logger.error("Error al cerrar sesión: " + e.getMessage(), e);
+            logger.error("Error en logoutUser", e);
         }
     }
-
-    // --------------------------------------------------------------------------------
-    //  AUXILIARES DE FLUJO
-    // --------------------------------------------------------------------------------
+    private boolean handleNavigation(long chatId, String messageText, BotConversationState state) {
+        if (messageText.equals("⬅️ Volver a Proyectos") || messageText.equals("⬅️ Regresar a Proyectos")) {
+            showMainMenu(chatId, state.loggedUser);
+            return true;
+        }
+        if (messageText.equals("⬅️ Volver a Sprints")) {
+            boolean isManager = isManager(state.loggedUser.getIdUser(), state.currentProjectId);
+            showSprintsForProject(chatId, state.currentProjectId, isManager);
+            return true;
+        }
+        return false;
+    }
     private void resetFlow(BotConversationState state) {
         state.flow = Flow.NONE;
         state.step = 0;
@@ -1149,144 +620,72 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         state.taskDescription = null;
         state.taskDeadline = null;
         state.taskPriority = null;
-        state.aiSortedUsers = null;
-        state.chosenPosition = 0;
-        state.newUserName = null;
-        state.newUserPassword = null;
-        state.newUserSkill = null;
-        state.newUserTelegramId = null;
-        state.newUserTelegramUsername = null;
-        state.editUserId = 0;
-        state.editNewSkill = null;
+        state.allOracleUsers = null;
     }
-
-    private KeyboardRow createTitleRow(String title) {
-        KeyboardRow row = new KeyboardRow();
-        row.add(title);
-        return row;
-    }
-
     private void sendMsg(long chatId, String text, boolean markdown) {
         SendMessage msg = new SendMessage();
         msg.setChatId(chatId);
         msg.setText(text);
-        if (markdown) {
-            msg.enableMarkdown(true);
-        }
+        if (markdown) msg.enableMarkdown(true);
         try {
             execute(msg);
         } catch (TelegramApiException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Error al enviar mensaje", e);
         }
     }
 
-    // --------------------------------------------------------------------------------
-    //  LLAMADAS AL BACKEND
-    // --------------------------------------------------------------------------------
-    private OracleUser doLogin(String name, String password) {
+    // --------------------------
+    // Llamadas al Backend
+    // --------------------------
+    // 1) Login (/users/login)
+    private OracleUser doLogin(String username, String password) {
         try {
             String url = baseUrl + "/users/login";
             LoginRequest req = new LoginRequest();
-            req.setName(name);
+            req.setName(username);
             req.setPassword(password);
             ResponseEntity<OracleUser> resp = restTemplate.postForEntity(url, req, OracleUser.class);
             if (resp.getStatusCode() == HttpStatus.OK && resp.getBody() != null) {
                 return resp.getBody();
             }
         } catch (Exception e) {
-            logger.error("Error login: " + e.getMessage(), e);
+            logger.error("Error en doLogin", e);
         }
         return null;
     }
 
-    private List<ToDoItem> getAllToDoItems() {
+    // 2) Obtener proyectos para un usuario (/api/project-users/user/{userId}/projects)
+    private List<Projects> getProjectsForUser(int userId) {
         try {
-            String url = baseUrl + "/todolist";
-            ResponseEntity<ToDoItem[]> resp = restTemplate.getForEntity(url, ToDoItem[].class);
-            if (resp.getStatusCode().is2xxSuccessful()) {
+            String url = baseUrl + "/api/project-users/user/" + userId + "/projects";
+            ResponseEntity<Projects[]> resp = restTemplate.getForEntity(url, Projects[].class);
+            if (resp.getStatusCode().is2xxSuccessful() && resp.getBody() != null) {
                 return Arrays.asList(resp.getBody());
             }
         } catch (Exception e) {
-            logger.error("Error getAllToDoItems: " + e.getMessage(), e);
+            logger.error("Error en getProjectsForUser", e);
         }
         return Collections.emptyList();
     }
 
-    private List<ToDoItem> getToDoItemsByUser(int userId) {
-        try {
-            String url = baseUrl + "/todolist/user/" + userId;
-            ResponseEntity<ToDoItem[]> resp = restTemplate.getForEntity(url, ToDoItem[].class);
-            if (resp.getStatusCode().is2xxSuccessful()) {
-                return Arrays.asList(resp.getBody());
-            }
-        } catch (Exception e) {
-            logger.error("Error getToDoItemsByUser: " + e.getMessage(), e);
-        }
-        return Collections.emptyList();
-    }
 
-    private boolean doCreateItem(ToDoItem item) {
+    // 7) Crear un sprint (POST /api/sprints)
+    private Sprint createSprint(Sprint sprint) {
         try {
-            String url = baseUrl + "/todolist";
-            ResponseEntity<Void> resp = restTemplate.postForEntity(url, item, Void.class);
-            return resp.getStatusCode().is2xxSuccessful();
-        } catch (Exception e) {
-            logger.error("Error doCreateItem: " + e.getMessage(), e);
-            return false;
-        }
-    }
-
-    // Llamada a PUT/DELETE en tu service, ajusta si usas PATCH, etc.
-    public ResponseEntity<ToDoItem> updateToDoItem(int id, ToDoItem item) {
-        try {
-            ToDoItem updated = toDoItemService.updateToDoItem(id, item);
-            if (updated == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(updated, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-    
-
-    // EJEMPLO en un controlador normal:
-    public ResponseEntity<Boolean> deleteToDoItem(int id) {
-        try {
-            boolean result = toDoItemService.deleteToDoItem(id);
-            if (result) {
-                return new ResponseEntity<>(true, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    private ResponseEntity<ToDoItem> getToDoItemById(int id) {
-        try {
-            return toDoItemService.getItemById(id);
-        } catch (Exception e) {
-            logger.error("Error getToDoItemById: " + e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    private OracleUser doRegisterUser(OracleUser newUser) {
-        try {
-            String url = baseUrl + "/users/register";
-            ResponseEntity<OracleUser> resp = restTemplate.postForEntity(url, newUser, OracleUser.class);
-            if (resp.getStatusCode() == HttpStatus.CREATED) {
+            String url = baseUrl + "/api/sprints";
+            ResponseEntity<Sprint> resp = restTemplate.postForEntity(url, sprint, Sprint.class);
+            if (resp.getStatusCode() == HttpStatus.CREATED && resp.getBody() != null) {
                 return resp.getBody();
             }
         } catch (Exception e) {
-            logger.error("Error registerUser: " + e.getMessage(), e);
+            logger.error("Error en createSprint", e);
         }
         return null;
     }
 
-    private List<OracleUser> getAllUsers() {
+
+    // 10) Obtener todos los OracleUser (/users)
+    private List<OracleUser> getAllOracleUsers() {
         try {
             String url = baseUrl + "/users";
             ResponseEntity<OracleUser[]> resp = restTemplate.getForEntity(url, OracleUser[].class);
@@ -1294,59 +693,45 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                 return Arrays.asList(resp.getBody());
             }
         } catch (Exception e) {
-            logger.error("Error getAllUsers: " + e.getMessage(), e);
+            logger.error("Error en getAllOracleUsers", e);
         }
         return Collections.emptyList();
     }
 
-    private OracleUser doPatchUserSkill(int userId, String newSkill) {
+    // 11) Agregar un usuario a un proyecto (POST /api/project-users)
+    // Se envía el payload en forma de Map con la estructura requerida.
+    private void addUserToProject(Map<String, Object> payload) {
         try {
-            String url = baseUrl + "/users/" + userId;
-            OracleUser userUpdates = new OracleUser();
-            //userUpdates.setSkill(newSkill);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<OracleUser> request = new HttpEntity<>(userUpdates, headers);
-            ResponseEntity<OracleUser> resp = restTemplate.exchange(
-                    url,
-                    HttpMethod.PATCH,
-                    request,
-                    OracleUser.class
-            );
-            if (resp.getStatusCode().is2xxSuccessful()) {
-                return resp.getBody();
+            String url = baseUrl + "/api/project-users";
+            restTemplate.postForEntity(url, payload, Object.class);
+        } catch (Exception e) {
+            logger.error("Error en addUserToProject", e);
+        }
+    }
+    
+    // --------------------------
+    // Método isManager: verifica si un usuario es manager en un proyecto.
+    // --------------------------
+    private boolean isManager(int userId, int projectId) {
+        try {
+            String url = baseUrl + "/api/project-users";
+            ResponseEntity<ProjectUser[]> resp = restTemplate.getForEntity(url, ProjectUser[].class);
+            if (resp.getBody() != null) {
+                for (ProjectUser pu : resp.getBody()) {
+                    if (pu.getUser() != null 
+                        && pu.getUser().getIdUser() == userId 
+                        && pu.getProject() != null 
+                        && pu.getProject().getIdProject() == projectId 
+                        && pu.getRoleUser() != null 
+                        && pu.getRoleUser().trim().equalsIgnoreCase("manager")) {
+                        return true;
+                    }
+                }
             }
         } catch (Exception e) {
-            logger.error("Error doPatchUserSkill: " + e.getMessage(), e);
+            logger.error("Error en isManager", e);
         }
-        return null;
+        return true;
     }
 
-    private List<OracleUser> callAiForAssignment(String description) {
-        try {
-            String url = baseUrl + "/assignment/by-ai";
-            Map<String, String> payload = new HashMap<>();
-            payload.put("description", description);
-
-            ResponseEntity<OracleUser[]> resp = restTemplate.postForEntity(url, payload, OracleUser[].class);
-            if (resp.getStatusCode().is2xxSuccessful() && resp.getBody() != null) {
-                return Arrays.asList(resp.getBody());
-            }
-        } catch (Exception e) {
-            logger.error("Error callAiForAssignment: " + e.getMessage(), e);
-        }
-        return Collections.emptyList();
-    }
-
-    private String getPriorityText(Integer p) {
-        if (p == null) return "N/A";
-        switch (p) {
-            case 1: return "Alta";
-            case 2: return "Media";
-            case 3: return "Baja";
-            default: return "Desconocida";
-        }
-    }
 }

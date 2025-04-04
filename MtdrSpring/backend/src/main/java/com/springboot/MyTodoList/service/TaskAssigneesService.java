@@ -93,5 +93,9 @@ public class TaskAssigneesService {
     public List<TaskAssignees> getTaskAssigneesByUserAndSprint(int projectUserId, int sprintId) {
         return taskAssigneesRepository.findByProjectUserIdAndSprintId(projectUserId, sprintId);
     }
+    // Nuevo método: obtener la cantidad de tareas con status "Done" para un ProjectUser en un Sprint
+    public long getCountDoneTasksByUserAndSprint(int projectUserId, int sprintId) {
+        return taskAssigneesRepository.countDoneTasksByProjectUserAndSprint(projectUserId, sprintId);
+    }
 }
  
