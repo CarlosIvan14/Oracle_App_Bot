@@ -36,7 +36,7 @@ spec:
   selector:
     matchLabels:
       app: todolistapp-springboot
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
@@ -52,8 +52,22 @@ spec:
               value: "TODOUSER"
             - name: db_url
               value: "jdbc:oracle:thin:@%TODO_PDB_NAME%_tp?TNS_ADMIN=/mtdrworkshop/creds"
-            - name: todo.table.name
-              value: "todoitem"
+            - name: oracle_user.table.name
+              value: "oracle_users"
+            - name: projects.table.name
+              value: "projects"
+            - name: sprints.table.name
+              value: "sprints"
+            - name: project_users.table.name
+              value: "project_users"
+            - name: tasks.table.name
+              value: "tasks"
+            - name: task_assignees.table.name
+              value: "task_assignees"
+            - name: time_logs.table.name
+              value: "time_logs"
+            - name: skills.table.name
+              value: "skills"
             - name: driver_class_name
               value: "oracle.jdbc.OracleDriver"
             - name: OCI_REGION
