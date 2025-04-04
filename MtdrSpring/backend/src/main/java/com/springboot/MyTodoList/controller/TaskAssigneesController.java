@@ -78,4 +78,11 @@ public class TaskAssigneesController {
         long count = taskAssigneesService.getCountDoneTasksByUserAndSprint(projectUserId, sprintId);
         return new ResponseEntity<>(count, HttpStatus.OK);
     }
+    @GetMapping("/user/{projectUserId}/sprint/{sprintId}/done")
+    public ResponseEntity<List<TaskAssignees>> getCompletedTasksByUserAndSprint(
+            @PathVariable int projectUserId, @PathVariable int sprintId) {
+        List<TaskAssignees> taskAssignees = taskAssigneesService.getCompletedTasksByUserAndSprint(projectUserId, sprintId);
+        return new ResponseEntity<>(taskAssignees, HttpStatus.OK);
+    }
+
 }

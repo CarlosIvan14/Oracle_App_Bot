@@ -117,6 +117,10 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             fetchAndShowAllOracleUsers(chatId, state);
             return;
         }
+        if (messageText.equals("📊 Reports")) {
+            showReports(chatId, state);
+            return;
+        }        
         // Navegación: volver a Proyectos o Sprints
         if (handleNavigation(chatId, messageText, state)) return;
 
@@ -376,6 +380,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     }
     private void listTasksForSprint(long chatId, int sprintId, int userId) {
         // Fetch TaskAssignees dynamically
+        
+
         List<TaskAssignees> taskAssignments = taskServiceBot.getUserTaskAssignments(sprintId, userId);
     
         List<Tasks> tasks = taskAssignments.stream()
@@ -396,7 +402,10 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
         keyboard.setResizeKeyboard(true);
         List<KeyboardRow> rows = new ArrayList<>();
-    
+        // Dentro de listTasksForSprint(), antes de mostrar las tareas:
+        KeyboardRow reportRow = new KeyboardRow();
+        reportRow.add("📊 Reports");
+        rows.add(reportRow);
         // Navigation buttons
         KeyboardRow headerRow = new KeyboardRow();
         headerRow.add("⬅ Volver a Sprints");
@@ -468,6 +477,47 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     // --------------------------
     // Flujo: Crear Sprint
     // --------------------------
+    private void showReports(long chatId, BotConversationState state) {
+        // 1. Obtener usuarios del proyecto (se puede reutilizar el endpoint que ya existe)
+        String urlUsers = baseUrl + "/api/project-users/project/" + state.currentProjectId + "/users";
+        ResponseEntity<OracleUser[]> respUsers = restTemplate.getForEntity(urlUsers, OracleUser[].class);
+        OracleUser[] users = respUsers.getBody();
+    
+        StringBuilder reportMsg = new StringBuilder("*Reporte de Tareas Completadas*\n\n");
+    
+        if (users != null && users.length > 0) {
+            for (OracleUser user : users) {
+                reportMsg.append("- ").append(user.getName()).append(":\n");
+    
+                // 2. Consultar las tareas completadas para cada usuario en el sprint actual.
+                // Se asume que el endpoint creado a continuación devuelve la lista de TaskAssignees
+                String urlCompleted = baseUrl + "/api/task-assignees/user/" + user.getIdUser() + "/sprint/" + state.currentSprintId + "/done";
+                ResponseEntity<TaskAssignees[]> respTasks = restTemplate.getForEntity(urlCompleted, TaskAssignees[].class);
+                TaskAssignees[] tasks = respTasks.getBody();
+    
+                int totalCompleted = (tasks != null) ? tasks.length : 0;
+                reportMsg.append("      Completed Tasks:   Tot: ").append(totalCompleted).append("\n");
+    
+                // 3. Para cada tarea, se muestran los detalles.
+                if (tasks != null && tasks.length > 0) {
+                    for (TaskAssignees ta : tasks) {
+                        Tasks task = ta.getTask();
+                        // Se asume que en el objeto Tasks existen los métodos getDescription(), getRealHours() y getEstimatedHours()
+                        reportMsg.append("         - ").append(task.getDescription())
+                                 .append("       Real Hours: ").append(task.getRealHours())
+                                 .append("      StimatedHours: ").append(task.getEstimatedHours())
+                                 .append("\n");
+                    }
+                }
+                reportMsg.append("\n");
+            }
+        } else {
+            reportMsg.append("No se encontraron usuarios asignados al proyecto.");
+        }
+        
+        sendMsg(chatId, reportMsg.toString(), true);
+    }
+    
     private void processAddSprintFlow(long chatId, String messageText, BotConversationState state) {
         if (state.step == 1) {
             state.newSprintName = messageText;

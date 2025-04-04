@@ -97,5 +97,9 @@ public class TaskAssigneesService {
     public long getCountDoneTasksByUserAndSprint(int projectUserId, int sprintId) {
         return taskAssigneesRepository.countDoneTasksByProjectUserAndSprint(projectUserId, sprintId);
     }
+    public List<TaskAssignees> getCompletedTasksByUserAndSprint(int projectUserId, int sprintId) {
+        return taskAssigneesRepository.findCompletedTasksByProjectUserAndSprint(projectUserId, sprintId);
+    }
+    
 }
  

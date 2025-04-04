@@ -16,7 +16,10 @@ public interface TaskAssigneesRepository extends JpaRepository<TaskAssignees, In
     @Query("select ta from TaskAssignees ta where ta.projectUser.idProjectUser = ?1 and ta.task.sprint.id = ?2")
     List<TaskAssignees> findByProjectUserIdAndSprintId(int projectUserId, int sprintId);
 
-    // Nuevo método: obtener el count de tareas con status "Done"
-    @Query("select count(ta) from TaskAssignees ta where ta.projectUser.idProjectUser = ?1 and ta.task.sprint.id = ?2 and ta.task.status = 'Done'")
+    // Nuevo método: obtener el count de tareas con status "COMPLETED"
+    @Query("select count(ta) from TaskAssignees ta where ta.projectUser.idProjectUser = ?1 and ta.task.sprint.id = ?2 and ta.task.status = 'COMPLETED'")
     long countDoneTasksByProjectUserAndSprint(int projectUserId, int sprintId);
+    @Query("select ta from TaskAssignees ta where ta.projectUser.idProjectUser = ?1 and ta.task.sprint.id = ?2 and ta.task.status = 'COMPLETED'")
+    List<TaskAssignees> findCompletedTasksByProjectUserAndSprint(int projectUserId, int sprintId);
+
 }
