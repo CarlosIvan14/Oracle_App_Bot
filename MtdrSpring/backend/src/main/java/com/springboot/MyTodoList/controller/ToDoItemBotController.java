@@ -644,6 +644,10 @@ private void createAndSendTask(long chatId, BotConversationState state) {
         // Iteramos los sprints para mostrar cada uno con su botón de toggle
         // Mostrar cada sprint
         for (Sprint sprint : sprints) {
+            // Si el usuario no es manager (developer), se omiten los sprints que no estén activos
+            if (!isManager && !"Active".equalsIgnoreCase(sprint.getDescription())) {
+                continue;
+            }
             KeyboardRow row = new KeyboardRow();
             String statusIcon = "Active".equalsIgnoreCase(sprint.getDescription()) ? "🟢" : "🔴";
             String sprintLabel = statusIcon + " " + sprint.getName() + " (ID: " + sprint.getId() + ") #SPRINT#";
@@ -657,7 +661,6 @@ private void createAndSendTask(long chatId, BotConversationState state) {
             }
             rows.add(row);
         }
-    
         keyboard.setKeyboard(rows);
         SendMessage msg = new SendMessage();
         msg.setChatId(chatId);
