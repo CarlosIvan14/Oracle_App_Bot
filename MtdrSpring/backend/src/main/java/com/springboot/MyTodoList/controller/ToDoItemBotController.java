@@ -888,7 +888,7 @@ private void createAndSendTask(long chatId, BotConversationState state) {
             reportMsg.append("No se encontraron usuarios asignados al proyecto.");
         }
         
-        sendMsg(chatId, reportMsg.toString(), true);
+        sendMsg(chatId, reportMsg.toString(),false);
     }
     
     private void processAddSprintFlow(long chatId, String messageText, BotConversationState state) {
