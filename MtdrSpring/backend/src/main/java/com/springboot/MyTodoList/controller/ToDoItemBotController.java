@@ -118,6 +118,13 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             fetchAndShowAllOracleUsers(chatId, state);
             return;
         }
+        // Flujo para agregar usuario
+        if (messageText.equalsIgnoreCase("➕ Añadir Sprint")) {
+            state.step = 1;
+            state.flow = Flow.ADD_SPRINT;
+            sendMsg(chatId, "Por favor ingresa el nombre del nuevo sprint:", true);
+            return;
+        }        
         if (messageText.equals("📊 Reports")) {
             showReports(chatId, state);
             return;
@@ -561,6 +568,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     }
     
     private void processAddSprintFlow(long chatId, String messageText, BotConversationState state) {
+        System.out.println("STATE STEP: " + state.step);
         if (state.step == 1) {
             state.newSprintName = messageText;
             state.step = 2;
