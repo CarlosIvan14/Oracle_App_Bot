@@ -3,8 +3,11 @@ package com.springboot.MyTodoList.controller;
 import com.springboot.MyTodoList.model.*;
 import com.springboot.MyTodoList.service.ProjectsServiceBot;
 import com.springboot.MyTodoList.service.SprintsServiceBot;
+import com.springboot.MyTodoList.service.TaskCreationServiceBot;
 import com.springboot.MyTodoList.service.TaskServiceBot;
 import com.springboot.MyTodoList.service.ToDoItemService;
+import com.springboot.MyTodoList.service.UserRoleServiceBot;
+
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +21,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,6 +38,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     private final ProjectsServiceBot projectsServiceBot;
     private final SprintsServiceBot sprintsServiceBot;
     private final TaskServiceBot taskServiceBot;
+    private final TaskCreationServiceBot taskCreationServiceBot;
+    private final UserRoleServiceBot userRoleServiceBot;
     private final String baseUrl = "http://localhost:8081";
     private final RestTemplate restTemplate;
     private final String botName;
@@ -54,17 +64,19 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         String newUserPassword;
         // Datos para crear sprint
         String newSprintName;
-        // Datos para crear tarea
-        String taskDescription;
-        String taskDeadline; // formato "yyyy-MM-dd HH:mm" si lo requieres
-        Integer taskPriority;
+        // Task creation fields
+        private String taskName;
+        private String taskDescription;
+        private LocalDate taskDeadline;
+        private Integer taskStoryPoints;
+        private Double taskEstimatedHours;
         // Datos para agregar usuario
         List<OracleUser> allOracleUsers;
     }
 
     private final Map<Long, BotConversationState> conversationStates = new HashMap<>();
 
-    public ToDoItemBotController(String botToken, String botName, ProjectsServiceBot projectsServiceBot, SprintsServiceBot sprintsServiceBot, TaskServiceBot taskServiceBot) {
+    public ToDoItemBotController(String botToken, String botName, ProjectsServiceBot projectsServiceBot, SprintsServiceBot sprintsServiceBot, TaskServiceBot taskServiceBot, TaskCreationServiceBot taskCreationServiceBot, UserRoleServiceBot userRoleServiceBot) {
         super(botToken);
         this.botToken = botToken;
         this.botName = botName;
@@ -72,6 +84,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         this.projectsServiceBot = projectsServiceBot;
         this.sprintsServiceBot = sprintsServiceBot;
         this.taskServiceBot = taskServiceBot;
+        this.taskCreationServiceBot = taskCreationServiceBot;
+        this.userRoleServiceBot = userRoleServiceBot;
     }
 
     @Override
@@ -111,6 +125,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                 return;
             }
         }
+        
         // Flujo para agregar usuario
         if (messageText.equalsIgnoreCase("➕ Agregar Usuario")) {
             state.flow = Flow.ADD_USER;
@@ -138,6 +153,12 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             updateSprintStatus(chatId, sprintId, "Active");
             return;
         }                
+
+        // Add this with your other command handlers
+        if (messageText.equals("➕ Add Task")) {
+            startAddTaskFlow(chatId, state);
+            return;
+        }
         // Navegación: volver a Proyectos o Sprints
         if (handleNavigation(chatId, messageText, state)) return;
 
@@ -150,6 +171,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             return;
         }
         if (handleSprintSelection(chatId, messageText, state)) return;
+
         if (handleProjectSelection(chatId, messageText, state)) return;
         // 10. Handle task status updates
         if (handleTaskStatusUpdates(chatId, messageText, state)){
@@ -205,7 +227,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                 processAddSprintFlow(chatId, messageText, state);
                 break;
             case ADD_TASK:
-                //processAddTaskFlow(chatId, messageText, state);
+                processAddTaskFlow(chatId, messageText, state);
                 break;
             case TASK_COMPLETE:
                 if (state.step == 1) {
@@ -230,6 +252,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                 break;
         }
     }
+
     private void processLoginFlow(long chatId, String messageText, BotConversationState state) {
         if (state.step == 1) {
             state.newUserName = messageText;
@@ -249,6 +272,138 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             }
         }
     }
+
+    private void startAddTaskFlow(long chatId, BotConversationState state) {
+    if (state.currentSprintId == 0) {
+        sendMsg(chatId, "⚠️ Please select a sprint first", false);
+        return;
+    }
+    
+    state.flow = Flow.ADD_TASK;
+    state.step = 1;
+    sendMsg(chatId, "🆕 Creating new task\n1) Enter task name:", false);
+}
+
+private void processAddTaskFlow(long chatId, String messageText, BotConversationState state) {
+    switch (state.step) {
+        case 1: // Task name
+            state.taskName = messageText;
+            state.step = 2;
+            sendMsg(chatId, "2) Enter task description:", false);
+            break;
+            
+        case 2: // Description
+            state.taskDescription = messageText;
+            state.step = 3;
+            sendMsg(chatId, "3) Enter deadline (YYYY-MM-DD):", false);
+            break;
+            
+        case 3: // Deadline
+            try {
+                state.taskDeadline = LocalDate.parse(messageText);
+                state.step = 4;
+                sendMsg(chatId, "4) Enter story points (integer):", false);
+            } catch (DateTimeParseException e) {
+                sendMsg(chatId, "⚠️ Invalid date format. Please use YYYY-MM-DD", false);
+            }
+            break;
+            
+        case 4: // Story points
+            try {
+                state.taskStoryPoints = Integer.parseInt(messageText);
+                state.step = 5;
+                sendMsg(chatId, "5) Enter estimated hours (e.g., 2.5):", false);
+            } catch (NumberFormatException e) {
+                sendMsg(chatId, "⚠️ Please enter a whole number", false);
+            }
+            break;
+            
+        case 5: // Estimated hours
+            try {
+                state.taskEstimatedHours = Double.parseDouble(messageText);
+                
+                // Create and send the task
+                createAndSendTask(chatId, state);
+                
+                // Reset flow
+                resetFlow(state);
+                // Refresh task list
+                listTasksForSprint(chatId, state.currentSprintId, state.loggedUser.getIdUser());
+                
+            } catch (NumberFormatException e) {
+                sendMsg(chatId, "⚠️ Please enter a valid number (e.g., 2.5)", false);
+            }
+            break;
+    }
+}
+
+private Sprint createSprintWithId(int sprintId) {
+    Sprint sprint = new Sprint();
+    sprint.setId(sprintId); // Assuming Sprint has setId() method
+    return sprint;
+}
+
+private void createAndSendTask(long chatId, BotConversationState state) {
+
+    logger.debug("state currentSprint", state.currentSprintId);
+    try {
+        // 1. Create task object
+        Tasks newTask = new Tasks();
+        newTask.setName(state.taskName);
+        newTask.setDescription(state.taskDescription);
+        newTask.setDeadline(state.taskDeadline.atStartOfDay());
+        newTask.setStoryPoints(state.taskStoryPoints);
+        newTask.setEstimatedHours(state.taskEstimatedHours);
+        newTask.setRealHours(0.0);
+        newTask.setCreationTs(LocalDateTime.now());
+        newTask.setSprint(createSprintWithId(state.currentSprintId));
+
+        // Create sprint object with correct field name
+        logger.debug("state currentSprint", state.currentSprintId);
+        Sprint sprint = new Sprint();
+        sprint.setId(state.currentSprintId); 
+        newTask.setSprint(sprint);
+
+        // 2. Debug print before setting status
+        logger.debug("Task object before status assignment: {}", newTask);
+        
+        // 3. Set status based on role
+        boolean isManager = userRoleServiceBot.isManagerInProject(
+            state.currentProjectId, 
+            state.loggedUser.getIdUser()
+        );
+        newTask.setStatus(isManager ? "UNASSIGNED" : "ASSIGNED");
+        
+        // 4. Debug print after status assignment
+        logger.debug("Task object after status assignment: {}", newTask);
+        logger.debug("User is {} in project {}", 
+            isManager ? "manager" : "developer", 
+            state.currentProjectId);
+
+        // 5. Create the task
+        Tasks createdTask = taskCreationServiceBot.createTask(newTask);
+        logger.debug("Task created with ID: {}", createdTask.getId());
+        
+        // 4. Auto-assign if developer
+        if (!isManager) {
+            Integer projectUserId = taskCreationServiceBot.getProjectUserId(
+                state.currentProjectId,
+                state.loggedUser.getIdUser()
+            );
+            if (projectUserId != null) {
+                taskCreationServiceBot.assignTask(createdTask.getId(), projectUserId);
+                logger.debug("Task assigned to project user ID: {}", projectUserId);
+            }
+        }
+        
+        // 7. Final debug output
+        logger.debug("Final task state: {}", createdTask);
+        sendMsg(chatId, "✅ Task created successfully!", false);
+    } catch (Exception e) {
+        logger.error("Error creating task. State: {}, Error: {}", state, e.getMessage(), e);
+        sendMsg(chatId, "❌ Error creating task: " + e.getMessage(), false);
+    }
+}
 
     // --------------------------
     // Menú Principal: Proyectos
@@ -296,7 +451,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         if (matcher.find()) {
             int projectId = Integer.parseInt(matcher.group(1));
             state.currentProjectId = projectId;
-            boolean isManager = isManager(state.loggedUser.getIdUser(), projectId);
+                    // Set status based on role
+        boolean isManager = userRoleServiceBot.isManagerInProject(
+            state.currentProjectId, 
+            state.loggedUser.getIdUser()
+        );
             showSprintsForProject(chatId, projectId, isManager);
             return true;
         }
@@ -589,12 +748,18 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                     sendMsg(chatId, "Error al crear el sprint.", false);
                 }
                 resetFlow(state);
-                boolean isManager = isManager(state.loggedUser.getIdUser(), state.currentProjectId);
+                boolean isManager = userRoleServiceBot.isManagerInProject(
+                    state.currentProjectId, 
+                    state.loggedUser.getIdUser()
+                );
                 showSprintsForProject(chatId, state.currentProjectId, isManager);
             } else if (messageText.equalsIgnoreCase("/cancel")) {
                 sendMsg(chatId, "Creación de sprint cancelada.", false);
                 resetFlow(state);
-                boolean isManager = isManager(state.loggedUser.getIdUser(), state.currentProjectId);
+                boolean isManager = userRoleServiceBot.isManagerInProject(
+                    state.currentProjectId, 
+                    state.loggedUser.getIdUser()
+                );
                 showSprintsForProject(chatId, state.currentProjectId, isManager);
             }
         }
@@ -719,7 +884,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         state.newSprintName = null;
         state.taskDescription = null;
         state.taskDeadline = null;
-        state.taskPriority = null;
         state.allOracleUsers = null;
     }
     private void sendMsg(long chatId, String text, boolean markdown) {
@@ -733,6 +897,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             logger.error("Error al enviar mensaje", e);
         }
     }
+
+    
 
     // --------------------------
     // Llamadas al Backend

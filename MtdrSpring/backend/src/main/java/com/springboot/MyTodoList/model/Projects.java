@@ -20,10 +20,10 @@ public class Projects {
     private int idProject;
 
     @Column(name = "CREATION_TS")
-    private LocalDateTime creation_ts;
+    private LocalDateTime creationTs;
 
     @Column(name = "DELETED_TS")
-    private LocalDateTime deleted_ts;
+    private LocalDateTime deletedTs;
 
     @Column(name = "DESCRIPTION")
     private String description;
@@ -39,10 +39,10 @@ public class Projects {
     public Projects() {
     }
 
-    public Projects(int idProject, LocalDateTime creation_ts, LocalDateTime deleted_ts, String description, String name) {
+    public Projects(int idProject, LocalDateTime creationTs, LocalDateTime deletedTs, String description, String name) {
         this.idProject = idProject;
-        this.creation_ts = creation_ts;
-        this.deleted_ts = deleted_ts;
+        this.creationTs = creationTs;
+        this.deletedTs = deletedTs;
         this.description = description;
         this.name = name;
     }
@@ -56,19 +56,19 @@ public class Projects {
     }
 
     public LocalDateTime getCreationTs() {
-        return creation_ts;
+        return creationTs;
     }
 
-    public void setCreationTs(LocalDateTime creation_ts) {
-        this.creation_ts = creation_ts;
+    public void setCreationTs(LocalDateTime creationTs) {
+        this.creationTs = creationTs;
     }
 
     public LocalDateTime getDeletedTs() {
-        return deleted_ts;
+        return deletedTs;
     }
 
-    public void setDeletedTs(LocalDateTime deleted_ts) {
-        this.deleted_ts = deleted_ts;
+    public void setDeletedTs(LocalDateTime deletedTs) {
+        this.deletedTs = deletedTs;
     }
 
     public String getDescription() {
@@ -99,8 +99,8 @@ public class Projects {
     public String toString() {
         return "Projects{" +
                 "idProject=" + idProject +
-                ", creation_ts=" + creation_ts +
-                ", deleted_ts=" + deleted_ts +
+                ", creation_ts=" + creationTs +
+                ", deleted_ts=" + deletedTs +
                 ", description='" + description + '\'' +
                 ", name='" + name + '\'' +
                 '}';

@@ -18,4 +18,10 @@ public interface ProjectUserRepository extends JpaRepository<ProjectUser, Intege
 
     @Query("SELECT pu.project FROM ProjectUser pu WHERE pu.user.id = :userId")
     List<Projects> findProjectsByUserId(int userId);
+
+    @Query("SELECT pu.idProjectUser FROM ProjectUser pu WHERE pu.user.id = :userId AND pu.project.id = :projectId")
+    Integer findProjectUserIdByUserIdAndProjectId(int userId, int projectId);
+
+    @Query("SELECT pu.roleUser FROM ProjectUser pu WHERE pu.user.id = :userId AND pu.project.id = :projectId")
+    String findRoleUserByUserIdAndProjectId(int userId, int projectId);
 }

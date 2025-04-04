@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface TasksRepository extends JpaRepository<Tasks, Integer> {
     // Devuelve todas las tareas cuyo sprint tenga el id_sprint indicado
-    @Query("SELECT t FROM Tasks t WHERE t.sprint.id_sprint = :sprintId")
+    @Query("SELECT t FROM Tasks t WHERE t.sprint.id = :sprintId")
     List<Tasks> findBySprintId(@Param("sprintId") int sprintId);
 }

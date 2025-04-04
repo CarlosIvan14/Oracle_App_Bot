@@ -69,8 +69,8 @@ public class ToDoItemService {
 
             // Si la petición trae creation_ts, lo actualizamos
             // (a veces no se desea cambiar la fecha de creación, decide según tu caso)
-            if (td.getCreation_ts() != null) {
-                existing.setCreation_ts(td.getCreation_ts());
+            if (td.getCreationTs() != null) {
+                existing.setCreationTs(td.getCreationTs());
             }
 
             // Deadline

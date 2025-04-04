@@ -19,7 +19,7 @@ public class ToDoItem {
     private String description;
 
     @Column(name = "CREATION_TS")
-    private OffsetDateTime creation_ts;
+    private OffsetDateTime creationTs;
 
     @Column(name = "DONE")
     private boolean done;
@@ -44,10 +44,10 @@ public class ToDoItem {
     public ToDoItem() {
     }
 
-    public ToDoItem(int ID, String description, OffsetDateTime creation_ts, boolean done) {
+    public ToDoItem(int ID, String description, OffsetDateTime creationTs, boolean done) {
         this.ID = ID;
         this.description = description;
-        this.creation_ts = creation_ts;
+        this.creationTs = creationTs;
         this.done = done;
     }
 
@@ -67,12 +67,12 @@ public class ToDoItem {
         this.description = description;
     }
 
-    public OffsetDateTime getCreation_ts() {
-        return creation_ts;
+    public OffsetDateTime getCreationTs() {
+        return creationTs;
     }
 
-    public void setCreation_ts(OffsetDateTime creation_ts) {
-        this.creation_ts = creation_ts;
+    public void setCreationTs(OffsetDateTime creationTs) {
+        this.creationTs = creationTs;
     }
 
     public boolean isDone() {
@@ -120,7 +120,7 @@ public class ToDoItem {
         return "ToDoItem{" +
                 "ID=" + ID +
                 ", description='" + description + '\'' +
-                ", creation_ts=" + creation_ts +
+                ", creation_ts=" + creationTs +
                 ", done=" + done +
                 ", deadline=" + deadline +
                 ", priority=" + priority +

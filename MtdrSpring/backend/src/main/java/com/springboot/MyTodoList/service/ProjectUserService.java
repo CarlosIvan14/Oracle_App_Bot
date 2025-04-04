@@ -127,4 +127,12 @@ public class ProjectUserService {
     public List<Projects> getProjectsByUserId(int userId) {
         return projectUserRepository.findProjectsByUserId(userId);
     }
+
+    public Integer getProjectUserIdByUserIdAndProjectId(int userId, int projectId) {
+        return projectUserRepository.findProjectUserIdByUserIdAndProjectId(userId, projectId);
+    }
+
+    public String getRoleUserByUserIdAndProjectId(int userId, int projectId) {
+        return projectUserRepository.findRoleUserByUserIdAndProjectId(userId, projectId);
+    }
 }

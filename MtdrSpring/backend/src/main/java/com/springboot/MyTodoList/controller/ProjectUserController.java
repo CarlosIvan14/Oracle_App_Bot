@@ -81,4 +81,16 @@ public class ProjectUserController {
         List<Projects> projects = projectUserService.getProjectsByUserId(userId);
         return ResponseEntity.ok(projects);
     }
+
+    @GetMapping("project-user-id/project-id/{projectId}/user-id/{userId}")
+    public ResponseEntity<Integer> getProjectUserId(@PathVariable int userId, @PathVariable int projectId) {
+        Integer id = projectUserService.getProjectUserIdByUserIdAndProjectId(userId, projectId);
+        return id != null ? ResponseEntity.ok(id) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/role-user/project-id/{projectId}/user-id/{userId}")
+    public ResponseEntity<String> getRoleUser(@PathVariable int userId, @PathVariable int projectId) {
+        String roleUser = projectUserService.getRoleUserByUserIdAndProjectId(userId, projectId);
+        return roleUser != null ? ResponseEntity.ok(roleUser) : ResponseEntity.notFound().build();
+    }
 }

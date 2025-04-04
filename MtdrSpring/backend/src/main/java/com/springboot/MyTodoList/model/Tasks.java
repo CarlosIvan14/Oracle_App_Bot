@@ -13,10 +13,10 @@ public class Tasks {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_TASK")
-    private int id_task;
+    private int idTask;
 
     @Column(name = "CREATION_IS")
-    private LocalDateTime creation_ts;
+    private LocalDateTime creationTs;
 
     @Column(name = "NAME", nullable = false)
     private String name;
@@ -28,7 +28,7 @@ public class Tasks {
     private String description;
 
     @Column(name = "STORY_POINTS")
-    private Integer story_points;
+    private Integer storyPoints;
 
     @ManyToOne
     @JoinColumn(name = "ID_SPRINT", nullable = false)
@@ -39,45 +39,45 @@ public class Tasks {
     private LocalDateTime deadline;
 
     @Column(name = "REAL_HOURS")
-    private Double real_hours;
+    private Double realHours;
 
     @Column(name = "ESTIMATED_HOURS")
-    private Double estimated_hours;
+    private Double estimatedHours;
 
     // Constructor por defecto
     public Tasks() {
     }
 
     // Constructor completo (excepto id_task)
-    public Tasks(LocalDateTime creation_ts, String name, String status, String description, Integer story_points,
-                 Sprint sprint, LocalDateTime deadline, Double real_hours, Double estimated_hours) {
-        this.creation_ts = creation_ts;
+    public Tasks(LocalDateTime creationTs, String name, String status, String description, Integer storyPoints,
+                 Sprint sprint, LocalDateTime deadline, Double realHours, Double estimatedHours) {
+        this.creationTs = creationTs;
         this.name = name;
         this.status = status;
         this.description = description;
-        this.story_points = story_points;
+        this.storyPoints = storyPoints;
         this.sprint = sprint;
         this.deadline = deadline;
-        this.real_hours = real_hours;
-        this.estimated_hours = estimated_hours;
+        this.realHours = realHours;
+        this.estimatedHours = estimatedHours;
     }
 
     // Getters y Setters
 
     public int getId() {
-        return id_task;
+        return idTask;
     }
 
-    public void setId(int id_task) {
-        this.id_task = id_task;
+    public void setId(int idTask) {
+        this.idTask = idTask;
     }
 
     public LocalDateTime getCreationTs() {
-        return creation_ts;
+        return creationTs;
     }
 
-    public void setCreationTs(LocalDateTime creation_ts) {
-        this.creation_ts = creation_ts;
+    public void setCreationTs(LocalDateTime creationTs) {
+        this.creationTs = creationTs;
     }
 
     public String getName() {
@@ -105,11 +105,11 @@ public class Tasks {
     }
 
     public Integer getStoryPoints() {
-        return story_points;
+        return storyPoints;
     }
 
-    public void setStoryPoints(Integer story_points) {
-        this.story_points = story_points;
+    public void setStoryPoints(Integer storyPoints) {
+        this.storyPoints = storyPoints;
     }
 
     public Sprint getSprint() {
@@ -129,18 +129,18 @@ public class Tasks {
     }
 
     public Double getRealHours() {
-        return real_hours;
+        return realHours;
     }
 
-    public void setRealHours(Double real_hours) {
-        this.real_hours = real_hours;
+    public void setRealHours(Double realHours) {
+        this.realHours = realHours;
     }
 
     public Double getEstimatedHours() {
-        return estimated_hours;
+        return estimatedHours;
     }
 
-    public void setEstimatedHours(Double estimated_hours) {
-        this.estimated_hours = estimated_hours;
+    public void setEstimatedHours(Double estimatedHours) {
+        this.estimatedHours = estimatedHours;
     }
 }

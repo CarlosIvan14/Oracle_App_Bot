@@ -17,10 +17,10 @@
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         @Column(name = "ID_SPRINT")
         @JsonProperty("id_sprint")  // Para que el JSON asigne este valor correctamente
-        private int id_sprint;
+        private int sprintId;
 
         @Column(name = "CREATION_TS")
-        private LocalDateTime creation_ts;
+        private LocalDateTime creationTs;
 
         @Column(name = "DESCRIPTION")
         private String description;
@@ -41,9 +41,9 @@
         }
 
         // Constructor completo
-        public Sprint(int id_sprint, LocalDateTime creation_ts, String description, String name, Projects project, List<Tasks> tasks) {
-            this.id_sprint = id_sprint;
-            this.creation_ts = creation_ts;
+        public Sprint(int sprintId, LocalDateTime creationTs, String description, String name, Projects project, List<Tasks> tasks) {
+            this.sprintId = sprintId;
+            this.creationTs = creationTs;
             this.description = description;
             this.name = name;
             this.project = project;
@@ -52,19 +52,19 @@
 
         // Getters y Setters
         public int getId() {
-            return id_sprint;
+            return sprintId;
         }
 
-        public void setId(int id_sprint) {
-            this.id_sprint = id_sprint;
+        public void setId(int sprintId) {
+            this.sprintId = sprintId;
         }
 
         public LocalDateTime getCreationTs() {
-            return creation_ts;
+            return creationTs;
         }
 
-        public void setCreationTs(LocalDateTime creation_ts) {
-            this.creation_ts = creation_ts;
+        public void setCreationTs(LocalDateTime creationTs) {
+            this.creationTs = creationTs;
         }
 
         public String getDescription() {
