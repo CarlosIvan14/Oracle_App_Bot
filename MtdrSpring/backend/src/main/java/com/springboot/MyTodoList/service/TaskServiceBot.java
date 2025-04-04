@@ -5,14 +5,13 @@ import com.springboot.MyTodoList.model.Tasks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import org.springframework.http.*;
 import org.springframework.web.util.UriComponentsBuilder;
-
+import java.util.Arrays; 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -33,22 +32,16 @@ public class TaskServiceBot {
         this.restTemplate = restTemplateBuilder.build();
     }
 
-    public List<TaskAssignees> getUserTaskAssignments(int sprintId, int userId) {
-        String url = apiBaseUrl + "/task-assignees/user/" + userId + "/sprint/" + sprintId;
+    // Llama al endpoint que obtiene las asignaciones de tareas para un sprint y usuario.
+    public List<TaskAssignees> getUserTaskAssignments(int sprintId, int projectUserId) {
+        String url = apiBaseUrl + "/task-assignees/user/" + projectUserId + "/sprint/" + sprintId;
+        ResponseEntity<TaskAssignees[]> response =
+                restTemplate.getForEntity(url, TaskAssignees[].class);
 
-        // Log the request URL
-        logger.info("Fetching TaskAssignees from: {}", url);
-
-        ResponseEntity<List<TaskAssignees>> response = restTemplate.exchange(
-            url,
-            HttpMethod.GET,
-            null,
-            new ParameterizedTypeReference<List<TaskAssignees>>() {}
-        );
-
-        logger.info("Response Status: {}", response.getStatusCode());
-        return response.getBody();
+        TaskAssignees[] assignments = response.getBody();
+        return (assignments != null) ? Arrays.asList(assignments) : Collections.emptyList();
     }
+
 
     public void updateTask(int taskId, Map<String, Object> updates) {
         String url = apiBaseUrl + "/tasks/" + taskId;

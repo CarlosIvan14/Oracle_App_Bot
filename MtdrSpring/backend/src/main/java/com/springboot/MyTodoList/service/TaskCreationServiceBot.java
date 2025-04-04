@@ -1,5 +1,6 @@
 package com.springboot.MyTodoList.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springboot.MyTodoList.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -9,51 +10,64 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.OffsetDateTime;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 @Service
 public class TaskCreationServiceBot {
     private final RestTemplate restTemplate;
     private final String apiBaseUrl = "http://localhost:8081/api";
     private final UserRoleServiceBot userRoleService;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Autowired
     public TaskCreationServiceBot(RestTemplateBuilder restTemplateBuilder, 
-                                UserRoleServiceBot userRoleService) {
+                                  UserRoleServiceBot userRoleService) {
         this.restTemplate = restTemplateBuilder.build();
         this.userRoleService = userRoleService;
     }
-
+    // Método para obtener la referencia del Sprint existente
+    public Sprint getSprintReference(int sprintId) {
+        return entityManager.getReference(Sprint.class, sprintId);
+    }
     // Get project user ID for automatic assignment
     public Integer getProjectUserId(int projectId, int userId) {
-        String url = apiBaseUrl + "/project-users/project-id/" + projectId + "/user-id/" + userId;
-        ResponseEntity<ProjectUser> response = restTemplate.exchange(
+        String url = apiBaseUrl + "/project-users/project-user-id/project-id/" + projectId + "/user-id/" + userId;
+        ResponseEntity<Integer> response = restTemplate.exchange(
             url,
             HttpMethod.GET,
             null,
-            ProjectUser.class
+            Integer.class
         );
-        return response.getBody() != null ? response.getBody().getIdProjectUser() : null;
+        return response.getBody();
     }
 
     // Create a new task
     public Tasks createTask(Tasks task) {
+        // LOGUEA el objeto que enviarás:
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            System.out.println("JSON que se enviará = " + mapper.writeValueAsString(task));
+        } catch (Exception e) {}
+        
         String url = apiBaseUrl + "/tasks";
         HttpEntity<Tasks> request = new HttpEntity<>(task);
         ResponseEntity<Tasks> response = restTemplate.postForEntity(url, request, Tasks.class);
         return response.getBody();
     }
 
+
     public TaskAssignees assignTask(int taskId, int projectUserId) {
         String url = apiBaseUrl + "/task-assignees";
         
-        // Create Task reference with just the ID
         Tasks task = new Tasks();
         task.setId(taskId);
         
-        // Create ProjectUser reference with just the ID
         ProjectUser projectUser = new ProjectUser();
         projectUser.setIdProjectUser(projectUserId);
         
-        // Create the assignment
         TaskAssignees assignment = new TaskAssignees();
         assignment.setTask(task);
         assignment.setProjectUser(projectUser);
@@ -67,21 +81,25 @@ public class TaskCreationServiceBot {
         return response.getBody();
     }
 
-    // Combined method for developer workflow
+    // Método combinado para flujo de desarrollador
+    // Método combinado para flujo de desarrollador
     public Tasks createDeveloperTask(Tasks task, int projectId, int userId) {
-        // 1. Get project user ID
         Integer projectUserId = getProjectUserId(projectId, userId);
         if (projectUserId == null) {
             throw new RuntimeException("User not found in project");
         }
-    
-        // 2. Create the task (status should be "ASSIGNED" for developer)
+
+        // En vez de usar getSprintReference(), creamos un objeto Sprint simple
+        if (task.getSprint() != null) {
+            Sprint sprint = new Sprint();
+            sprint.setId(task.getSprint().getId());
+            task.setSprint(sprint);
+        }
+
         task.setStatus("ASSIGNED");
         Tasks createdTask = createTask(task);
-        
-        // 3. Auto-assign to developer
         assignTask(createdTask.getId(), projectUserId);
-        
         return createdTask;
     }
+
 }

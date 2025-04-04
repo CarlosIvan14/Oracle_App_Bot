@@ -18,9 +18,11 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.*;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -70,6 +72,9 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         private LocalDate taskDeadline;
         private Integer taskStoryPoints;
         private Double taskEstimatedHours;
+        // Agrega los campos para Telegram
+        private Long telegramId;
+        private String phoneNumber;
         // Datos para agregar usuario
         List<OracleUser> allOracleUsers;
     }
@@ -99,10 +104,23 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText().trim();
         BotConversationState state = conversationStates.computeIfAbsent(chatId, k -> new BotConversationState());
-
+        // Si el usuario comparte su contacto, lo capturamos
+        if (update.getMessage().hasContact()) {
+            Long telegramId = update.getMessage().getContact().getUserId();
+            String phoneNumber = update.getMessage().getContact().getPhoneNumber();
+            // Aquí puedes guardar estos datos en el estado para usarlos en el login o actualizar el usuario
+            state.telegramId = telegramId; // agrega un campo en BotConversationState si lo requieres
+            state.phoneNumber = phoneNumber;
+            logger.info("Contacto compartido: Telegram ID: {}, Phone Number: {}", telegramId, phoneNumber);
+        } else {
+            // Si no se comparte el contacto, siempre puedes capturar el id de Telegram del remitente
+            Long telegramId = update.getMessage().getFrom().getId();
+            state.telegramId = telegramId;
+            // En este caso, el phoneNumber podría quedar vacío o podrías solicitarlo en otro paso
+        }
         // Comandos especiales
         if (messageText.equalsIgnoreCase("/start")) {
-            startLoginFlow(chatId, state);
+            startLoginFlow(chatId, state, update);
             return;
         }
         if (messageText.equalsIgnoreCase("/logout") || messageText.equalsIgnoreCase("Logout 🚪")) {
@@ -163,7 +181,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         if (handleNavigation(chatId, messageText, state)) return;
 
         if (state.loggedUser == null && state.flow != Flow.LOGIN) {
-            startLoginFlow(chatId, state);
+            startLoginFlow(chatId, state, update);
             return;
         }
         if (state.flow != Flow.NONE) {
@@ -213,10 +231,29 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     // --------------------------
     // Flujo de Login
     // --------------------------
-    private void startLoginFlow(long chatId, BotConversationState state) {
+    private void startLoginFlow(long chatId, BotConversationState state, Update update) {
         state.flow = Flow.LOGIN;
         state.step = 1;
-        sendMsg(chatId, "¡Bienvenido! Ingresa tu *nombre de usuario*:", true);
+        // Se puede solicitar que el usuario comparta su contacto usando un teclado con botón de "Compartir contacto"
+        SendMessage msg = new SendMessage();
+        msg.setChatId(chatId);
+        msg.setText("¡Bienvenido! Ingresa tu *nombre de usuario*.\nSi deseas, comparte tu contacto para actualizar tus datos automáticamente.");
+        
+        // Crear botón para compartir contacto
+        KeyboardButton contactButton = new KeyboardButton("Compartir Contacto");
+        contactButton.setRequestContact(true);
+        KeyboardRow row = new KeyboardRow();
+        row.add(contactButton);
+        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+        keyboard.setResizeKeyboard(true);
+        keyboard.setKeyboard(Collections.singletonList(row));
+        msg.setReplyMarkup(keyboard);
+        
+        try {
+            execute(msg);
+        } catch (TelegramApiException e) {
+            logger.error("Error en startLoginFlow", e);
+        }
     }
     private void processFlow(long chatId, String messageText, BotConversationState state) {
         switch (state.flow) {
@@ -236,9 +273,18 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                         Map<String, Object> updates = new HashMap<>();
                         updates.put("status", "COMPLETED");
                         updates.put("realHours", hours);
-                        
+            
                         taskServiceBot.updateTask(state.currentTaskId, updates);
-                        listTasksForSprint(chatId, state.currentSprintId, state.loggedUser.getIdUser());
+            
+                        // 1) Obtener projectUserId
+                        Integer projectUserId = taskCreationServiceBot.getProjectUserId(
+                            state.currentProjectId,
+                            state.loggedUser.getIdUser()
+                        );
+            
+                        // 2) Refrescar la lista con projectUserId
+                        listTasksForSprint(chatId, state.currentSprintId, projectUserId);
+            
                         resetFlow(state);
                     } catch (NumberFormatException e) {
                         sendMsg(chatId, "⚠ Por favor ingresa un número válido (ej. 2.5)", false);
@@ -265,6 +311,38 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                 sendMsg(chatId, "Login fallido. Intenta nuevamente con /start.", false);
                 conversationStates.remove(chatId);
             } else {
+                // Actualiza los datos de Telegram antes de continuar
+                user.setTelegramId(state.telegramId);
+                if (state.phoneNumber != null) {
+                    user.setPhoneNumber(state.phoneNumber);
+                }
+                try {
+                    String url = baseUrl + "/users/" + user.getIdUser();
+                    Map<String, Object> payload = new HashMap<>();
+                    payload.put("telegramId", state.telegramId);
+                    logger.info("Datos de Telegram ", state.phoneNumber);
+                    if (state.phoneNumber != null) {
+                        payload.put("phoneNumber", state.phoneNumber);
+                    }
+                    HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload);
+                    ResponseEntity<OracleUser> patchResponse = restTemplate.exchange(
+                            url,
+                            HttpMethod.PATCH,
+                            request,
+                            OracleUser.class
+                    );
+                    if (patchResponse.getStatusCode().is2xxSuccessful() && patchResponse.getBody() != null) {
+                        // Actualiza el objeto user con la respuesta del backend
+                        user = patchResponse.getBody();
+                        logger.info("Datos de Telegram actualizados correctamente para el usuario {}", user.getIdUser());
+                    } else {
+                        logger.warn("No se pudo actualizar los datos de Telegram para el usuario {}", user.getIdUser());
+                    }
+                } catch (Exception e) {
+                    logger.error("Error actualizando datos de Telegram para el usuario {}", user.getIdUser(), e);
+                }
+                // Puedes llamar a un método de servicio para actualizar estos campos en la base
+                // Por ejemplo: oracleUserService.updateTelegramData(user);
                 state.loggedUser = user;
                 resetFlow(state);
                 sendMsg(chatId, "¡Login exitoso! Bienvenido, " + user.getName(), false);
@@ -272,6 +350,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             }
         }
     }
+    
 
     private void startAddTaskFlow(long chatId, BotConversationState state) {
     if (state.currentSprintId == 0) {
@@ -318,22 +397,28 @@ private void processAddTaskFlow(long chatId, String messageText, BotConversation
             }
             break;
             
-        case 5: // Estimated hours
-            try {
-                state.taskEstimatedHours = Double.parseDouble(messageText);
-                
-                // Create and send the task
-                createAndSendTask(chatId, state);
-                
-                // Reset flow
-                resetFlow(state);
-                // Refresh task list
-                listTasksForSprint(chatId, state.currentSprintId, state.loggedUser.getIdUser());
-                
-            } catch (NumberFormatException e) {
-                sendMsg(chatId, "⚠️ Please enter a valid number (e.g., 2.5)", false);
-            }
-            break;
+            case 5: // Estimated hours
+                try {
+                    state.taskEstimatedHours = Double.parseDouble(messageText);
+            
+                    createAndSendTask(chatId, state);
+            
+                    resetFlow(state);
+            
+                    // 1) Obtener projectUserId
+                    Integer projectUserId = taskCreationServiceBot.getProjectUserId(
+                        state.currentProjectId,
+                        state.loggedUser.getIdUser()
+                    );
+            
+                    // 2) Refrescar la lista con projectUserId
+                    listTasksForSprint(chatId, state.currentSprintId, projectUserId);
+            
+                } catch (NumberFormatException e) {
+                    sendMsg(chatId, "⚠️ Please enter a valid number (e.g., 2.5)", false);
+                }
+                break;
+        
     }
 }
 
@@ -344,10 +429,8 @@ private Sprint createSprintWithId(int sprintId) {
 }
 
 private void createAndSendTask(long chatId, BotConversationState state) {
-
-    logger.debug("state currentSprint", state.currentSprintId);
     try {
-        // 1. Create task object
+        // 1. Crear el objeto Tasks
         Tasks newTask = new Tasks();
         newTask.setName(state.taskName);
         newTask.setDescription(state.taskDescription);
@@ -356,35 +439,23 @@ private void createAndSendTask(long chatId, BotConversationState state) {
         newTask.setEstimatedHours(state.taskEstimatedHours);
         newTask.setRealHours(0.0);
         newTask.setCreationTs(LocalDateTime.now());
-        newTask.setSprint(createSprintWithId(state.currentSprintId));
-
-        // Create sprint object with correct field name
-        logger.debug("state currentSprint", state.currentSprintId);
-        Sprint sprint = new Sprint();
-        sprint.setId(state.currentSprintId); 
-        newTask.setSprint(sprint);
-
-        // 2. Debug print before setting status
-        logger.debug("Task object before status assignment: {}", newTask);
         
-        // 3. Set status based on role
+        // 2. Crear un objeto Sprint simple y asignar el id
+        Sprint sprint = new Sprint();
+        sprint.setId(state.currentSprintId); // Al usar el getter anotado, al serializar se enviará "id_sprint": <valor>
+        newTask.setSprint(sprint);
+        
+        // 3. Asignar el status según el rol del usuario
         boolean isManager = userRoleServiceBot.isManagerInProject(
             state.currentProjectId, 
             state.loggedUser.getIdUser()
         );
         newTask.setStatus(isManager ? "UNASSIGNED" : "ASSIGNED");
-        
-        // 4. Debug print after status assignment
-        logger.debug("Task object after status assignment: {}", newTask);
-        logger.debug("User is {} in project {}", 
-            isManager ? "manager" : "developer", 
-            state.currentProjectId);
 
-        // 5. Create the task
+        // 4. Crear la tarea mediante el servicio
         Tasks createdTask = taskCreationServiceBot.createTask(newTask);
-        logger.debug("Task created with ID: {}", createdTask.getId());
         
-        // 4. Auto-assign if developer
+        // 5. Si el usuario es developer, se asigna automáticamente la tarea
         if (!isManager) {
             Integer projectUserId = taskCreationServiceBot.getProjectUserId(
                 state.currentProjectId,
@@ -392,18 +463,16 @@ private void createAndSendTask(long chatId, BotConversationState state) {
             );
             if (projectUserId != null) {
                 taskCreationServiceBot.assignTask(createdTask.getId(), projectUserId);
-                logger.debug("Task assigned to project user ID: {}", projectUserId);
             }
         }
         
-        // 7. Final debug output
-        logger.debug("Final task state: {}", createdTask);
         sendMsg(chatId, "✅ Task created successfully!", false);
     } catch (Exception e) {
         logger.error("Error creating task. State: {}, Error: {}", state, e.getMessage(), e);
         sendMsg(chatId, "❌ Error creating task: " + e.getMessage(), false);
     }
 }
+
 
     // --------------------------
     // Menú Principal: Proyectos
@@ -462,19 +531,26 @@ private void createAndSendTask(long chatId, BotConversationState state) {
         return false;
     }
     private boolean handleSprintSelection(long chatId, String messageText, BotConversationState state) {
-        // Check if the message contains #SPRINT#
         if (messageText.contains("#SPRINT#")) {
-            // Extract the sprint ID from the message (using regex to find (ID: <number>))
             Matcher sprintMatcher = Pattern.compile(".*\\(ID: (\\d+)\\) #SPRINT#").matcher(messageText);
             if (sprintMatcher.find()) {
                 int sprintId = Integer.parseInt(sprintMatcher.group(1));
-                state.currentSprintId = sprintId; // Set the selected sprint ID in the conversation state
-                listTasksForSprint(chatId, sprintId, state.loggedUser.getIdUser()); // Call the function to show tasks related to the sprint
+                state.currentSprintId = sprintId;
+    
+                // En vez de usar el ID del usuario, obtenemos el projectUserId:
+                Integer projectUserId = taskCreationServiceBot.getProjectUserId(
+                        state.currentProjectId,
+                        state.loggedUser.getIdUser()
+                );
+    
+                // Y ahora pasamos projectUserId:
+                listTasksForSprint(chatId, sprintId, projectUserId);
                 return true;
             }
         }
         return false;
     }
+    
     private boolean handleTaskStatusUpdates(long chatId, String messageText, BotConversationState state) {
         // Check for START (Assigned → In Progress)
         if (messageText.startsWith("▶ START-")) {
@@ -507,26 +583,35 @@ private void createAndSendTask(long chatId, BotConversationState state) {
     }
     private void updateTaskStatus(long chatId, int taskId, String newStatus, int sprintId) {
         try {
+            // Recuperamos la conversación actual
+            BotConversationState state = conversationStates.get(chatId);
+    
             Map<String, Object> updates = new HashMap<>();
             updates.put("status", newStatus);
-            
-            // Add realHours if completing the task
+    
             if ("COMPLETED".equals(newStatus)) {
-                // You might want to ask for hours worked here
-                updates.put("realHours", 0.0); // Default or prompt user
+                updates.put("realHours", 0.0);
             }
-            
+    
             taskServiceBot.updateTask(taskId, updates);
-            
-            // Refresh the task list
-            listTasksForSprint(chatId, sprintId, conversationStates.get(chatId).loggedUser.getIdUser());
-            
+    
+            // 1) Obtener projectUserId usando state
+            Integer projectUserId = taskCreationServiceBot.getProjectUserId(
+                state.currentProjectId,
+                state.loggedUser.getIdUser()
+            );
+    
+            // 2) Refrescar la lista de tareas usando projectUserId
+            listTasksForSprint(chatId, sprintId, projectUserId);
+    
             sendMsg(chatId, "✅ Estado de tarea actualizado a: " + newStatus, false);
         } catch (Exception e) {
             logger.error("Error updating task status", e);
             sendMsg(chatId, "❌ Error al actualizar la tarea", false);
         }
     }
+    
+    
     // --------------------------
     // Mostrar Sprints de un Proyecto
     // --------------------------
@@ -557,20 +642,19 @@ private void createAndSendTask(long chatId, BotConversationState state) {
         rows.add(titleRow);
     
         // Iteramos los sprints para mostrar cada uno con su botón de toggle
+        // Mostrar cada sprint
         for (Sprint sprint : sprints) {
             KeyboardRow row = new KeyboardRow();
-            // Se muestra un icono según el estado del sprint
             String statusIcon = "Active".equalsIgnoreCase(sprint.getDescription()) ? "🟢" : "🔴";
             String sprintLabel = statusIcon + " " + sprint.getName() + " (ID: " + sprint.getId() + ") #SPRINT#";
             row.add(sprintLabel);
-            // Botón para cambiar estado:
-            String toggleButton;
-            if ("Active".equalsIgnoreCase(sprint.getDescription())) {
-                toggleButton = "Deshabilitar-" + sprint.getId();
-            } else {
-                toggleButton = "Habilitar-" + sprint.getId();
+            // Solo para manager se agrega el botón de toggle
+            if (isManager) {
+                String toggleButton = "Active".equalsIgnoreCase(sprint.getDescription())
+                        ? "Deshabilitar-" + sprint.getId()
+                        : "Habilitar-" + sprint.getId();
+                row.add(toggleButton);
             }
-            row.add(toggleButton);
             rows.add(row);
         }
     
@@ -586,11 +670,11 @@ private void createAndSendTask(long chatId, BotConversationState state) {
         }
     }
     
-    private void listTasksForSprint(long chatId, int sprintId, int userId) {
+    private void listTasksForSprint(long chatId, int sprintId, int projectUserId) {
         // Fetch TaskAssignees dynamically
         
 
-        List<TaskAssignees> taskAssignments = taskServiceBot.getUserTaskAssignments(sprintId, userId);
+        List<TaskAssignees> taskAssignments = taskServiceBot.getUserTaskAssignments(sprintId, projectUserId);
     
         List<Tasks> tasks = taskAssignments.stream()
         .map(TaskAssignees::getTask)
@@ -614,11 +698,10 @@ private void createAndSendTask(long chatId, BotConversationState state) {
         KeyboardRow reportRow = new KeyboardRow();
         reportRow.add("📊 Reports");
         rows.add(reportRow);
-        // Navigation buttons
+        // Botón de navegación: Volver a Sprints (texto exacto)
         KeyboardRow headerRow = new KeyboardRow();
-        headerRow.add("⬅ Volver a Sprints");
+        headerRow.add("⬅️ Volver a Sprints");
         rows.add(headerRow);
-    
         // Button to add a new task
         KeyboardRow addTaskRow = new KeyboardRow();
         addTaskRow.add("➕ Add Task");
@@ -867,10 +950,12 @@ private void createAndSendTask(long chatId, BotConversationState state) {
         }
     }
     private boolean handleNavigation(long chatId, String messageText, BotConversationState state) {
+        // Fíjate bien en los textos de los botones que creas
         if (messageText.equals("⬅️ Volver a Proyectos") || messageText.equals("⬅️ Regresar a Proyectos")) {
             showMainMenu(chatId, state.loggedUser);
             return true;
         }
+        // Usa el mismo texto que pones en la ReplyKeyboard para la Sprints
         if (messageText.equals("⬅️ Volver a Sprints")) {
             boolean isManager = isManager(state.loggedUser.getIdUser(), state.currentProjectId);
             showSprintsForProject(chatId, state.currentProjectId, isManager);

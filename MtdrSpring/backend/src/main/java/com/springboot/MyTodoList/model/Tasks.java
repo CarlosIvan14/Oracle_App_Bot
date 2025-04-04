@@ -2,6 +2,8 @@ package com.springboot.MyTodoList.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -14,6 +16,11 @@ public class Tasks {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_TASK")
     private int idTask;
+
+    @ManyToOne
+    @JoinColumn(name = "ID_SPRINT", nullable = false)
+    private Sprint sprint;
+
 
     @Column(name = "CREATION_IS")
     private LocalDateTime creationTs;
@@ -29,11 +36,6 @@ public class Tasks {
 
     @Column(name = "STORY_POINTS")
     private Integer storyPoints;
-
-    @ManyToOne
-    @JoinColumn(name = "ID_SPRINT", nullable = false)
-    @JsonBackReference // Lado "hijo" de la relación con Sprint
-    private Sprint sprint;
 
     @Column(name = "DEADLINE")
     private LocalDateTime deadline;
