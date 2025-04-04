@@ -198,20 +198,45 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             return;
         }
 
-        // Add this with your other command handlers
         if (messageText.startsWith("👤 ASSIGN-")) {
             int taskId = Integer.parseInt(messageText.replace("👤 ASSIGN-", ""));
-            state.flow = Flow.ASSIGN_TASK;
-            state.taskToAssignId = taskId;
-            state.step = 1;
             
-            // Get the current sprint ID from state or message context
-            int sprintId = state.currentSprintId; // You'll need to track this
+            // Obtener el projectUserId para el usuario logueado en el proyecto actual.
+            Integer projectUserId = taskCreationServiceBot.getProjectUserId(
+                state.currentProjectId,
+                state.loggedUser.getIdUser()
+            );
             
-            // Show users available for assignment
-            //showUsersForAssignment(chatId, sprintId);
+            if (projectUserId == null) {
+                sendMsg(chatId, "⚠️ No se encontró el usuario en el proyecto.", false);
+                return;
+            }
+            
+            // Llamar al servicio para asignar la tarea.
+            taskCreationServiceBot.assignTask(taskId, projectUserId);
+            
+            // Actualizar el estado de la tarea a "ASSIGNED" mediante PATCH
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("status", "ASSIGNED");
+            String url = baseUrl + "/api/tasks/" + taskId;
+            ResponseEntity<Tasks> patchResponse = restTemplate.exchange(
+                url,
+                HttpMethod.PATCH,
+                new HttpEntity<>(updates),
+                Tasks.class
+            );
+            
+            if (patchResponse.getStatusCode().is2xxSuccessful()) {
+                sendMsg(chatId, "✅ Tarea asignada y actualizada a ASSIGNED exitosamente!", false);
+            } else {
+                sendMsg(chatId, "⚠️ Tarea asignada, pero hubo un error al actualizar el estado.", false);
+            }
+            
+            // Actualizar la lista de tareas en el sprint
+            listTasksForSprint(chatId, state.currentSprintId, projectUserId);
             return;
         }
+        
         // Navegación: volver a Proyectos o Sprints
         if (handleNavigation(chatId, messageText, state)) return;
 
