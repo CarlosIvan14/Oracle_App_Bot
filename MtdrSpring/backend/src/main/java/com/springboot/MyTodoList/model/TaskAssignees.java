@@ -11,7 +11,7 @@ public class TaskAssignees {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_TASK_ASSIGNEES")
-    private int id_task_assignees;
+    private int idTaskAssignees;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_PROJECT_USER", nullable = false)
@@ -26,18 +26,18 @@ public class TaskAssignees {
     public TaskAssignees() {
     }
 
-    public TaskAssignees(int id_task_assignees, ProjectUser projectUser, Tasks task) {
-        this.id_task_assignees = id_task_assignees;
+    public TaskAssignees(int idTaskAssignees, ProjectUser projectUser, Tasks task) {
+        this.idTaskAssignees = idTaskAssignees;
         this.projectUser = projectUser;
         this.task = task;
     }
 
     public int getIdTaskAssignees() {
-        return id_task_assignees;
+        return idTaskAssignees;
     }
 
     public void setIdTaskAssignees(int idTaskAssignees) {
-        this.id_task_assignees = idTaskAssignees;
+        this.idTaskAssignees = idTaskAssignees;
     }
 
     public ProjectUser getProjectUser() {
@@ -59,7 +59,7 @@ public class TaskAssignees {
     @Override
     public String toString() {
         return "TaskAssignees{" +
-                "id_task_assignees=" + id_task_assignees +
+                "idTaskAssignees=" + idTaskAssignees +
                 ", projectUser=" + (projectUser != null ? projectUser.getIdProjectUser() : null) +
                 ", task=" + (task != null ? task.getId() : null) +
                 '}';

@@ -10,7 +10,7 @@ public class TimeLogs {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_TIME_LOGS")
-    private int id_time_logs;
+    private int idTimeLogs;
 
     // Relación ManyToOne con TaskAssignees
     @ManyToOne(fetch = FetchType.LAZY)
@@ -18,27 +18,27 @@ public class TimeLogs {
     private TaskAssignees taskAssignees;
 
     @Column(name = "START_TS")
-    private LocalDateTime start_ts;
+    private LocalDateTime startTs;
 
     @Column(name = "END_TS")
-    private LocalDateTime end_ts;
+    private LocalDateTime endTs;
 
     public TimeLogs() {
     }
 
-    public TimeLogs(int id_time_logs, TaskAssignees taskAssignees, LocalDateTime start_ts, LocalDateTime end_ts) {
-        this.id_time_logs = id_time_logs;
+    public TimeLogs(int idTimeLogs, TaskAssignees taskAssignees, LocalDateTime startTs, LocalDateTime endTs) {
+        this.idTimeLogs = idTimeLogs;
         this.taskAssignees = taskAssignees;
-        this.start_ts = start_ts;
-        this.end_ts = end_ts;
+        this.startTs = startTs;
+        this.endTs = endTs;
     }
 
     public int getIdTimeLogs() {
-        return id_time_logs;
+        return idTimeLogs;
     }
 
     public void setIdTimeLogs(int idTimeLogs) {
-        this.id_time_logs = idTimeLogs;
+        this.idTimeLogs = idTimeLogs;
     }
 
     public TaskAssignees getTaskAssignees() {
@@ -50,28 +50,28 @@ public class TimeLogs {
     }
 
     public LocalDateTime getStartTs() {
-        return start_ts;
+        return startTs;
     }
 
-    public void setStartTs(LocalDateTime start_ts) {
-        this.start_ts = start_ts;
+    public void setStartTs(LocalDateTime startTs) {
+        this.startTs = startTs;
     }
 
     public LocalDateTime getEndTs() {
-        return end_ts;
+        return endTs;
     }
 
-    public void setEndTs(LocalDateTime end_ts) {
-        this.end_ts = end_ts;
+    public void setEndTs(LocalDateTime endTs) {
+        this.endTs = endTs;
     }
 
     @Override
     public String toString() {
         return "TimeLogs{" +
-                "id_time_logs=" + id_time_logs +
+                "idTimeLogs=" + idTimeLogs +
                 ", taskAssignees=" + taskAssignees.getIdTaskAssignees() +
-                ", start_ts=" + start_ts +
-                ", end_ts=" + end_ts +
+                ", startTs=" + startTs +
+                ", endTs=" + endTs +
                 '}';
     }
 }

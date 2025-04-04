@@ -2,6 +2,7 @@
 package com.springboot.MyTodoList.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.springboot.MyTodoList.dto.SimplifiedTaskDTO;
 import com.springboot.MyTodoList.model.Tasks;
 import com.springboot.MyTodoList.service.TasksService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -77,4 +79,25 @@ public class TasksController {
         List<Tasks> tasks = tasksService.getTasksBySprint(sprintId);
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
+
+
+    // Get unassigned tasks by sprint ID
+    @GetMapping("/unassigned/{sprintId}")
+    public ResponseEntity<List<SimplifiedTaskDTO>> getSimpleUnassignedTasksBySprint(@PathVariable int sprintId) {
+    List<Tasks> tasks = tasksService.getUnassignedTasksBySprint(sprintId);
+    
+    List<SimplifiedTaskDTO> result = tasks.stream()
+        .map(task -> new SimplifiedTaskDTO(
+            task.getId(),
+            task.getName(),
+            task.getStatus(),
+            task.getDescription(),
+            task.getStoryPoints(),
+            task.getDeadline(),
+            task.getEstimatedHours()
+        ))
+        .collect(Collectors.toList());
+    
+    return ResponseEntity.ok(result);
+}
 }

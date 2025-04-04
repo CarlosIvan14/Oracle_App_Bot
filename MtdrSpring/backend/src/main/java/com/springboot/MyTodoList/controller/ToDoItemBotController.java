@@ -1,5 +1,6 @@
 package com.springboot.MyTodoList.controller;
 
+import com.springboot.MyTodoList.dto.SimplifiedTaskDTO;
 import com.springboot.MyTodoList.model.*;
 import com.springboot.MyTodoList.service.ProjectsServiceBot;
 import com.springboot.MyTodoList.service.SprintsServiceBot;
@@ -19,8 +20,11 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
@@ -48,7 +52,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     private final String botToken;
 
     private enum Flow {
-        NONE, LOGIN, ADD_SPRINT, ADD_TASK, ADD_USER, TASK_COMPLETE
+        NONE, LOGIN, ADD_SPRINT, ADD_TASK, ADD_USER, TASK_COMPLETE, ASSIGN_TASK
     }
 
     /**
@@ -72,6 +76,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         private LocalDate taskDeadline;
         private Integer taskStoryPoints;
         private Double taskEstimatedHours;
+        public Integer taskToAssignId;
         // Agrega los campos para Telegram
         private Long telegramId;
         private String phoneNumber;
@@ -118,8 +123,23 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             state.telegramId = telegramId;
             // En este caso, el phoneNumber podría quedar vacío o podrías solicitarlo en otro paso
         }
+        // Si el usuario comparte su contacto, lo capturamos
+        if (update.getMessage().hasContact()) {
+            Long telegramId = update.getMessage().getContact().getUserId();
+            String phoneNumber = update.getMessage().getContact().getPhoneNumber();
+            // Aquí puedes guardar estos datos en el estado para usarlos en el login o actualizar el usuario
+            state.telegramId = telegramId; // agrega un campo en BotConversationState si lo requieres
+            state.phoneNumber = phoneNumber;
+            logger.info("Contacto compartido: Telegram ID: {}, Phone Number: {}", telegramId, phoneNumber);
+        } else {
+            // Si no se comparte el contacto, siempre puedes capturar el id de Telegram del remitente
+            Long telegramId = update.getMessage().getFrom().getId();
+            state.telegramId = telegramId;
+            // En este caso, el phoneNumber podría quedar vacío o podrías solicitarlo en otro paso
+        }
         // Comandos especiales
         if (messageText.equalsIgnoreCase("/start")) {
+            startLoginFlow(chatId, state, update);
             startLoginFlow(chatId, state, update);
             return;
         }
@@ -177,6 +197,21 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             startAddTaskFlow(chatId, state);
             return;
         }
+
+        // Add this with your other command handlers
+        if (messageText.startsWith("👤 ASSIGN-")) {
+            int taskId = Integer.parseInt(messageText.replace("👤 ASSIGN-", ""));
+            state.flow = Flow.ASSIGN_TASK;
+            state.taskToAssignId = taskId;
+            state.step = 1;
+            
+            // Get the current sprint ID from state or message context
+            int sprintId = state.currentSprintId; // You'll need to track this
+            
+            // Show users available for assignment
+            //showUsersForAssignment(chatId, sprintId);
+            return;
+        }
         // Navegación: volver a Proyectos o Sprints
         if (handleNavigation(chatId, messageText, state)) return;
 
@@ -197,6 +232,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         }
 
     }
+
     private void updateSprintStatus(long chatId, int sprintId, String newStatus) {
         try {
             Map<String, Object> updates = new HashMap<>();
@@ -213,7 +249,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             sendMsg(chatId, "Error al actualizar el sprint.", false);
         }
         // Refrescar la lista de sprints
-        boolean isManager = isManager(conversationStates.get(chatId).loggedUser.getIdUser(), conversationStates.get(chatId).currentProjectId);
+        boolean isManager =  userRoleServiceBot.isManagerInProject(conversationStates.get(chatId).currentProjectId, conversationStates.get(chatId).loggedUser.getIdUser());
         showSprintsForProject(chatId, conversationStates.get(chatId).currentProjectId, isManager);
     }
     
@@ -680,10 +716,13 @@ private void createAndSendTask(long chatId, BotConversationState state) {
         List<TaskAssignees> taskAssignments = taskServiceBot.getUserTaskAssignments(sprintId, projectUserId);
     
         List<Tasks> tasks = taskAssignments.stream()
-        .map(TaskAssignees::getTask)
-        .collect(Collectors.toList());
-    
-        // Filtrar tareas por estado
+            .map(TaskAssignees::getTask)
+            .collect(Collectors.toList());
+
+        // Fetch unassigned tasks using the new service
+        List<SimplifiedTaskDTO> unassignedTasks = taskServiceBot.getUnassignedTasksBySprint(sprintId);
+
+        // Filter tasks by status (existing code)
         List<Tasks> assigned = tasks.stream()
                 .filter(t -> "ASSIGNED".equalsIgnoreCase(t.getStatus()))
                 .collect(Collectors.toList());
@@ -693,11 +732,12 @@ private void createAndSendTask(long chatId, BotConversationState state) {
         List<Tasks> completed = tasks.stream()
                 .filter(t -> "COMPLETED".equalsIgnoreCase(t.getStatus()))
                 .collect(Collectors.toList());
-    
+
         ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
         keyboard.setResizeKeyboard(true);
         List<KeyboardRow> rows = new ArrayList<>();
-        // Dentro de listTasksForSprint(), antes de mostrar las tareas:
+        
+        // Navigation buttons (existing code)
         KeyboardRow reportRow = new KeyboardRow();
         reportRow.add("📊 Reports");
         rows.add(reportRow);
@@ -709,8 +749,19 @@ private void createAndSendTask(long chatId, BotConversationState state) {
         KeyboardRow addTaskRow = new KeyboardRow();
         addTaskRow.add("➕ Add Task");
         rows.add(addTaskRow);
-    
-        // Assigned Section
+
+        // ===== NEW SECTION: UNASSIGNED TASKS =====
+        if (!unassignedTasks.isEmpty()) {
+            rows.add(createTitleRow("==📭 NO ASIGNADAS 📭=="));
+            unassignedTasks.forEach(task -> {
+                KeyboardRow row = new KeyboardRow();
+                row.add(task.getDescription() + " [ID: " + task.getId() + "]");
+                row.add("👤 ASSIGN-" + task.getId());
+                rows.add(row);
+            });
+        }
+
+        // Existing sections (assigned, in progress, completed)
         if (!assigned.isEmpty()) {
             rows.add(createTitleRow("==📥 ASIGNADAS 📥=="));
             assigned.forEach(task -> {
@@ -720,8 +771,7 @@ private void createAndSendTask(long chatId, BotConversationState state) {
                 rows.add(row);
             });
         }
-    
-        // In Progress Section
+
         if (!inProgress.isEmpty()) {
             rows.add(createTitleRow("==⏳ EN PROGRESO ⏳=="));
             inProgress.forEach(task -> {
@@ -732,8 +782,7 @@ private void createAndSendTask(long chatId, BotConversationState state) {
                 rows.add(row);
             });
         }
-    
-        // Completed Section
+
         if (!completed.isEmpty()) {
             rows.add(createTitleRow("==✅ COMPLETADAS ✅=="));
             completed.forEach(task -> {
@@ -743,14 +792,14 @@ private void createAndSendTask(long chatId, BotConversationState state) {
                 rows.add(row);
             });
         }
-    
+
         keyboard.setKeyboard(rows);
-    
+
         SendMessage msg = new SendMessage();
         msg.setChatId(chatId);
         msg.setText("Tablero del Sprint " + sprintId);
         msg.setReplyMarkup(keyboard);
-    
+
         try {
             execute(msg);
         } catch (TelegramApiException e) {
@@ -782,10 +831,15 @@ private void createAndSendTask(long chatId, BotConversationState state) {
         if (users != null && users.length > 0) {
             for (OracleUser user : users) {
                 reportMsg.append("- ").append(user.getName()).append(":\n");
+
+                Integer projectUserId = taskCreationServiceBot.getProjectUserId(
+                            state.currentProjectId,
+                            user.getIdUser()
+                        );
     
                 // 2. Consultar las tareas completadas para cada usuario en el sprint actual.
                 // Se asume que el endpoint creado a continuación devuelve la lista de TaskAssignees
-                String urlCompleted = baseUrl + "/api/task-assignees/user/" + user.getIdUser() + "/sprint/" + state.currentSprintId + "/done";
+                String urlCompleted = baseUrl + "/api/task-assignees/user/" + projectUserId + "/sprint/" + state.currentSprintId + "/done";
                 ResponseEntity<TaskAssignees[]> respTasks = restTemplate.getForEntity(urlCompleted, TaskAssignees[].class);
                 TaskAssignees[] tasks = respTasks.getBody();
     
@@ -912,7 +966,7 @@ private void createAndSendTask(long chatId, BotConversationState state) {
                 sb.append("No hay usuarios asignados al proyecto.");
             }
             // Solo si el usuario es manager se muestra "➕ Agregar Usuario"
-            boolean isManager = isManager(conversationStates.get(chatId).loggedUser.getIdUser(), projectId);
+            boolean isManager = userRoleServiceBot.isManagerInProject(projectId, conversationStates.get(chatId).loggedUser.getIdUser());
             ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
             keyboard.setResizeKeyboard(true);
             List<KeyboardRow> rows = new ArrayList<>();
@@ -952,6 +1006,7 @@ private void createAndSendTask(long chatId, BotConversationState state) {
             logger.error("Error en logoutUser", e);
         }
     }
+
     private boolean handleNavigation(long chatId, String messageText, BotConversationState state) {
         // Fíjate bien en los textos de los botones que creas
         if (messageText.equals("⬅️ Volver a Proyectos") || messageText.equals("⬅️ Regresar a Proyectos")) {
@@ -960,12 +1015,13 @@ private void createAndSendTask(long chatId, BotConversationState state) {
         }
         // Usa el mismo texto que pones en la ReplyKeyboard para la Sprints
         if (messageText.equals("⬅️ Volver a Sprints")) {
-            boolean isManager = isManager(state.loggedUser.getIdUser(), state.currentProjectId);
+            boolean isManager = userRoleServiceBot.isManagerInProject(state.currentProjectId, state.loggedUser.getIdUser());
             showSprintsForProject(chatId, state.currentProjectId, isManager);
             return true;
         }
         return false;
     }
+
     private void resetFlow(BotConversationState state) {
         state.flow = Flow.NONE;
         state.step = 0;
@@ -1062,30 +1118,4 @@ private void createAndSendTask(long chatId, BotConversationState state) {
             logger.error("Error en addUserToProject", e);
         }
     }
-    
-    // --------------------------
-    // Método isManager: verifica si un usuario es manager en un proyecto.
-    // --------------------------
-    private boolean isManager(int userId, int projectId) {
-        try {
-            String url = baseUrl + "/api/project-users";
-            ResponseEntity<ProjectUser[]> resp = restTemplate.getForEntity(url, ProjectUser[].class);
-            if (resp.getBody() != null) {
-                for (ProjectUser pu : resp.getBody()) {
-                    if (pu.getUser() != null 
-                        && pu.getUser().getIdUser() == userId 
-                        && pu.getProject() != null 
-                        && pu.getProject().getIdProject() == projectId 
-                        && pu.getRoleUser() != null 
-                        && pu.getRoleUser().trim().equalsIgnoreCase("manager")) {
-                        return true;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Error en isManager", e);
-        }
-        return true;
-    }
-
 }

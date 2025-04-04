@@ -75,4 +75,9 @@ public class TasksService {
     public List<Tasks> getTasksBySprint(int sprintId) {
         return tasksRepository.findBySprintId(sprintId);
     }
+
+        // Get all unassigned tasks for a sprint
+        public List<Tasks> getUnassignedTasksBySprint(int sprintId) {
+            return tasksRepository.findUnassignedTasksBySprint(sprintId);
+        }
 }

@@ -18,6 +18,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.springboot.MyTodoList.dto.SimplifiedTaskDTO;
 import com.springboot.MyTodoList.model.TaskAssignees; // Import the correct model
 
 @Service
@@ -64,4 +65,21 @@ public class TaskServiceBot {
     
         logger.info("Task update response status: {}", response.getStatusCode());
     }
+
+    public List<SimplifiedTaskDTO> getUnassignedTasksBySprint(int sprintId) {
+        String url = apiBaseUrl + "/tasks/unassigned/" + sprintId;
+        
+        logger.info("Fetching simplified unassigned tasks for sprint {} from: {}", sprintId, url);
+
+        ResponseEntity<List<SimplifiedTaskDTO>> response = restTemplate.exchange(
+            url,
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<List<SimplifiedTaskDTO>>() {}
+        );
+
+        return response.getBody();
+    }
+
+    
 }
