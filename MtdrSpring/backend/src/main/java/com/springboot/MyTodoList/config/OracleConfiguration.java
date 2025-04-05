@@ -45,7 +45,7 @@ public class OracleConfiguration {
         logger.info("Using URL: " + dbSettings.getUrl());
         ds.setUser(dbSettings.getUsername());
         logger.info("Using Username: " + dbSettings.getUsername());
-        ds.setPassword(dbSettings.getPassword());
-        return ds; */
+        ds.setPassword(dbSettings.getPassword()); */
+        return ds;
     }
 }
