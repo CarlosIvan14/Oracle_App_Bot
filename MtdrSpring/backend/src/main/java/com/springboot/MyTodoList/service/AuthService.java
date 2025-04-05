@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class AuthService {
     private final RestTemplate restTemplate;
-    private final String apiBaseUrl = "http://localhost:8081/api";
+    private final String apiBaseUrl = "http://159.54.153.189/api";
 
     @Autowired
     public AuthService(RestTemplateBuilder restTemplateBuilder) {

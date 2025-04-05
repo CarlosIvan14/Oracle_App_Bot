@@ -26,7 +26,7 @@ public class TaskServiceBot {
     private static final Logger logger = LoggerFactory.getLogger(TaskServiceBot.class);
     
     private final RestTemplate restTemplate;
-    private final String apiBaseUrl = "http://localhost:8081/api";
+    private final String apiBaseUrl = "http://159.54.153.189/api";
 
     @Autowired
     public TaskServiceBot(RestTemplateBuilder restTemplateBuilder) {

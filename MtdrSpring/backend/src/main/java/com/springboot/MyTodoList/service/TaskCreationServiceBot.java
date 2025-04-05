@@ -16,7 +16,7 @@ import javax.persistence.PersistenceContext;
 @Service
 public class TaskCreationServiceBot {
     private final RestTemplate restTemplate;
-    private final String apiBaseUrl = "http://localhost:8081/api";
+    private final String apiBaseUrl = "http://159.54.153.189/api";
     private final UserRoleServiceBot userRoleService;
 
     @PersistenceContext

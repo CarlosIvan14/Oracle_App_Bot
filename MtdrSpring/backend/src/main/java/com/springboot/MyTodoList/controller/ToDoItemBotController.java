@@ -46,7 +46,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     private final TaskServiceBot taskServiceBot;
     private final TaskCreationServiceBot taskCreationServiceBot;
     private final UserRoleServiceBot userRoleServiceBot;
-    private final String baseUrl = "http://localhost:8081";
+    private final String baseUrl = "http://159.54.153.189";
     private final RestTemplate restTemplate;
     private final String botName;
     private final String botToken;
