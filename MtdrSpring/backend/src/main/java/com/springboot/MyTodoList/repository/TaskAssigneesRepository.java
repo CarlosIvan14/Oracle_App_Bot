@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.springboot.MyTodoList.model.TaskAssignees;
+import com.springboot.MyTodoList.model.Tasks;
 
 @Repository
 public interface TaskAssigneesRepository extends JpaRepository<TaskAssignees, Integer> {
@@ -26,7 +27,7 @@ public interface TaskAssigneesRepository extends JpaRepository<TaskAssignees, In
     long countDoneTasksByProjectUserAndSprint(int projectUserId, int sprintId);
 
     @Query("select ta from TaskAssignees ta where ta.projectUser.idProjectUser = ?1 and ta.task.sprint.id = ?2 and ta.task.status = 'COMPLETED'")
-    List<TaskAssignees> findCompletedTasksByProjectUserAndSprint(int projectUserId, int sprintId);
+    List<Tasks> findCompletedTasksByProjectUserAndSprint(int projectUserId, int sprintId);
 
     // TODO: Correct Queries from R02-R06
     
@@ -41,23 +42,23 @@ public interface TaskAssigneesRepository extends JpaRepository<TaskAssignees, In
         "where ta.projectUser.idProjectUser = ?1 " +
         "and ta.task.completionDate >= ?2 and ta.task.completionDate < ?3 " +
         "and ta.task.status = 'COMPLETED'")
-    List<TaskAssignees> findCompletedTasksByProjectUserAndDateRange(int projectUserId, LocalDateTime from, LocalDateTime to);
+    List<Tasks> findCompletedTasksByProjectUserAndDateRange(int projectUserId, LocalDateTime from, LocalDateTime to);
 
     // R04: Team-Sprint reports
     @Query("select count(ta) from TaskAssignees ta where ta.task.sprint.id = ?1 and ta.task.status = 'COMPLETED'")
     long countDoneTasksByTeamAndSprint(int sprintId);
     
     @Query("select count(ta) from TaskAssignees ta where ta.task.sprint.id = ?1 and ta.task.status = 'COMPLETED'")
-    List<TaskAssignees> findCompletedTasksByTeamAndSprint(int sprintId);
+    List<Tasks> findCompletedTasksByTeamAndSprint(int sprintId);
 
     // R05 y R06: Team-Week reports
     @Query("select count(ta) from TaskAssignees ta " +
         "where ta.task.completionDate >= ?1 and ta.task.completionDate < ?2 " +
         "and ta.task.status = 'COMPLETED'")
-    long countDoneTasksByTeamAndDateRange(LocalDateTime from, LocalDateTime to);
+    long countDoneTasksByTeamAndDateRange(int projectId, LocalDateTime from, LocalDateTime to);
     
     @Query("select ta from TaskAssignees ta " +
         "where ta.task.completionDate >= ?1 and ta.task.completionDate < ?2 " +
         "and ta.task.status = 'COMPLETED'")
-    List<TaskAssignees> findCompletedTasksByTeamAndDateRange(LocalDateTime from, LocalDateTime to);
+    List<Tasks> findCompletedTasksByTeamAndDateRange(int projectId, LocalDateTime from, LocalDateTime to);
 }
