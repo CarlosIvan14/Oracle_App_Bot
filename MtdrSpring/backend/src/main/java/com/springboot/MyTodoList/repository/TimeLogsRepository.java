@@ -14,4 +14,8 @@ public interface TimeLogsRepository extends JpaRepository<TimeLogs, Integer> {
     // Fetch timelogs by taskAssignee ID.
     @Query("SELECT tl FROM TimeLogs tl WHERE tl.taskAssignees.id = :taskAssigneeId")
     List<TimeLogs> findByTaskAssigneeID(@Param("taskAssigneeId") int taskAssigneeId);
+
+    // Fetch timelogs by taskAssignee ID Array.
+    @Query("SELECT tl FROM TimeLogs tl WHERE tl.taskAssignees.id IN :taskAssigneeIds")
+    List<TimeLogs> findByTaskAssigneeIds(@Param("taskAssigneeIds") List<Integer> taskAssigneeIds);
 }

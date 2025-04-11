@@ -71,4 +71,23 @@ public class TimeLogsService {
         return timeLogsRepository.findByTaskAssigneeID(taskAssigneeId);
     }
 
+    // Método para obtener todos los timeLogs de un arreglo de taskAssignees.
+    public List<TimeLogs> getTimeLogsByTaskAssignees(List<Integer> taskAssigneeIdArray) {
+        return timeLogsRepository.findByTaskAssigneeIds(taskAssigneeIdArray);
+    }
+
+    // Método para obtener el realtime en conjunto de un arreglo de taskAssignees.
+    public Long getRealTimeSumByTaskAssignees(List<Integer> taskAssigneeIdArray) {
+        List<TimeLogs> timeLogs = timeLogsRepository.findByTaskAssigneeIds(taskAssigneeIdArray);
+    
+        return timeLogs.stream()
+            .map(timeLog -> {
+                if (timeLog.getStartTs() != null && timeLog.getEndTs() != null) {
+                    return java.time.Duration.between(timeLog.getStartTs(), timeLog.getEndTs()).toHours();
+                } else {
+                    return 0L;
+                }
+            })
+            .reduce(0L, Long::sum);
+    }    
 }
