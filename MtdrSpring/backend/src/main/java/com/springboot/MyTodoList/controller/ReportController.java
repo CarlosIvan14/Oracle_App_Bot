@@ -87,14 +87,14 @@ public class ReportController {
     }
 
     // R04: tareas completadas por equipo en sprint
-    @GetMapping("/team-sprint/{sprintId}/count")
+    @GetMapping("/team-sprint/{sprintId}/tasks-done/count")
     public ResponseEntity<Long> getDoneTasksCountByTeamAndSprint(
             @PathVariable int sprintId) {
         long count = taskAssigneesService.getCountDoneTasksByTeamAndSprint(sprintId);
         return new ResponseEntity<>(count, HttpStatus.OK);
     }
 
-    @GetMapping("/team-sprint/{sprintId}")
+    @GetMapping("/team-sprint/{sprintId}/tasks-done")
     public ResponseEntity<List<Tasks>> getCompletedTasksByTeamAndSprint(
             @PathVariable int sprintId) {
         List<Tasks> tasks = taskAssigneesService.getCompletedTasksByTeamAndSprint(sprintId);
@@ -203,47 +203,59 @@ public class ReportController {
     }
 
     // R10: horas reales por equipo en sprint
-    // @GetMapping("/team/{teamId}/sprint/{sprintId}/hours/count")
-    // public ResponseEntity<Long> getRealHoursCountByTeamAndSprint(
-    //         @PathVariable int teamId, @PathVariable int sprintId) {
-    //     long count = taskAssigneesService.getRealHoursCountByTeamAndSprint(teamId, sprintId);
-    //     return new ResponseEntity<>(count, HttpStatus.OK);
-    // }
+    @GetMapping("/team-sprint/{sprintId}/real-hours")
+    public ResponseEntity<Long> getRealHoursByTeamAndSprint(
+            @PathVariable int sprintId) {
+        long realHours = timeLogsService.getRealHoursByTeamAndSprint(sprintId);
+        return new ResponseEntity<>(realHours, HttpStatus.OK);
+    }
 
-    // @GetMapping("/team/{teamId}/sprint/{sprintId}/hours")
-    // public ResponseEntity<List<TaskAssignees>> getRealHoursByTeamAndSprint(
-    //         @PathVariable int teamId, @PathVariable int sprintId) {
-    //     List<TaskAssignees> taskAssignees = taskAssigneesService.getRealHoursByTeamAndSprint(teamId, sprintId);
-    //     return new ResponseEntity<>(taskAssignees, HttpStatus.OK);
-    // }
+    @GetMapping("/team-sprint/{sprintId}/time-logs")
+    public ResponseEntity<List<TimeLogs>> getTimeLogsByTeamAndSprint(
+            @PathVariable int sprintId) {
+        List<TimeLogs> timeLogs = timeLogsService.getTimeLogsByTeamAndSprint(sprintId);
+        return new ResponseEntity<>(timeLogs, HttpStatus.OK);
+    }
 
     // // R11: horas reales por equipo en semana
-    // @GetMapping("/team/{teamId}/week/{week}/hours/count")
-    // public ResponseEntity<Long> getRealHoursCountByTeamAndWeek(
-    //         @PathVariable int teamId, @PathVariable int week) {
-    //     long count = taskAssigneesService.getRealHoursCountByTeamAndWeek(teamId, week);
-    //     return new ResponseEntity<>(count, HttpStatus.OK);
-    // }
+    @GetMapping("/team-week/{date}/{projectId}/real-hours")
+    public ResponseEntity<Long> getRealHoursByTeamAndWeek(
+            @PathVariable int projectId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate from = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate to = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        long realHours = timeLogsService.getRealHoursByTeamByDateRange(projectId, from, to);
+        return new ResponseEntity<>(realHours, HttpStatus.OK);
+    }
 
-    // @GetMapping("/team/{teamId}/week/{week}/hours")
-    // public ResponseEntity<List<TaskAssignees>> getRealHoursByTeamAndWeek(
-    //         @PathVariable int teamId, @PathVariable int week) {
-    //     List<TaskAssignees> taskAssignees = taskAssigneesService.getRealHoursByTeamAndWeek(teamId, week);
-    //     return new ResponseEntity<>(taskAssignees, HttpStatus.OK);
-    // }
+    @GetMapping("/team-week/{date}/{projectId}/time-logs")
+    public ResponseEntity<List<TimeLogs>> getTimeLogsByTeamAndWeek(
+            @PathVariable int projectId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate from = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate to = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        List<TimeLogs> timeLogs = timeLogsService.getTimeLogsByTeamByDateRange(projectId, from, to);
+        return new ResponseEntity<>(timeLogs, HttpStatus.OK);
+    }
 
-    // // R12: horas reales por equipo en mes
-    // @GetMapping("/team/{teamId}/month/{month}/hours/count")
-    // public ResponseEntity<Long> getRealHoursCountByTeamAndMonth(
-    //         @PathVariable int teamId, @PathVariable int month) {
-    //     long count = taskAssigneesService.getRealHoursCountByTeamAndMonth(teamId, month);
-    //     return new ResponseEntity<>(count, HttpStatus.OK);
-    // }
+    // R12: horas reales por equipo en mes
+    @GetMapping("/team-month/{date}/{projectId}/real-hours")
+    public ResponseEntity<Long> getRealHoursByTeamAndMonth(
+            @PathVariable int projectId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate from = date.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate to = date.with(TemporalAdjusters.lastDayOfMonth());
+        long realHours = timeLogsService.getRealHoursByTeamByDateRange(projectId, from, to);
+        return new ResponseEntity<>(realHours, HttpStatus.OK);
+    }
 
-    // @GetMapping("/team/{teamId}/month/{month}/hours")
-    // public ResponseEntity<List<TaskAssignees>> getRealHoursByTeamAndMonth(
-    //         @PathVariable int teamId, @PathVariable int month) {
-    //     List<TaskAssignees> taskAssignees = taskAssigneesService.getRealHoursByTeamAndMonth(teamId, month);
-    //     return new ResponseEntity<>(taskAssignees, HttpStatus.OK);
-    // }
+    @GetMapping("/team-month/{date}/{projectId}/tasks-done")
+    public ResponseEntity<List<TimeLogs>> getTimeLogsByTeamAndMonth(
+            @PathVariable int projectId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate from = date.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate to = date.with(TemporalAdjusters.lastDayOfMonth());
+        List<TimeLogs> timeLogs = timeLogsService.getTimeLogsByTeamByDateRange(projectId, from, to);
+        return new ResponseEntity<>(timeLogs, HttpStatus.OK);
+    }
 }
