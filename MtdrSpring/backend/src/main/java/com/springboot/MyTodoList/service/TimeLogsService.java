@@ -1,6 +1,7 @@
 package com.springboot.MyTodoList.service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,4 +91,57 @@ public class TimeLogsService {
             })
             .reduce(0L, Long::sum);
     }    
+
+    // HELPER
+    public long getRealHoursByTimeLogs(List<TimeLogs> timeLogs) {
+        return timeLogs.stream()
+            .map(timeLog -> {
+                if (timeLog.getStartTs() != null && timeLog.getEndTs() != null) {
+                    return java.time.Duration.between(timeLog.getStartTs(), timeLog.getEndTs()).toHours();
+                } else {
+                    return 0L;
+                }
+            })
+            .reduce(0L, Long::sum);
+    }
+
+    // timelogs-user-sprint methods (R07)
+    public long getRealHoursByUserAndSprint(int projectUserId, int sprintId) {
+        List<TimeLogs> timeLogs = timeLogsRepository.findTimeLogsByProjectUserAndSprint(projectUserId, sprintId);
+        return getRealHoursByTimeLogs(timeLogs);
+    }
+    
+    public List<TimeLogs> getTimeLogsByUserAndSprint(int projectUserId, int sprintId) {
+        return timeLogsRepository.findTimeLogsByProjectUserAndSprint(projectUserId, sprintId);
+    }
+
+    // timelogs-user-daterange methods (R08 y R09)
+    public long getRealHoursByUserByDateRange(int projectUserId, LocalDate from, LocalDate to) {
+        List<TimeLogs> timeLogs = timeLogsRepository.findTimeLogsByProjectUserAndDateRange(projectUserId, from.atStartOfDay(), to.plusDays(1).atStartOfDay());
+        return getRealHoursByTimeLogs(timeLogs);
+    }
+    
+    public List<TimeLogs> getTimeLogsByUserByDateRange(int projectUserId, LocalDate from, LocalDate to) {
+        return timeLogsRepository.findTimeLogsByProjectUserAndDateRange(projectUserId, from.atStartOfDay(), to.plusDays(1).atStartOfDay());
+    }
+
+    // timelogs-team-sprint methods (R10)
+    public long getRealHoursByTeamAndSprint(int sprintId) {
+        List<TimeLogs> timeLogs =  timeLogsRepository.findTimeLogsByTeamAndSprint(sprintId);
+        return getRealHoursByTimeLogs(timeLogs);
+    }
+    
+    public List<TimeLogs> getTimeLogsByTeamAndSprint(int sprintId) {
+        return timeLogsRepository.findTimeLogsByTeamAndSprint(sprintId);
+    }
+
+    // timelogs-team-daterange methods (R11 y R12)
+    public long getRealHoursByTeamByDateRange(int projectId, LocalDate from, LocalDate to) {
+        List<TimeLogs> timeLogs = timeLogsRepository.findTimeLogsByTeamAndDateRange(projectId, from.atStartOfDay(), to.plusDays(1).atStartOfDay());
+        return getRealHoursByTimeLogs(timeLogs);
+    }
+    
+    public List<TimeLogs> getTimeLogsByTeamByDateRange(int projectId, LocalDate from, LocalDate to) {
+        return timeLogsRepository.findTimeLogsByTeamAndDateRange(projectId, from.atStartOfDay(), to.plusDays(1).atStartOfDay());
+    }
 }

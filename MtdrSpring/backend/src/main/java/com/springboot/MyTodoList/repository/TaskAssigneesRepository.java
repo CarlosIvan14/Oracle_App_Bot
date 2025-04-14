@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.springboot.MyTodoList.model.TaskAssignees;
-import com.springboot.MyTodoList.model.Tasks;
 
 @Repository
 public interface TaskAssigneesRepository extends JpaRepository<TaskAssignees, Integer> {
@@ -23,42 +23,61 @@ public interface TaskAssigneesRepository extends JpaRepository<TaskAssignees, In
     // Reportes de tasks.
 
     // R01: User-Sprint reports: obtener el count de tareas con status "COMPLETED"
+    // FLOW: projectUserId+sprintId ->  -> count(done tasks)
     @Query("select count(ta) from TaskAssignees ta where ta.projectUser.idProjectUser = ?1 and ta.task.sprint.id = ?2 and ta.task.status = 'COMPLETED'")
     long countDoneTasksByProjectUserAndSprint(int projectUserId, int sprintId);
 
     @Query("select ta from TaskAssignees ta where ta.projectUser.idProjectUser = ?1 and ta.task.sprint.id = ?2 and ta.task.status = 'COMPLETED'")
-    List<Tasks> findCompletedTasksByProjectUserAndSprint(int projectUserId, int sprintId);
-
-    // TODO: Correct Queries from R02-R06
+    List<TaskAssignees> findCompletedTasksByProjectUserAndSprint(int projectUserId, int sprintId);
     
     // R02 y R03: User-From-To reports using completion date between start and end
-    @Query("select count(ta) from TaskAssignees ta " +
-        "where ta.projectUser.idProjectUser = ?1 " +
-        "and ta.task.completionDate >= ?2 and ta.task.completionDate < ?3 " +
-        "and ta.task.status = 'COMPLETED'")
-    long countDoneTasksByProjectUserAndDateRange(int projectUserId, LocalDateTime from, LocalDateTime to);
+    @Query("SELECT COUNT(ta) FROM TaskAssignees ta " +
+       "WHERE ta.projectUser.idProjectUser = :projectUserId " +
+       "AND ta.task.status = 'COMPLETED' " +
+       "AND ta.task.deadline >= :from " +
+       "AND ta.task.deadline < :to")
+    long countDoneTasksByProjectUserAndDateRange(
+        @Param("projectUserId") int projectUserId,
+        @Param("from") LocalDateTime from,
+        @Param("to") LocalDateTime to);
 
-    @Query("select ta from TaskAssignees ta " +
-        "where ta.projectUser.idProjectUser = ?1 " +
-        "and ta.task.completionDate >= ?2 and ta.task.completionDate < ?3 " +
-        "and ta.task.status = 'COMPLETED'")
-    List<Tasks> findCompletedTasksByProjectUserAndDateRange(int projectUserId, LocalDateTime from, LocalDateTime to);
-
+    @Query("SELECT ta FROM TaskAssignees ta " +
+        "WHERE ta.projectUser.idProjectUser = :projectUserId " +
+        "AND ta.task.status = 'COMPLETED' " +
+        "AND ta.task.deadline >= :from " +
+        "AND ta.task.deadline < :to")
+    List<TaskAssignees> findCompletedTasksByProjectUserAndDateRange(
+        @Param("projectUserId") int projectUserId,
+        @Param("from") LocalDateTime from,
+        @Param("to") LocalDateTime to);
+ 
     // R04: Team-Sprint reports
-    @Query("select count(ta) from TaskAssignees ta where ta.task.sprint.id = ?1 and ta.task.status = 'COMPLETED'")
-    long countDoneTasksByTeamAndSprint(int sprintId);
+    @Query("SELECT COUNT(ta) FROM TaskAssignees ta " +
+       "WHERE ta.task.sprint.id = :sprintId " +
+       "AND ta.task.status = 'COMPLETED'")
+    long countDoneTasksByTeamAndSprint(@Param("sprintId") int sprintId);
     
-    @Query("select count(ta) from TaskAssignees ta where ta.task.sprint.id = ?1 and ta.task.status = 'COMPLETED'")
-    List<Tasks> findCompletedTasksByTeamAndSprint(int sprintId);
+    @Query("SELECT ta FROM TaskAssignees ta " +
+       "WHERE ta.task.sprint.id = :sprintId " +
+       "AND ta.task.status = 'COMPLETED'")
+    List<TaskAssignees> findCompletedTasksByTeamAndSprint(@Param("sprintId") int sprintId);
 
     // R05 y R06: Team-Week reports
-    @Query("select count(ta) from TaskAssignees ta " +
-        "where ta.task.completionDate >= ?1 and ta.task.completionDate < ?2 " +
-        "and ta.task.status = 'COMPLETED'")
-    long countDoneTasksByTeamAndDateRange(int projectId, LocalDateTime from, LocalDateTime to);
-    
-    @Query("select ta from TaskAssignees ta " +
-        "where ta.task.completionDate >= ?1 and ta.task.completionDate < ?2 " +
-        "and ta.task.status = 'COMPLETED'")
-    List<Tasks> findCompletedTasksByTeamAndDateRange(int projectId, LocalDateTime from, LocalDateTime to);
+    @Query("SELECT COUNT(ta) FROM TaskAssignees ta " +
+       "WHERE ta.task.status = 'COMPLETED' " +
+       "AND ta.task.sprint.project.idProject = :projectId " +
+       "AND ta.task.deadline >= :from AND ta.task.deadline < :to")
+    long countDoneTasksByTeamAndDateRange(
+       @Param("projectId") int projectId,
+       @Param("from") LocalDateTime from,
+       @Param("to") LocalDateTime to);
+
+       @Query("SELECT ta FROM TaskAssignees ta " +
+       "WHERE ta.task.status = 'COMPLETED' " +
+       "AND ta.task.sprint.project.idProject = :projectId " +
+       "AND ta.task.deadline >= :from AND ta.task.deadline < :to")
+    List<TaskAssignees> findCompletedTasksByTeamAndDateRange(
+       @Param("projectId") int projectId,
+       @Param("from") LocalDateTime from,
+       @Param("to") LocalDateTime to);
 }

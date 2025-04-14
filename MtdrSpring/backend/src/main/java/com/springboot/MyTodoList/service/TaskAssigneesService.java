@@ -103,7 +103,7 @@ public class TaskAssigneesService {
         return taskAssigneesRepository.countDoneTasksByProjectUserAndSprint(projectUserId, sprintId);
     }
     
-    public List<Tasks> getCompletedTasksByUserAndSprint(int projectUserId, int sprintId) {
+    public List<TaskAssignees> getCompletedTasksByUserAndSprint(int projectUserId, int sprintId) {
         return taskAssigneesRepository.findCompletedTasksByProjectUserAndSprint(projectUserId, sprintId);
     }
 
@@ -112,7 +112,7 @@ public class TaskAssigneesService {
         return taskAssigneesRepository.countDoneTasksByProjectUserAndDateRange(projectUserId, from.atStartOfDay(), to.plusDays(1).atStartOfDay());
     }
     
-    public List<Tasks> getCompletedTasksByUserByDateRange(int projectUserId, LocalDate from, LocalDate to) {
+    public List<TaskAssignees> getCompletedTasksByUserByDateRange(int projectUserId, LocalDate from, LocalDate to) {
         return taskAssigneesRepository.findCompletedTasksByProjectUserAndDateRange(projectUserId, from.atStartOfDay(), to.plusDays(1).atStartOfDay());
     }
 
@@ -121,7 +121,7 @@ public class TaskAssigneesService {
         return taskAssigneesRepository.countDoneTasksByTeamAndSprint(sprintId);
     }
     
-    public List<Tasks> getCompletedTasksByTeamAndSprint(int sprintId) {
+    public List<TaskAssignees> getCompletedTasksByTeamAndSprint(int sprintId) {
         return taskAssigneesRepository.findCompletedTasksByTeamAndSprint(sprintId);
     }
 
@@ -130,7 +130,7 @@ public class TaskAssigneesService {
         return taskAssigneesRepository.countDoneTasksByTeamAndDateRange(projectId, from.atStartOfDay(), to.plusDays(1).atStartOfDay());
     }
     
-    public List<Tasks> getCompletedTasksByTeamByDateRange(int projectId, LocalDate from, LocalDate to) {
+    public List<TaskAssignees> getCompletedTasksByTeamByDateRange(int projectId, LocalDate from, LocalDate to) {
         return taskAssigneesRepository.findCompletedTasksByTeamAndDateRange(projectId, from.atStartOfDay(), to.plusDays(1).atStartOfDay());
     }
     
