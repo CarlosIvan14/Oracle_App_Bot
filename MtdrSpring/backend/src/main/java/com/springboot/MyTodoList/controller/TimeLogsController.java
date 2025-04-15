@@ -90,6 +90,8 @@ public class TimeLogsController {
         return new ResponseEntity<>(timeLogs, HttpStatus.OK);
     }
 
+    // REPORTES TimeLogs 07-12
+
     // R07: horas reales por usuario en sprint
     @GetMapping("/individual-sprint/{sprintId}/{projectUserId}/real-hours")
     public ResponseEntity<Long> getRealHoursByUserAndSprint(

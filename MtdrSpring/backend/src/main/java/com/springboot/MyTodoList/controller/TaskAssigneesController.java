@@ -83,7 +83,9 @@ public class TaskAssigneesController {
         List<TaskAssignees> taskAssignees = taskAssigneesService.getTaskAssigneesByUserAndSprint(projectUserId, sprintId);
         return new ResponseEntity<>(taskAssignees, HttpStatus.OK);
     }
-    // Nuevo endpoint: obtener la cantidad de tareas "Done" para un usuario (ProjectUser) en un sprint específico
+    
+    // REPORTES Tasks 01-06
+
     // R01: obtener las tareas completadas (Done) para un usuario (ProjectUser) en un sprint específico
     @GetMapping("/user/{projectUserId}/sprint/{sprintId}/done/count")
     public ResponseEntity<Long> getDoneTasksCountByUserAndSprint(
