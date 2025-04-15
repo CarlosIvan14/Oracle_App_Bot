@@ -84,28 +84,14 @@ public class TaskAssigneesController {
         return new ResponseEntity<>(taskAssignees, HttpStatus.OK);
     }
     // Nuevo endpoint: obtener la cantidad de tareas "Done" para un usuario (ProjectUser) en un sprint específico
-    @GetMapping("/user/{projectUserId}/sprint/{sprintId}/done/count")
-    public ResponseEntity<Long> getDoneTasksCountByUserAndSprint1(
-            @PathVariable int projectUserId, @PathVariable int sprintId) {
-        long count = taskAssigneesService.getCountDoneTasksByUserAndSprint(projectUserId, sprintId);
-        return new ResponseEntity<>(count, HttpStatus.OK);
-    }
-    @GetMapping("/user/{projectUserId}/sprint/{sprintId}/done")
-    public ResponseEntity<List<TaskAssignees>> getCompletedTasksByUserAndSprint1(
-            @PathVariable int projectUserId, @PathVariable int sprintId) {
-        List<TaskAssignees> taskAssignees = taskAssigneesService.getCompletedTasksByUserAndSprint(projectUserId, sprintId);
-        return new ResponseEntity<>(taskAssignees, HttpStatus.OK);
-    }
-
     // R01: obtener las tareas completadas (Done) para un usuario (ProjectUser) en un sprint específico
-    @GetMapping("/individual-sprint/{sprintId}/{projectUserId}/tasks-done/count")
+    @GetMapping("/user/{projectUserId}/sprint/{sprintId}/done/count")
     public ResponseEntity<Long> getDoneTasksCountByUserAndSprint(
             @PathVariable int projectUserId, @PathVariable int sprintId) {
         long count = taskAssigneesService.getCountDoneTasksByUserAndSprint(projectUserId, sprintId);
         return new ResponseEntity<>(count, HttpStatus.OK);
     }
-
-    @GetMapping("/individual-sprint/{sprintId}/{projectUserId}/tasks-done")
+    @GetMapping("/user/{projectUserId}/sprint/{sprintId}/done")
     public ResponseEntity<List<TaskAssignees>> getCompletedTasksByUserAndSprint(
             @PathVariable int projectUserId, @PathVariable int sprintId) {
         List<TaskAssignees> taskAssignees = taskAssigneesService.getCompletedTasksByUserAndSprint(projectUserId, sprintId);
@@ -113,7 +99,7 @@ public class TaskAssigneesController {
     }
 
     // R02: tareas completadas por usuario en semana
-    @GetMapping("/individual-week/{date}/{projectUserId}/tasks-done/count")
+    @GetMapping("/user/{projectUserId}/week/{date}/done/count")
     public ResponseEntity<Long> getDoneTasksCountByUserAndWeek(
             @PathVariable int projectUserId, 
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
@@ -123,7 +109,7 @@ public class TaskAssigneesController {
         return new ResponseEntity<>(count, HttpStatus.OK);
     }
 
-    @GetMapping("/individual-week/{date}/{projectUserId}/tasks-done")
+    @GetMapping("/user/{projectUserId}/week/{date}/done")
     public ResponseEntity<List<TaskAssignees>> getCompletedTasksByUserAndWeek(
             @PathVariable int projectUserId, 
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
@@ -134,7 +120,7 @@ public class TaskAssigneesController {
     }
 
     // R03: tareas completadas por usuario en mes
-    @GetMapping("/individual-month/{date}/{projectUserId}/tasks-done/count")
+    @GetMapping("/user/{projectUserId}/month/{date}/done/count")
     public ResponseEntity<Long> getDoneTasksCountByUserAndMonth(
             @PathVariable int projectUserId, 
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
@@ -144,7 +130,7 @@ public class TaskAssigneesController {
         return new ResponseEntity<>(count, HttpStatus.OK);
     }
 
-    @GetMapping("/individual-month/{date}/{projectUserId}/tasks-done")
+    @GetMapping("/user/{projectUserId}/month/{date}/done")
     public ResponseEntity<List<TaskAssignees>> getCompletedTasksByUserAndMonth(
             @PathVariable int projectUserId, 
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
@@ -155,14 +141,14 @@ public class TaskAssigneesController {
     }
 
     // R04: tareas completadas por equipo en sprint
-    @GetMapping("/team-sprint/{sprintId}/tasks-done/count")
+    @GetMapping("/team-sprint/{sprintId}/done/count")
     public ResponseEntity<Long> getDoneTasksCountByTeamAndSprint(
             @PathVariable int sprintId) {
         long count = taskAssigneesService.getCountDoneTasksByTeamAndSprint(sprintId);
         return new ResponseEntity<>(count, HttpStatus.OK);
     }
 
-    @GetMapping("/team-sprint/{sprintId}/tasks-done")
+    @GetMapping("/team-sprint/{sprintId}/done")
     public ResponseEntity<List<TaskAssignees>> getCompletedTasksByTeamAndSprint(
             @PathVariable int sprintId) {
         List<TaskAssignees> tasks = taskAssigneesService.getCompletedTasksByTeamAndSprint(sprintId);
@@ -170,7 +156,7 @@ public class TaskAssigneesController {
     }
 
     // R05: tareas completadas por equipo en semana
-    @GetMapping("/team-week/{date}/{projectId}/tasks-done/count")
+    @GetMapping("/team-week/{date}/project/{projectId}/done/count")
     public ResponseEntity<Long> getDoneTasksCountByTeamAndWeek(
             @PathVariable int projectId,
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
@@ -180,7 +166,7 @@ public class TaskAssigneesController {
         return new ResponseEntity<>(count, HttpStatus.OK);
     }
 
-    @GetMapping("/team-week/{date}/{projectId}/tasks-done")
+    @GetMapping("/team-week/{date}/project/{projectId}/done")
     public ResponseEntity<List<TaskAssignees>> getCompletedTasksByTeamAndWeek(
             @PathVariable int projectId,
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
@@ -191,7 +177,7 @@ public class TaskAssigneesController {
     }
 
     // R06: tareas completadas por equipo en mes
-    @GetMapping("/team-month/{date}/{projectId}/tasks-done/count")
+    @GetMapping("/team-month/{date}/project/{projectId}/done/count")
     public ResponseEntity<Long> getDoneTasksCountByTeamAndMonth(
             @PathVariable int projectId,
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
@@ -201,7 +187,7 @@ public class TaskAssigneesController {
         return new ResponseEntity<>(count, HttpStatus.OK);
     }
 
-    @GetMapping("/team-month/{date}/{projectId}/tasks-done")
+    @GetMapping("/team-month/{date}/project/{projectId}/done")
     public ResponseEntity<List<TaskAssignees>> getCompletedTasksByTeamAndMonth(
             @PathVariable int projectId,
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
