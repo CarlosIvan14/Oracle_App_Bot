@@ -48,7 +48,7 @@ function App() {
             <Route path="home" element={<Home />} />
             <Route path="projects/:projectId" element={<ProjectSprints />} />
             <Route path="projects/:projectId/sprint/:sprintId" element={<SprintTasks />} />
-            <Route path="users" element={<UsersList />} />
+            <Route path="/projects/:projectId/users" element={<UsersList />} />
             <Route path="reports" element={<Reports />} />
             <Route path="profile" element={<Profile user={user} />} />
           </Route>

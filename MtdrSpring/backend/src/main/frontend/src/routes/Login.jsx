@@ -11,17 +11,24 @@ function Login({ onLogin }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Harcodeado o real
-      // Ejemplo HARCODE para test:
-      if (name === 'manager' && password === '123') {
-        onLogin({ idUser: 1, name: 'Manager User', role: 'manager' });
-        navigate('/home');
-      } else if (name === 'dev' && password === '123') {
-        onLogin({ idUser: 2, name: 'Developer User', role: 'developer' });
-        navigate('/home');
-      } else {
+      const response = await fetch("http://localhost:8081/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, password })
+      });
+
+      if (!response.ok) {
         throw new Error('Usuario/contraseña inválidos');
       }
+
+      const data = await response.json();
+      // Guardamos el usuario en el almacenamiento local
+      localStorage.setItem('user', JSON.stringify(data));
+      // Actualiza el estado global o del componente padre si es necesario
+      onLogin(data);
+      navigate('/home');
     } catch (err) {
       setError(err.message);
     }
