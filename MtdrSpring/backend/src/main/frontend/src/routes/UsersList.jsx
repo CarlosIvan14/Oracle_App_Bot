@@ -1,16 +1,168 @@
 // src/routes/UsersList.js
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
+/** Íconos de ejemplo. Reemplaza estos componentes con los íconos de tu elección */
+const IconEdit = () => <span>✎</span>;
+const IconTrash = () => <span>🗑</span>;
+const IconCheck = () => <span>✓</span>;
+const IconCancel = () => <span>✕</span>;
+const IconBack = () => <span>←</span>;
+
+/**
+ * Componente que representa una fila de una skill existente.
+ * Maneja internamente su estado de edición.
+ */
+function SkillRow({
+  skill,
+  isEditing,
+  defaultName,
+  defaultDesc,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onDelete,
+}) {
+  const [localName, setLocalName] = useState(defaultName);
+  const [localDesc, setLocalDesc] = useState(defaultDesc);
+
+  const handleSave = () => {
+    onSaveEdit(skill.idSkills, localName, localDesc);
+  };
+
+  if (!isEditing) {
+    return (
+      <tr className="border-b border-gray-200 dark:border-gray-700">
+        <td className="px-4 py-2">{skill.name}</td>
+        <td className="px-4 py-2">{skill.description}</td>
+        <td className="px-4 py-2 space-x-2">
+          <button
+            onClick={onStartEdit}
+            className="rounded-full bg-gray-200 dark:bg-gray-600 p-2 hover:bg-gray-300 dark:hover:bg-gray-500"
+            title="Editar Skill"
+          >
+            <IconEdit />
+          </button>
+          <button
+            onClick={() => onDelete(skill.idSkills)}
+            className="rounded-full bg-gray-200 dark:bg-gray-600 p-2 hover:bg-gray-300 dark:hover:bg-gray-500"
+            title="Eliminar Skill"
+          >
+            <IconTrash />
+          </button>
+        </td>
+      </tr>
+    );
+  } else {
+    return (
+      <tr className="border-b border-gray-200 dark:border-gray-700">
+        <td className="px-4 py-2">
+          <input
+            className="w-full rounded-md p-1 dark:bg-gray-700 dark:text-white"
+            value={localName}
+            onChange={(e) => setLocalName(e.target.value)}
+          />
+        </td>
+        <td className="px-4 py-2">
+          <input
+            className="w-full rounded-md p-1 dark:bg-gray-700 dark:text-white"
+            value={localDesc}
+            onChange={(e) => setLocalDesc(e.target.value)}
+          />
+        </td>
+        <td className="px-4 py-2 space-x-2">
+          <button
+            onClick={handleSave}
+            className="rounded-full bg-green-200 dark:bg-green-700 p-2 hover:bg-green-300 dark:hover:bg-green-600"
+            title="Guardar cambios"
+          >
+            <IconCheck />
+          </button>
+          <button
+            onClick={onCancelEdit}
+            className="rounded-full bg-red-200 dark:bg-red-700 p-2 hover:bg-red-300 dark:hover:bg-red-600"
+            title="Cancelar edición"
+          >
+            <IconCancel />
+          </button>
+        </td>
+      </tr>
+    );
+  }
+}
+
+/**
+ * Componente que representa una fila para agregar una nueva skill.
+ */
+function NewSkillRow({ onSave, onCancel }) {
+  const [name, setName] = useState('');
+  const [desc, setDesc] = useState('');
+
+  const handleSave = () => {
+    if (!name || !desc) {
+      alert('Completa el nombre y la descripción');
+      return;
+    }
+    onSave(name, desc);
+  };
+
+  return (
+    <tr className="border-b border-gray-200 dark:border-gray-700 bg-green-50 dark:bg-green-900/30">
+      <td className="px-4 py-2">
+        <input
+          className="w-full rounded-md p-1 dark:bg-gray-700 dark:text-white"
+          placeholder="Nombre de la skill"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </td>
+      <td className="px-4 py-2">
+        <input
+          className="w-full rounded-md p-1 dark:bg-gray-700 dark:text-white"
+          placeholder="Descripción"
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+        />
+      </td>
+      <td className="px-4 py-2 space-x-2">
+        <button
+          onClick={handleSave}
+          className="rounded-full bg-green-200 dark:bg-green-700 p-2 hover:bg-green-300 dark:hover:bg-green-600"
+          title="Guardar nueva skill"
+        >
+          <IconCheck />
+        </button>
+        <button
+          onClick={onCancel}
+          className="rounded-full bg-red-200 dark:bg-red-700 p-2 hover:bg-red-300 dark:hover:bg-red-600"
+          title="Cancelar"
+        >
+          <IconCancel />
+        </button>
+      </td>
+    </tr>
+  );
+}
+
+/**
+ * Componente principal: muestra la lista de usuarios y permite ver las skills de cada uno en un modal.
+ * Se incorpora un botón de "Go Back" para regresar a los sprints del proyecto.
+ */
 function UsersList() {
-  // Usamos el projectId de la ruta. Si no se proporciona, se usa un valor por defecto.
   const { projectId } = useParams() || { projectId: "41" };
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Manejo del modal para ver y editar skills
+  const [showModal, setShowModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [editingSkillId, setEditingSkillId] = useState(null);
+  const [newSkillRow, setNewSkillRow] = useState(false);
+
   useEffect(() => {
-    // Primero obtenemos la lista de usuarios del proyecto
+    // Obtener la lista de usuarios del proyecto
     fetch(`http://localhost:8081/api/project-users/project/${projectId}/users`)
       .then((response) => {
         if (!response.ok) {
@@ -19,13 +171,9 @@ function UsersList() {
         return response.json();
       })
       .then((usersData) => {
-        // Para cada usuario, obtenemos su rol y sus skills
         return Promise.all(
           usersData.map((user) =>
-            // Obtener rol
-            fetch(
-              `http://localhost:8081/api/project-users/role-user/project-id/${projectId}/user-id/${user.idUser}`
-            )
+            fetch(`http://localhost:8081/api/project-users/role-user/project-id/${projectId}/user-id/${user.idUser}`)
               .then((respRole) => {
                 if (!respRole.ok) {
                   throw new Error("Error al obtener el rol de usuario");
@@ -33,7 +181,6 @@ function UsersList() {
                 return respRole.text();
               })
               .then((roleText) =>
-                // Obtener skills
                 fetch(`http://localhost:8081/api/skills/oracleuser/${user.idUser}`)
                   .then((respSkill) => {
                     if (!respSkill.ok) {
@@ -41,13 +188,11 @@ function UsersList() {
                     }
                     return respSkill.json();
                   })
-                  .then((skillsData) => {
-                    return {
-                      ...user,
-                      role: roleText.trim(), // Rol devuelto (por ejemplo "manager" o "developer")
-                      skills: Array.isArray(skillsData) ? skillsData : [] // Nos aseguramos que sea un arreglo
-                    };
-                  })
+                  .then((skillsData) => ({
+                    ...user,
+                    role: roleText.trim(),
+                    skills: Array.isArray(skillsData) ? skillsData : [],
+                  }))
               )
           )
         );
@@ -62,55 +207,131 @@ function UsersList() {
       });
   }, [projectId]);
 
-  // Función para editar una skill
-  const handleEditSkill = (userId, skill) => {
-    // Se solicitan nuevos valores por prompt
-    const newName = window.prompt("Ingrese el nuevo nombre de la skill:", skill.name);
-    const newDescription = window.prompt("Ingrese la nueva descripción de la skill:", skill.description);
-    const payload = {};
-    if (newName && newName !== skill.name) {
-      payload.name = newName;
-    }
-    if (newDescription && newDescription !== skill.description) {
-      payload.description = newDescription;
-    }
-    if (Object.keys(payload).length === 0) {
-      alert("No se realizaron cambios.");
-      return;
-    }
-    // Enviamos la petición PATCH para actualizar la skill
-    fetch(`http://localhost:8081/api/skills/${skill.idSkills}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Error al actualizar la skill");
-        }
-        return response.json();
-      })
-      .then((updatedSkill) => {
-        // Actualizamos la lista de usuarios en el estado, reemplazando la skill actualizada
-        setUsers((prevUsers) =>
-          prevUsers.map((u) => {
-            if (u.idUser === userId) {
-              return {
-                ...u,
-                skills: u.skills.map((s) =>
-                  s.idSkills === skill.idSkills ? { ...s, ...updatedSkill } : s
-                )
-              };
-            }
-            return u;
-          })
-        );
-      })
-      .catch((err) => {
-        alert(err.message);
+  // Función para regresar a los sprints del proyecto
+  const handleGoBack = () => {
+    navigate(`/projects/${projectId}`);
+  };
+
+  // Abre el modal con el usuario seleccionado
+  const openModal = (user) => {
+    setSelectedUser(user);
+    setShowModal(true);
+    setEditingSkillId(null);
+    setNewSkillRow(false);
+  };
+
+  const closeModal = () => {
+    setSelectedUser(null);
+    setShowModal(false);
+    setEditingSkillId(null);
+    setNewSkillRow(false);
+  };
+
+  // Funciones para editar skills
+  const startEditSkill = (skillId) => {
+    setEditingSkillId(skillId);
+    setNewSkillRow(false);
+  };
+  const cancelEditSkill = () => {
+    setEditingSkillId(null);
+  };
+  const saveEditSkill = async (skillId, newName, newDesc) => {
+    if (!selectedUser) return;
+    try {
+      const response = await fetch(`http://localhost:8081/api/skills/${skillId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: newName, description: newDesc }),
       });
+      if (!response.ok) {
+        throw new Error("Error al actualizar la skill");
+      }
+      const updatedSkill = await response.json();
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => {
+          if (user.idUser === selectedUser.idUser) {
+            const updatedSkills = user.skills.map((s) =>
+              s.idSkills === skillId ? { ...s, ...updatedSkill } : s
+            );
+            return { ...user, skills: updatedSkills };
+          }
+          return user;
+        })
+      );
+      setEditingSkillId(null);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const deleteSkill = async (skillId) => {
+    if (!selectedUser) return;
+    const confirmDel = window.confirm("¿Eliminar esta skill?");
+    if (!confirmDel) return;
+    try {
+      const response = await fetch(`http://localhost:8081/api/skills/${skillId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error("Error al eliminar la skill");
+      }
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => {
+          if (user.idUser === selectedUser.idUser) {
+            const filtered = user.skills.filter((s) => s.idSkills !== skillId);
+            return { ...user, skills: filtered };
+          }
+          return user;
+        })
+      );
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  // Funciones para agregar skill
+  const addSkillRow = () => {
+    setNewSkillRow(true);
+    setEditingSkillId(null);
+  };
+
+  const cancelAddSkill = () => {
+    setNewSkillRow(false);
+  };
+
+  const saveNewSkill = async (newName, newDesc) => {
+    if (!selectedUser) return;
+    const payload = {
+      oracleUser: { idUser: selectedUser.idUser },
+      name: newName,
+      description: newDesc,
+    };
+    try {
+      const response = await fetch(`http://localhost:8081/api/skills`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error("Error al crear la skill");
+      }
+      const createdSkill = await response.json();
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => {
+          if (user.idUser === selectedUser.idUser) {
+            return { ...user, skills: [...user.skills, createdSkill] };
+          }
+          return user;
+        })
+      );
+      setNewSkillRow(false);
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   if (loading) {
@@ -122,14 +343,22 @@ function UsersList() {
 
   return (
     <div className="p-6">
+      {/* Botón Go Back */}
+      <button
+        onClick={handleGoBack}
+        className="mb-4 rounded-full border border-gray-300 px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+      >
+        <IconBack /> Volver a Sprints
+      </button>
+
       <h1 className="text-3xl font-bold mb-4">Lista de Usuarios</h1>
-      <table className="min-w-full bg-black bg-opacity-20">
-        <thead>
+      <table className="min-w-full bg-black bg-opacity-20 rounded-2xl overflow-hidden">
+        <thead className="bg-black bg-opacity-30">
           <tr>
             <th className="px-4 py-2 text-left">ID</th>
             <th className="px-4 py-2 text-left">Nombre</th>
             <th className="px-4 py-2 text-left">Rol</th>
-            <th className="px-4 py-2 text-left">Skills</th>
+            <th className="px-4 py-2 text-left">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -139,30 +368,75 @@ function UsersList() {
               <td className="px-4 py-2">{u.name}</td>
               <td className="px-4 py-2">{u.role}</td>
               <td className="px-4 py-2">
-                {u.skills && u.skills.length > 0 ? (
-                  u.skills.map((skill) => (
-                    <div key={skill.idSkills} className="mb-2">
-                      <div>
-                        <span className="font-bold">Skill:</span> {skill.name}
-                        <br />
-                        <span className="font-bold">Descripción:</span> {skill.description}
-                      </div>
-                      <button
-                        onClick={() => handleEditSkill(u.idUser, skill)}
-                        className="mt-1 rounded border border-gray-300 px-2 py-1 hover:bg-gray-100"
-                      >
-                        Editar
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <span>No hay skills</span>
-                )}
+                <button
+                  onClick={() => openModal(u)}
+                  className="rounded-full border border-gray-300 px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Ver Skills
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* Modal para ver y editar Skills */}
+      {showModal && selectedUser && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 dark:bg-black dark:bg-opacity-70"
+          onClick={closeModal}
+        >
+          <div
+            className="max-w-2xl w-full p-4 bg-white dark:bg-customDark dark:text-white rounded-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-bold mb-4">
+              Skills de {selectedUser.name}
+            </h2>
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 text-xl bg-transparent cursor-pointer"
+            >
+              <IconCancel />
+            </button>
+            <table className="w-full bg-gray-50 dark:bg-customDark rounded-2xl overflow-hidden">
+              <thead className="bg-gray-200 dark:bg-customDarkligth">
+                <tr>
+                  <th className="px-4 py-2 text-left">Nombre</th>
+                  <th className="px-4 py-2 text-left">Descripción</th>
+                  <th className="px-4 py-2 text-left">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedUser.skills.map((skill) => (
+                  <SkillRow
+                    key={skill.idSkills}
+                    skill={skill}
+                    isEditing={skill.idSkills === editingSkillId}
+                    defaultName={skill.name}
+                    defaultDesc={skill.description}
+                    onStartEdit={() => startEditSkill(skill.idSkills)}
+                    onCancelEdit={cancelEditSkill}
+                    onSaveEdit={saveEditSkill}
+                    onDelete={deleteSkill}
+                  />
+                ))}
+                {newSkillRow && (
+                  <NewSkillRow onSave={saveNewSkill} onCancel={cancelAddSkill} />
+                )}
+              </tbody>
+            </table>
+            {!newSkillRow && (
+              <button
+                onClick={addSkillRow}
+                className="mt-4 rounded-full border border-green-500 text-green-500 px-3 py-1 hover:bg-green-500 hover:text-white"
+              >
+                Agregar Skill
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
