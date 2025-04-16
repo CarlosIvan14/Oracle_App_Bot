@@ -43,7 +43,7 @@ function Login({ onLogin }) {
           <div>
             <label className="block text-white">Name</label>
             <input
-              className="bg-gray-200 w-full rounded-full px-2 py-1"
+              className="bg-gray-200 bg-opacity-50 w-full rounded-full px-2 py-1"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -53,7 +53,7 @@ function Login({ onLogin }) {
           <div>
             <label className="block text-white">Password</label>
             <input
-              className="bg-gray-200 w-full rounded-full px-2 py-1"
+              className="bg-gray-200 bg-opacity-50 w-full rounded-full px-2 py-1"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

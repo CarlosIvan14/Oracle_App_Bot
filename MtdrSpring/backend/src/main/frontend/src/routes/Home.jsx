@@ -53,14 +53,14 @@ function Home({ user }) {
     return <p className="text-center mt-8 text-red-500">{error}</p>;
   }
 
-  return (
-    <div className="p-6 bg-gray-100 dark:bg-customDark">
+  return (      
+    <div className="p-6 ">
       <div className="mb-4 flex items-center justify-center">
         <h1 className="text-3xl font-bold mb-4">Tus Proyectos</h1>
       </div>
       <div className="mb-4 flex items-center justify-center">
         <input
-          className="border px-3 py-2 rounded-full w-full max-w-md bg-black bg-opacity-20 hover:bg-opacity-30 text-black dark:text-white placeholder-black dark:placeholder-white"
+          className="border px-3 py-2 rounded-full w-full max-w-md bg-black bg-opacity-20 hover:bg-opacity-30 text-white placeholder-white"
           type="text"
           placeholder="Buscar proyectos..."
           value={search}
@@ -79,7 +79,7 @@ function Home({ user }) {
             >
               <h2 className="text-xl font-semibold">{proj.name}</h2>
               {proj.description && (
-                <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                <p className="mt-2 text-sm text-gray-300">
                   {proj.description}
                 </p>
               )}
