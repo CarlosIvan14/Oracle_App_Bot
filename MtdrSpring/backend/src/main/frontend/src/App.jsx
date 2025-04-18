@@ -7,6 +7,7 @@ import Login from './routes/Login';
 import Home from './routes/Home';
 import ProjectSprints from './routes/ProjectSprints';
 import SprintTasks from './routes/SprintTasks';
+import AllTasksCalendar from './routes/AllTasksCalendar';
 import UsersList from './routes/UsersList';
 import Reports from './routes/Reports';
 import Profile from './routes/Profile';
@@ -43,7 +44,7 @@ function App() {
             <Route path="projects/:projectId" element={<ProjectSprints />} />
 
             <Route path="projects/:projectId/sprint/:sprintId" element={<SprintTasks />} />
-
+            <Route path="projects/:projectId/sprint/:sprintId/all" element={<AllTasksCalendar />} />
             {/* Lista de usuarios */}
             <Route path="projects/:projectId/users" element={<UsersList />} />
 

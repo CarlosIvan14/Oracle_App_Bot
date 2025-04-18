@@ -109,9 +109,7 @@ export default function ProjectSprints() {
           <div
             key={s.id_sprint}
             className="bg-black bg-opacity-20 p-4 rounded-2xl hover:bg-opacity-30 cursor-pointer"
-            onClick={() =>
-              navigate(`/projects/${projectId}/sprint/${s.id_sprint}/tasks`)
-            }
+            onClick={() => navigate(`/projects/${projectId}/sprint/${s.id_sprint}`)}
           >
             <div className="flex justify-between items-center">
               <div>

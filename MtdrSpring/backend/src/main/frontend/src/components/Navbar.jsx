@@ -1,4 +1,4 @@
-// src/components/Navbar.js
+// src/components/Navbar.jsx
 import React, { useState, useEffect } from 'react';
 import { NavLink, useMatch, useNavigate, useParams } from 'react-router-dom';
 
@@ -12,16 +12,20 @@ const IconPlus  = () => <span className="text-lg">＋</span>;
 
 export default function Navbar({ onLogout }) {
   const navigate      = useNavigate();
-  const matchHome     = useMatch('/home');
-  const matchProject  = useMatch('/projects/:projectId/*');
-  const matchSprints  = useMatch({ path: '/projects/:projectId', end: true });
-  const matchUsers    = useMatch('/projects/:projectId/users');
   const { projectId } = useParams();
 
-  // Obtener rol de projectUser (para mostrar Ver Usuarios y Añadir Sprint)
+  // Todas las rutas que necesitamos detectar, llamadas al top-level:
+  const matchHome     = useMatch('/home');
+  const matchSprintRoot = useMatch({ path: '/projects/:projectId', end: true });
+  const matchSprintTasks = useMatch('/projects/:projectId/sprint/:sprintId');
+  const matchAllTasks = useMatch('/projects/:projectId/sprint/:sprintId/all');
+  const matchUsers    = useMatch('/projects/:projectId/users');
+  const matchReports  = useMatch('/reports');
+
+  // Rol sólo nos importa en la vista de sprints raíz
   const [roleUser, setRoleUser] = useState(null);
   useEffect(() => {
-    if (matchProject && projectId) {
+    if (matchSprintRoot && projectId) {
       const u = JSON.parse(localStorage.getItem('user'));
       fetch(
         `http://localhost:8081/api/project-users/role-user/project-id/${projectId}/user-id/${u.idUser}`
@@ -30,7 +34,7 @@ export default function Navbar({ onLogout }) {
         .then(txt => setRoleUser(txt.trim()))
         .catch(() => setRoleUser(null));
     }
-  }, [matchProject, projectId]);
+  }, [matchSprintRoot, projectId]);
 
   const handleAddSprint = () => {
     window.dispatchEvent(new CustomEvent('openAddSprint'));
@@ -38,13 +42,13 @@ export default function Navbar({ onLogout }) {
 
   return (
     <nav className="w-full py-4 px-6 flex items-center justify-between bg-transparent text-white">
-      {/* Logo – sin subrayado */}
+      {/* Logo */}
       <div className="font-bold text-xl">
         <NavLink to="/home" className="text-white">Oracle Task Manager</NavLink>
       </div>
 
       <div className="flex items-center space-x-6">
-        {/* Proyectos */}
+        {/* Enlace a Proyectos */}
         <NavLink to="/home" className="relative font-bold text-white">
           Proyectos
           <span
@@ -54,10 +58,9 @@ export default function Navbar({ onLogout }) {
           />
         </NavLink>
 
-        {/* Sólo dentro de un proyecto */}
-        {matchProject && projectId && (
+        {/* VISTA SPRINTS (solo en /projects/:projectId exacto) */}
+        {matchSprintRoot && !matchSprintTasks && !matchAllTasks && !matchUsers && (
           <>
-            {/* Sprints */}
             <NavLink
               to={`/projects/${projectId}`}
               className="relative font-bold text-white"
@@ -65,30 +68,24 @@ export default function Navbar({ onLogout }) {
               Sprints del Proyecto {projectId}
               <span
                 className={`absolute bottom-[-2px] left-0 h-[2px] bg-white transition-all ${
-                  matchSprints && !matchUsers ? 'w-full' : 'w-0'
+                  matchSprintRoot ? 'w-full' : 'w-0'
                 }`}
               />
             </NavLink>
 
-            {/* Sólo managers */}
             {roleUser === 'manager' && (
               <>
-                 {!matchUsers && (
-                  <button
-                    onClick={handleAddSprint}
-                    className="flex items-center font-bold text-white hover:text-gray-200"
-                  >
-                    <IconPlus />
-                    <span className="ml-1">Añadir Sprint</span>
-                  </button>
-                )}
-
+                <button
+                  onClick={handleAddSprint}
+                  className="flex items-center font-bold text-white hover:text-gray-200"
+                >
+                  <IconPlus /><span className="ml-1">Añadir Sprint</span>
+                </button>
                 <NavLink
                   to={`/projects/${projectId}/users`}
                   className="relative flex items-center font-bold text-white"
                 >
-                  <IconUsers />
-                  <span className="ml-1">Ver Usuarios</span>
+                  <IconUsers /><span className="ml-1">Ver Usuarios</span>
                   <span
                     className={`absolute bottom-[-2px] left-0 h-[2px] bg-white transition-all ${
                       matchUsers ? 'w-full' : 'w-0'
@@ -100,7 +97,48 @@ export default function Navbar({ onLogout }) {
           </>
         )}
 
-        {/* Perfil / Logout */}
+        {/* VISTA TAREAS (solo en /projects/:projectId/sprint/:sprintId) */}
+        {matchSprintTasks && !matchAllTasks && (
+          <>
+            <NavLink
+              to={`/projects/${projectId}`}
+              className="relative font-bold text-white"
+            >
+              Sprints del Proyecto {projectId}
+              <span
+                className={`absolute bottom-[-2px] left-0 h-[2px] bg-white transition-all ${
+                  false /* no subrrayamos aquí */ ? 'w-full' : 'w-0'
+                }`}
+              />
+            </NavLink>
+
+            <NavLink
+              to={`/projects/${projectId}/sprint/${matchSprintTasks.params.sprintId}/all`}
+              className="relative font-bold text-white"
+            >
+              Todas las tareas
+              <span
+                className={`absolute bottom-[-2px] left-0 h-[2px] bg-white transition-all ${
+                  matchAllTasks ? 'w-full' : 'w-0'
+                }`}
+              />
+            </NavLink>
+
+            <NavLink
+              to="/reports"
+              className="relative font-bold text-white"
+            >
+              Reportes
+              <span
+                className={`absolute bottom-[-2px] left-0 h-[2px] bg-white transition-all ${
+                  matchReports ? 'w-full' : 'w-0'
+                }`}
+              />
+            </NavLink>
+          </>
+        )}
+
+        {/* Ícono de perfil + dropdown */}
         <div className="relative group">
           <button className="focus:outline-none">
             <IconProfile />
