@@ -14,15 +14,15 @@ export default function Navbar({ onLogout }) {
   const navigate      = useNavigate();
   const { projectId } = useParams();
 
-  // Todas las rutas que necesitamos detectar, llamadas al top-level:
-  const matchHome     = useMatch('/home');
-  const matchSprintRoot = useMatch({ path: '/projects/:projectId', end: true });
+  // Todos los hooks de useMatch al inicio
+  const matchHome        = useMatch('/home');
+  const matchSprintRoot  = useMatch({ path: '/projects/:projectId', end: true });
   const matchSprintTasks = useMatch('/projects/:projectId/sprint/:sprintId');
-  const matchAllTasks = useMatch('/projects/:projectId/sprint/:sprintId/all');
-  const matchUsers    = useMatch('/projects/:projectId/users');
-  const matchReports  = useMatch('/reports');
+  const matchAllTasks    = useMatch('/projects/:projectId/sprint/:sprintId/all');
+  const matchUsers       = useMatch('/projects/:projectId/users');
+  const matchReports     = useMatch('/reports');
 
-  // Rol sólo nos importa en la vista de sprints raíz
+  // Obtener rol solo en la ruta raíz de sprints
   const [roleUser, setRoleUser] = useState(null);
   useEffect(() => {
     if (matchSprintRoot && projectId) {
@@ -48,7 +48,7 @@ export default function Navbar({ onLogout }) {
       </div>
 
       <div className="flex items-center space-x-6">
-        {/* Enlace a Proyectos */}
+        {/* Proyectos (siempre) */}
         <NavLink to="/home" className="relative font-bold text-white">
           Proyectos
           <span
@@ -58,7 +58,7 @@ export default function Navbar({ onLogout }) {
           />
         </NavLink>
 
-        {/* VISTA SPRINTS (solo en /projects/:projectId exacto) */}
+        {/* RUTA: /projects/:projectId exacto */}
         {matchSprintRoot && !matchSprintTasks && !matchAllTasks && !matchUsers && (
           <>
             <NavLink
@@ -97,7 +97,28 @@ export default function Navbar({ onLogout }) {
           </>
         )}
 
-        {/* VISTA TAREAS (solo en /projects/:projectId/sprint/:sprintId) */}
+        {/* RUTA: /projects/:projectId/users */}
+        {matchUsers && (
+          <>
+            <NavLink
+              to={`/projects/${projectId}`}
+              className="relative font-bold text-white"
+            >
+              Sprints del Proyecto {projectId}
+            </NavLink>
+            <NavLink
+              to={`/projects/${projectId}/users`}
+              className="relative font-bold text-white"
+            >
+              Ver Usuarios
+              <span
+                className="absolute bottom-[-2px] left-0 h-[2px] bg-white w-full"
+              />
+            </NavLink>
+          </>
+        )}
+
+        {/* RUTA: /projects/:projectId/sprint/:sprintId */}
         {matchSprintTasks && !matchAllTasks && (
           <>
             <NavLink
@@ -105,13 +126,7 @@ export default function Navbar({ onLogout }) {
               className="relative font-bold text-white"
             >
               Sprints del Proyecto {projectId}
-              <span
-                className={`absolute bottom-[-2px] left-0 h-[2px] bg-white transition-all ${
-                  false /* no subrrayamos aquí */ ? 'w-full' : 'w-0'
-                }`}
-              />
             </NavLink>
-
             <NavLink
               to={`/projects/${projectId}/sprint/${matchSprintTasks.params.sprintId}/all`}
               className="relative font-bold text-white"
@@ -123,7 +138,6 @@ export default function Navbar({ onLogout }) {
                 }`}
               />
             </NavLink>
-
             <NavLink
               to="/reports"
               className="relative font-bold text-white"
@@ -138,7 +152,19 @@ export default function Navbar({ onLogout }) {
           </>
         )}
 
-        {/* Ícono de perfil + dropdown */}
+        {/* RUTA: /projects/:projectId/sprint/:sprintId/all */}
+        {matchAllTasks && (
+          <>
+            <NavLink
+              to={`/projects/${projectId}`}
+              className="relative font-bold text-white"
+            >
+              Sprints del Proyecto {projectId}
+            </NavLink>
+          </>
+        )}
+
+        {/* Icono perfil + dropdown (siempre) */}
         <div className="relative group">
           <button className="focus:outline-none">
             <IconProfile />

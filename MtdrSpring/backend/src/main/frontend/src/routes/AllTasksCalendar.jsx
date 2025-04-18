@@ -27,8 +27,22 @@ export default function AllTasksCalendar() {
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-4">Todas las tareas del Sprint {sprintId}</h1>
 
+      {/* Estilos para transparentar el track en Webkit */}
+      <style>{`
+        .no-white-scrollbar::-webkit-scrollbar { width: 8px; }
+        .no-white-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .no-white-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(107,114,128,0.6); border-radius: 4px; }
+      `}</style>
+
       {/* Scroll container */}
-      <div className="overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
+      <div
+        className="no-white-scrollbar overflow-y-auto max-h-[calc(100vh-200px)] pr-2"
+        style={{
+          /* Firefox */
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(107,114,128,0.6) transparent',
+        }}
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {tasks.map(task => (
             <div
