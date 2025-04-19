@@ -1,98 +1,92 @@
 import React, { useState, useEffect } from 'react';
-import DatePicker             from 'react-datepicker';
+import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 /**
- * Props:
- *  • projectId   – ID del proyecto activo
- *  • sprintId    – ID del sprint activo
- *  • onCreated() – callback para recargar las listas en SprintTasks
- *
- * El componente refresca el **rol** del usuario cada vez que se abre
- * el modal, de modo que siempre muestra los botones correctos.
+ * Props
+ * ──────────────────────────────────────────────────────────
+ * • projectId   → ID del proyecto actual
+ * • sprintId    → ID del sprint actual
+ * • onCreated() → callback para recargar listas en SprintTasks
  */
 export default function NewTaskModal({ projectId, sprintId, onCreated }) {
-  /* ───────── estados del modal ───────── */
-  const [open       , setOpen]       = useState(false);
+  /* ───────── toggle modal ───────── */
+  const [open, setOpen] = useState(false);
 
-  /* campos comunes de la tarea */
-  const [name       , setName]       = useState('');
-  const [description, setDescription] = useState('');
-  const [storyPoints, setStoryPoints] = useState(1);
-  const [estimated  , setEstimated]   = useState(1);
-  const [deadline   , setDeadline]    = useState(null);
+  /* ───────── campos de la tarea ───────── */
+  const [name,         setName]         = useState('');
+  const [description,  setDescription]  = useState('');
+  const [storyPoints,  setStoryPoints]  = useState(1);
+  const [estimated,    setEstimated]    = useState(1);
+  const [deadline,     setDeadline]     = useState(null);
 
-  /* datos relativos al usuario y rol ##################################### */
-  const user = JSON.parse(localStorage.getItem('user'));  // ya validado arriba en la app
-  const [role            , setRole]            = useState(null);   // 'manager' | 'developer'
-  const [myProjectUserId , setMyProjectUserId] = useState(null);
+  /* ───────── info de usuario / rol ───────── */
+  const user = JSON.parse(localStorage.getItem('user'));          // ← ya existe en localStorage
+  const [role,            setRole]            = useState(null);   // 'manager' | 'developer'
+  const [myProjectUserId, setMyProjectUserId] = useState(null);   // para auto‑asignar
 
-  /* manager‑only */
-  const [mode      , setMode]       = useState('FREE'); // FREE | ASSIGN | AI
-  const [allUsers  , setAllUsers]   = useState([]);     // project users
-  const [selectedPU, setSelectedPU] = useState('');     // idProjectUser
+  /* ───────── manager only ───────── */
+  const [mode, setMode] = useState('FREE');                       // FREE | ASSIGN | AI
+  const [allUsers, setAllUsers]       = useState([]);             // lista de usuarios   (idUser, name…)
+  const [selectedUserId, setSelected] = useState('');             // idUser elegido en el <select>
 
-  /* ════════════════════════════════════════════════════════════════════ */
-  /*                   Cargar ROL + projectUserId                        */
-  /* ════════════════════════════════════════════════════════════════════ */
-
-  /** Siempre que ABRIMOS el modal refrescamos los datos del usuario   */
+  /* ════════════════════════════════════════════════════════════════
+     Al ABRIR el modal refrescamos:
+       1) rol del usuario
+       2) su idProjectUser
+       3) todos los usuarios del proyecto (para managers)
+  ════════════════════════════════════════════════════════════════ */
   useEffect(() => {
     if (!open) return;
 
-    /* 1. Rol del usuario en este proyecto */
+    /* 1. Rol */
     fetch(`http://localhost:8081/api/project-users/role-user/project-id/${projectId}/user-id/${user.idUser}`)
       .then(r => r.ok ? r.text() : Promise.reject())
       .then(txt => setRole(txt.trim()))
-      .catch(()  => setRole(null));
+      .catch(() => setRole(null));
 
-    /* 2. Si es developer, necesitamos su idProjectUser                  */
+    /* 2. Mi idProjectUser (para developers) */
     fetch(`http://localhost:8081/api/project-users/project-user-id/project-id/${projectId}/user-id/${user.idUser}`)
       .then(r => r.ok ? r.json() : null)
-      .then(id => setMyProjectUserId(id))
+      .then(setMyProjectUserId)
       .catch(() => setMyProjectUserId(null));
 
-    /* 3. Limpiar caches por si el rol cambió                            */
-    setAllUsers([]);
-    setSelectedPU('');
+    /* 3. Lista de usuarios (nombre + idUser) — NO contiene idProjectUser */
+    fetch(`http://localhost:8081/api/project-users/project/${projectId}/users`)
+      .then(r => r.ok ? r.json() : [])
+      .then(setAllUsers)
+      .catch(() => setAllUsers([]));
+
+    /* reset de controles */
+    setSelected('');
     setMode('FREE');
   }, [open, projectId, user.idUser]);
 
-  /** Cargar TODOS los usuarios del proyecto (sólo managers)            */
-  useEffect(() => {
-    if (open && role === 'manager' && allUsers.length === 0) {
-      fetch(`http://localhost:8081/api/project-users/project/${projectId}/users`)
-        .then(r => r.ok ? r.json() : [])
-        .then(setAllUsers)
-        .catch(() => setAllUsers([]));
-    }
-  }, [open, role, allUsers.length, projectId]);
-
-  /* ════════════════════════════════════════════════════════════════════ */
-  /*                             Crear tarea                             */
-  /* ════════════════════════════════════════════════════════════════════ */
-
+  /* ════════════════════════════════════════════════════════════════
+     CREAR TAREA + (si corresponde) ASSIGNEE
+  ════════════════════════════════════════════════════════════════ */
   const handleCreate = async () => {
-    /* Validaciones mínimas */
-    if (!name || !description || !deadline)          return alert('Completa nombre, descripción y deadline');
-    if (role === 'manager' && mode === 'ASSIGN' && !selectedPU) return alert('Selecciona un usuario');
+    /* ─── validaciones mínimas ─── */
+    if (!name || !description || !deadline)
+      return alert('Completa nombre, descripción y deadline');
+    if (role === 'manager' && mode === 'ASSIGN' && !selectedUserId)
+      return alert('Selecciona un usuario al que asignar');
 
-    /* 1. Construimos el payload de la tarea */
+    /* ─── 1) crear la tarea ─── */
     const taskPayload = {
       name,
       status        : role === 'manager'
-                      ? (mode === 'FREE' ? 'UNASSIGNED' : 'ASSIGNED')
-                      : 'ASSIGNED',
+                        ? (mode === 'FREE' ? 'UNASSIGNED' : 'ASSIGNED')
+                        : 'ASSIGNED',
       description,
       deadline      : deadline.toISOString(),
       storyPoints   : Number(storyPoints),
-      sprint        : { id_sprint: Number(sprintId) },
+      sprint        : { idsprint: Number(sprintId) },
       creation_ts   : new Date().toISOString(),
       realHours     : 0,
       estimatedHours: Number(estimated)
     };
 
-    /* 2. Creamos la tarea */
     let createdTask;
     try {
       const res = await fetch('http://localhost:8081/api/tasks', {
@@ -106,50 +100,60 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
       return alert('Error creando la tarea');
     }
 
-    /* 3. Determinar si hay que crear un assignee ************************/
-    const mustCreateAssignee =
-      // Manager → modo ASSIGN
+    /* ─── 2) ¿hay que crear task‑assignee? ─── */
+    const needAssignee =
       (role === 'manager' && mode === 'ASSIGN') ||
-      // Developer → se auto‑asigna
-      (role === 'developer');
+      role === 'developer';
 
-    if (mustCreateAssignee) {
-      const projectUserToAssign =
-        role === 'manager' ? Number(selectedPU) : Number(myProjectUserId);
+    if (needAssignee) {
+      /* 2.a) determinar idProjectUser correcto                          */
+      let idProjectUser = null;
 
-      if (projectUserToAssign) {
+      if (role === 'developer') {
+        idProjectUser = myProjectUserId;
+      } else {                       // manager + ASSIGN
+        try {
+          const resPU = await fetch(
+            `http://localhost:8081/api/project-users/project-user-id/project-id/${projectId}/user-id/${selectedUserId}`
+          );
+          if (resPU.ok) idProjectUser = await resPU.json();
+        } catch {/* ignore */}
+      }
+
+      /* 2.b) POST a task‑assignees                                      */
+      if (idProjectUser) {
         try {
           await fetch('http://localhost:8081/api/task-assignees', {
             method : 'POST',
             headers: { 'Content-Type':'application/json' },
             body   : JSON.stringify({
-              projectUser: { idProjectUser: projectUserToAssign },
+              projectUser: { idProjectUser },
               task       : { id: createdTask.id }
             })
           });
         } catch {
-          alert('La tarea se creó, pero no se pudo asignar automáticamente.');
+          alert('La tarea se creó, pero falló la asignación automática.');
         }
       }
     }
 
-    /* 4. Cerrar, limpiar y avisar al padre */
+    /* ─── 3) limpiar y notificar ─── */
     setOpen(false);
-    setName(''); setDescription(''); setStoryPoints(1);
-    setEstimated(1); setDeadline(null); setSelectedPU('');
+    setName(''); setDescription('');
+    setStoryPoints(1); setEstimated(1);
+    setDeadline(null); setSelected('');
 
     onCreated && onCreated();
   };
 
-  /* ════════════════════════════════════════════════════════════════════ */
-  /*                                UI                                   */
-  /* ════════════════════════════════════════════════════════════════════ */
-
-  const ActionBtn = ({ value, children }) => (
+  /* ════════════════════════════════════════════════════════════════
+     UI
+  ════════════════════════════════════════════════════════════════ */
+  const BtnMode = ({ value, children }) => (
     <button
       type="button"
       onClick={() => setMode(value)}
-      className={`rounded-full px-3 py-1 border text-sm
+      className={`rounded-full px-3 py-1 border text-sm transition
         ${mode===value
           ? 'bg-cyan-500 text-white border-cyan-500'
           : 'border-gray-500 text-gray-300 hover:bg-cyan-500 hover:text-white'}`}
@@ -160,7 +164,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
 
   return (
     <>
-      {/* Botón que abre el modal */}
+      {/* trigger */}
       <button
         onClick={() => setOpen(true)}
         className="ml-4 flex items-center bg-transparent text-white font-semibold py-2 px-4 rounded-full
@@ -173,30 +177,27 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
         Añadir Tarea
       </button>
 
-      {/* Modal */}
+      {/* modal */}
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
              onClick={() => setOpen(false)}>
-
           <div
             className="max-w-lg w-full bg-gray-900 text-white p-6 rounded-2xl relative"
             onClick={e => e.stopPropagation()}
           >
-            {/* Cerrar */}
             <button className="absolute top-3 right-3" onClick={() => setOpen(false)}>✕</button>
-
             <h2 className="text-2xl font-bold mb-4 text-center">Nueva Tarea</h2>
 
-            {/* Botones modo (manager) */}
+            {/* modos (manager) */}
             {role === 'manager' && (
               <div className="flex justify-center mb-4 space-x-2">
-                <ActionBtn value="FREE">Free Task</ActionBtn>
-                <ActionBtn value="ASSIGN">Asignar usuario</ActionBtn>
-                <ActionBtn value="AI">Recomendación IA</ActionBtn>
+                <BtnMode value="FREE">Free Task</BtnMode>
+                <BtnMode value="ASSIGN">Asignar usuario</BtnMode>
+                <BtnMode value="AI">Recomendación IA</BtnMode>
               </div>
             )}
 
-            {/* Formulario principal */}
+            {/* formulario */}
             <div className="space-y-3">
               <input
                 placeholder="Nombre / título"
@@ -204,7 +205,6 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                 value={name}
                 onChange={e => setName(e.target.value)}
               />
-
               <textarea
                 rows={3}
                 placeholder="Descripción"
@@ -212,7 +212,6 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                 value={description}
                 onChange={e => setDescription(e.target.value)}
               />
-
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col text-sm">
                   Story Points
@@ -243,23 +242,22 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                 wrapperClassName="w-full"
               />
 
-              {/* Selector de usuario (manager + ASSIGN) */}
+              {/* selector usuario (manager + ASSIGN) */}
               {role === 'manager' && mode === 'ASSIGN' && (
                 <select
-                  value={selectedPU}
-                  onChange={e => setSelectedPU(e.target.value)}
+                  value={selectedUserId}
+                  onChange={e => setSelected(e.target.value)}
                   className="w-full bg-gray-700 rounded-lg p-2"
                 >
-                  <option value="">— Selecciona usuario —</option>
+                  <option value="">— Selecciona usuario —</option>
                   {allUsers.map(u => (
-                    <option key={u.idProjectUser} value={u.idProjectUser}>
-                      {u.name} ({u.role})
+                    <option key={u.idUser} value={u.idUser}>
+                      {u.name} ({u.roleUser})
                     </option>
                   ))}
                 </select>
               )}
 
-              {/* Placeholder IA */}
               {role === 'manager' && mode === 'AI' && (
                 <div className="text-center text-sm text-yellow-400">
                   Próximamente: asignación inteligente.
@@ -267,7 +265,6 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
               )}
             </div>
 
-            {/* Botón crear */}
             <button
               onClick={handleCreate}
               className="mt-6 w-full rounded-full border border-cyan-500 py-2
