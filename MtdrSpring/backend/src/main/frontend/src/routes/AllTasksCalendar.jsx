@@ -1,12 +1,11 @@
-// src/routes/AllTasksCalendar.js
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 export default function AllTasksCalendar() {
   const { sprintId } = useParams();
-  const [tasks, setTasks]       = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState('');
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [selectedTask, setSelectedTask] = useState(null);
 
   useEffect(() => {
@@ -15,7 +14,25 @@ export default function AllTasksCalendar() {
         if (!res.ok) throw new Error('Error al cargar todas las tareas');
         return res.json();
       })
-      .then(setTasks)
+      .then(data => {
+        // Transform the data to match the expected format
+        const transformedTasks = data.map(task => ({
+          ...task,
+          // Get the first assignee's name or set to 'Libre'
+          assignee: task.assignees?.length > 0 
+            ? task.assignees[0].projectUser.user.name 
+            : 'Libre',
+          // Flatten the assignee details for the modal
+          assigneeDetails: task.assignees?.length > 0
+            ? {
+                name: task.assignees[0].projectUser.user.name,
+                email: task.assignees[0].projectUser.user.email,
+                role: task.assignees[0].projectUser.roleUser
+              }
+            : null
+        }));
+        setTasks(transformedTasks);
+      })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [sprintId]);
@@ -27,7 +44,7 @@ export default function AllTasksCalendar() {
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-4 text-white">Todas las tareas del Sprint {sprintId}</h1>
 
-      {/* Estilos para transparentar el track en Webkit */}
+      {/* Scroll container styles */}
       <style>{`
         .no-white-scrollbar::-webkit-scrollbar { width: 8px; }
         .no-white-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -38,7 +55,6 @@ export default function AllTasksCalendar() {
       <div
         className="no-white-scrollbar overflow-y-auto max-h-[calc(100vh-200px)] pr-2"
         style={{
-          /* Firefox */
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(107,114,128,0.6) transparent',
         }}
@@ -51,7 +67,7 @@ export default function AllTasksCalendar() {
             >
               <h3 className="font-semibold text-white truncate">{task.name}</h3>
               <p className="text-gray-300 truncate">
-                Desarrollador: {task.assignee || 'Libre'}
+                Desarrollador: {task.assignee}
               </p>
               <p className="text-gray-400 text-sm">
                 Story Points:{' '}
@@ -93,13 +109,27 @@ export default function AllTasksCalendar() {
           >
             <h2 className="text-2xl font-bold mb-4">{selectedTask.name}</h2>
             <p className="mb-2">
-              <span className="font-semibold">Desarrollador:</span>{' '}
-              {selectedTask.assignee || 'Libre'}
-            </p>
-            <p className="mb-2">
               <span className="font-semibold">Status:</span>{' '}
               {selectedTask.status}
             </p>
+            <p className="mb-2">
+              <span className="font-semibold">Desarrollador:</span>{' '}
+              {selectedTask.assignee}
+            </p>
+            
+            {selectedTask.assigneeDetails && (
+              <>
+                <p className="mb-2">
+                  <span className="font-semibold">Email:</span>{' '}
+                  {selectedTask.assigneeDetails.email}
+                </p>
+                <p className="mb-2">
+                  <span className="font-semibold">Rol:</span>{' '}
+                  {selectedTask.assigneeDetails.role}
+                </p>
+              </>
+            )}
+            
             <p className="mb-2">
               <span className="font-semibold">Story Points:</span>{' '}
               <span
@@ -122,6 +152,10 @@ export default function AllTasksCalendar() {
             <p className="mb-4">
               <span className="font-semibold">Deadline:</span>{' '}
               {new Date(selectedTask.deadline).toLocaleString()}
+            </p>
+            <p className="mb-4">
+              <span className="font-semibold">Descripción:</span>{' '}
+              {selectedTask.description}
             </p>
             <button
               onClick={() => setSelectedTask(null)}

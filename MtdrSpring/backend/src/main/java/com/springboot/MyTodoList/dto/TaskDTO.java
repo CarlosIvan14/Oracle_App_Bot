@@ -1,82 +1,57 @@
-package com.springboot.MyTodoList.model;
+package com.springboot.MyTodoList.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
-import javax.persistence.*;
+import com.springboot.MyTodoList.model.TaskAssignees;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Entity
-@Table(name = "TASKS")
-public class Tasks {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_TASK")
-    private int idTask;
-
-    @ManyToOne
-    @JoinColumn(name = "ID_SPRINT", nullable = false)
-    private Sprint sprint;
-
-    @JsonManagedReference
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TaskAssignees> assignees;
-
-    @Column(name = "CREATION_IS")
+public class TaskDTO {
+    private int id;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime creationTs;
-
-    @Column(name = "NAME", nullable = false)
+    
     private String name;
-
-    @Column(name = "STATUS")
     private String status;
-
-    @Column(name = "DESCRIPTION")
     private String description;
-
-    @Column(name = "STORY_POINTS")
     private Integer storyPoints;
-
-    @Column(name = "DEADLINE")
+    
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime deadline;
-
-    @Column(name = "REAL_HOURS")
+    
     private Double realHours;
-
-    @Column(name = "ESTIMATED_HOURS")
     private Double estimatedHours;
+    private List<AssigneeDTO> assignees;
 
-    // Constructor por defecto
-    public Tasks() {
+    // Constructors
+    public TaskDTO() {
     }
 
-    // Constructor completo (excepto id_task)
-    public Tasks(LocalDateTime creationTs, String name, String status, String description, Integer storyPoints,
-                 Sprint sprint, LocalDateTime deadline, Double realHours, Double estimatedHours) {
+    public TaskDTO(int id, LocalDateTime creationTs, String name, String status, String description, 
+                  Integer storyPoints, LocalDateTime deadline, Double realHours, Double estimatedHours, 
+                  List<TaskAssignees> assignees) {
+        this.id = id;
         this.creationTs = creationTs;
         this.name = name;
         this.status = status;
         this.description = description;
         this.storyPoints = storyPoints;
-        this.sprint = sprint;
         this.deadline = deadline;
         this.realHours = realHours;
         this.estimatedHours = estimatedHours;
+        this.assignees = assignees.stream()
+            .map(AssigneeDTO::new)
+            .collect(Collectors.toList());
     }
 
-    // Getters y Setters
-
+    // Getters and Setters
     public int getId() {
-        return idTask;
+        return id;
     }
 
-    public void setId(int idTask) {
-        this.idTask = idTask;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public LocalDateTime getCreationTs() {
@@ -119,14 +94,6 @@ public class Tasks {
         this.storyPoints = storyPoints;
     }
 
-    public Sprint getSprint() {
-        return sprint;
-    }
-
-    public void setSprint(Sprint sprint) {
-        this.sprint = sprint;
-    }
-
     public LocalDateTime getDeadline() {
         return deadline;
     }
@@ -151,12 +118,11 @@ public class Tasks {
         this.estimatedHours = estimatedHours;
     }
 
-    public List<TaskAssignees> getAssignees() {
+    public List<AssigneeDTO> getAssignees() {
         return assignees;
     }
 
-    public void setAssignees(List<TaskAssignees> assignees) {
+    public void setAssignees(List<AssigneeDTO> assignees) {
         this.assignees = assignees;
     }
-
 }

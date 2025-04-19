@@ -17,4 +17,11 @@ public interface TasksRepository extends JpaRepository<Tasks, Integer> {
     @Query("SELECT t FROM Tasks t WHERE t.sprint.id = :sprintId AND t.status = 'UNASSIGNED'")
     List<Tasks> findUnassignedTasksBySprint(@Param("sprintId") int sprintId);
 
+    @Query("SELECT DISTINCT t FROM Tasks t " +
+    "LEFT JOIN FETCH t.assignees ta " +
+    "LEFT JOIN FETCH ta.projectUser pu " +
+    "LEFT JOIN FETCH pu.user " +
+    "WHERE t.sprint.id = :sprintId")
+    List<Tasks> findTasksWithAssigneesBySprintId(@Param("sprintId") int sprintId);
+    
 }

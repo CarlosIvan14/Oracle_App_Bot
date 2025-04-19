@@ -3,6 +3,7 @@ package com.springboot.MyTodoList.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.springboot.MyTodoList.dto.SimplifiedTaskDTO;
+import com.springboot.MyTodoList.dto.TaskDTO;
 import com.springboot.MyTodoList.model.Tasks;
 import com.springboot.MyTodoList.service.TasksService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,8 +76,8 @@ public class TasksController {
 
     // Obtener todas las tareas de un Sprint por id_sprint
     @GetMapping("/sprint/{sprintId}")
-    public ResponseEntity<List<Tasks>> getTasksBySprint(@PathVariable int sprintId) {
-        List<Tasks> tasks = tasksService.getTasksBySprint(sprintId);
+    public ResponseEntity<List<TaskDTO>> getTasksBySprint(@PathVariable int sprintId) {
+        List<TaskDTO> tasks = tasksService.getTasksBySprintWithAssignees(sprintId);
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
