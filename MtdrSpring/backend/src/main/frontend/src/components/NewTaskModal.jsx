@@ -1,3 +1,4 @@
+// src/components/NewTaskModal.jsx
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -14,21 +15,22 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
   const [open, setOpen] = useState(false);
 
   /* ───────── campos de la tarea ───────── */
-  const [name,         setName]         = useState('');
-  const [description,  setDescription]  = useState('');
-  const [storyPoints,  setStoryPoints]  = useState(1);
-  const [estimated,    setEstimated]    = useState(1);
-  const [deadline,     setDeadline]     = useState(null);
+  const [name,         setName]        = useState('');
+  const [description,  setDescription] = useState('');
+  const [storyPoints,  setStoryPoints] = useState(1);
+  const [estimated,    setEstimated]   = useState(1);
+  const [deadline,     setDeadline]    = useState(null);
 
   /* ───────── info de usuario / rol ───────── */
-  const user = JSON.parse(localStorage.getItem('user'));          // ← ya existe en localStorage
+  const user = JSON.parse(localStorage.getItem('user'));          // ← ya existe
   const [role,            setRole]            = useState(null);   // 'manager' | 'developer'
   const [myProjectUserId, setMyProjectUserId] = useState(null);   // para auto‑asignar
+  const [sending,         setSending]         = useState(false);  // bloqueo botón
 
   /* ───────── manager only ───────── */
   const [mode, setMode] = useState('FREE');                       // FREE | ASSIGN | AI
-  const [allUsers, setAllUsers]       = useState([]);             // lista de usuarios   (idUser, name…)
-  const [selectedUserId, setSelected] = useState('');             // idUser elegido en el <select>
+  const [allUsers,       setAllUsers]       = useState([]);       // [{ idUser, name, roleUser }]
+  const [selectedUserId, setSelectedUserId] = useState('');       // idUser elegido
 
   /* ════════════════════════════════════════════════════════════════
      Al ABRIR el modal refrescamos:
@@ -47,18 +49,18 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
 
     /* 2. Mi idProjectUser (para developers) */
     fetch(`http://localhost:8081/api/project-users/project-user-id/project-id/${projectId}/user-id/${user.idUser}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(setMyProjectUserId)
+      .then(r => r.ok ? r.text() : null)          // devuelve texto plano
+      .then(txt => setMyProjectUserId(txt ? Number(txt) : null))
       .catch(() => setMyProjectUserId(null));
 
-    /* 3. Lista de usuarios (nombre + idUser) — NO contiene idProjectUser */
+    /* 3. Lista de usuarios (nombre + idUser) */
     fetch(`http://localhost:8081/api/project-users/project/${projectId}/users`)
       .then(r => r.ok ? r.json() : [])
       .then(setAllUsers)
       .catch(() => setAllUsers([]));
 
     /* reset de controles */
-    setSelected('');
+    setSelectedUserId('');
     setMode('FREE');
   }, [open, projectId, user.idUser]);
 
@@ -66,11 +68,14 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
      CREAR TAREA + (si corresponde) ASSIGNEE
   ════════════════════════════════════════════════════════════════ */
   const handleCreate = async () => {
+    if (sending) return;                 // anti‑doble click
     /* ─── validaciones mínimas ─── */
     if (!name || !description || !deadline)
       return alert('Completa nombre, descripción y deadline');
     if (role === 'manager' && mode === 'ASSIGN' && !selectedUserId)
       return alert('Selecciona un usuario al que asignar');
+
+    setSending(true);
 
     /* ─── 1) crear la tarea ─── */
     const taskPayload = {
@@ -81,7 +86,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
       description,
       deadline      : deadline.toISOString(),
       storyPoints   : Number(storyPoints),
-      sprint        : { idsprint: Number(sprintId) },
+      sprint        : { id_sprint: Number(sprintId) },
       creation_ts   : new Date().toISOString(),
       realHours     : 0,
       estimatedHours: Number(estimated)
@@ -97,6 +102,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
       if (!res.ok) throw new Error();
       createdTask = await res.json();
     } catch {
+      setSending(false);
       return alert('Error creando la tarea');
     }
 
@@ -106,21 +112,24 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
       role === 'developer';
 
     if (needAssignee) {
-      /* 2.a) determinar idProjectUser correcto                          */
+      /* 2.a) obtener idProjectUser */
       let idProjectUser = null;
 
       if (role === 'developer') {
         idProjectUser = myProjectUserId;
-      } else {                       // manager + ASSIGN
+      } else {                            // manager + ASSIGN
         try {
           const resPU = await fetch(
             `http://localhost:8081/api/project-users/project-user-id/project-id/${projectId}/user-id/${selectedUserId}`
           );
-          if (resPU.ok) idProjectUser = await resPU.json();
-        } catch {/* ignore */}
+          if (resPU.ok) {
+            const txt = await resPU.text();      // ← texto plano
+            idProjectUser = txt ? Number(txt) : null;
+          }
+        } catch {/* ignorar */ }
       }
 
-      /* 2.b) POST a task‑assignees                                      */
+      /* 2.b) POST /task‑assignees */
       if (idProjectUser) {
         try {
           await fetch('http://localhost:8081/api/task-assignees', {
@@ -138,10 +147,11 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
     }
 
     /* ─── 3) limpiar y notificar ─── */
+    setSending(false);
     setOpen(false);
     setName(''); setDescription('');
     setStoryPoints(1); setEstimated(1);
-    setDeadline(null); setSelected('');
+    setDeadline(null); setSelectedUserId('');
 
     onCreated && onCreated();
   };
@@ -180,15 +190,14 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
       {/* modal */}
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
-             onClick={() => setOpen(false)}>
+             onClick={() => !sending && setOpen(false)}>
           <div
             className="max-w-lg w-full bg-gray-900 text-white p-6 rounded-2xl relative"
             onClick={e => e.stopPropagation()}
           >
-            <button className="absolute top-3 right-3" onClick={() => setOpen(false)}>✕</button>
+            <button className="absolute top-3 right-3" onClick={() => !sending && setOpen(false)}>✕</button>
             <h2 className="text-2xl font-bold mb-4 text-center">Nueva Tarea</h2>
 
-            {/* modos (manager) */}
             {role === 'manager' && (
               <div className="flex justify-center mb-4 space-x-2">
                 <BtnMode value="FREE">Free Task</BtnMode>
@@ -242,11 +251,10 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                 wrapperClassName="w-full"
               />
 
-              {/* selector usuario (manager + ASSIGN) */}
               {role === 'manager' && mode === 'ASSIGN' && (
                 <select
                   value={selectedUserId}
-                  onChange={e => setSelected(e.target.value)}
+                  onChange={e => setSelectedUserId(e.target.value)}
                   className="w-full bg-gray-700 rounded-lg p-2"
                 >
                   <option value="">— Selecciona usuario —</option>
@@ -266,11 +274,14 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
             </div>
 
             <button
+              disabled={sending}
               onClick={handleCreate}
-              className="mt-6 w-full rounded-full border border-cyan-500 py-2
-                         hover:bg-cyan-500 hover:text-white transition"
+              className={`mt-6 w-full rounded-full py-2 border
+                 ${sending
+                   ? 'border-gray-600 text-gray-500 cursor-not-allowed'
+                   : 'border-cyan-500 hover:bg-cyan-500 hover:text-white transition'}`}
             >
-              Crear Tarea
+              {sending ? 'Creando…' : 'Crear Tarea'}
             </button>
           </div>
         </div>
