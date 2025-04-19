@@ -82,6 +82,17 @@ export default function Navbar({ onLogout }) {
                   <IconPlus /><span className="ml-1">Añadir Sprint</span>
                 </button>
                 <NavLink
+                  to="/reports"
+                  className="relative font-bold text-white"
+                >
+                  Reportes
+                  <span
+                    className={`absolute bottom-[-2px] left-0 h-[2px] bg-white transition-all ${
+                      matchReports ? 'w-full' : 'w-0'
+                    }`}
+                  />
+                </NavLink>
+                <NavLink
                   to={`/projects/${projectId}/users`}
                   className="relative flex items-center font-bold text-white"
                 >
@@ -138,17 +149,7 @@ export default function Navbar({ onLogout }) {
                 }`}
               />
             </NavLink>
-            <NavLink
-              to="/reports"
-              className="relative font-bold text-white"
-            >
-              Reportes
-              <span
-                className={`absolute bottom-[-2px] left-0 h-[2px] bg-white transition-all ${
-                  matchReports ? 'w-full' : 'w-0'
-                }`}
-              />
-            </NavLink>
+           
           </>
         )}
 
