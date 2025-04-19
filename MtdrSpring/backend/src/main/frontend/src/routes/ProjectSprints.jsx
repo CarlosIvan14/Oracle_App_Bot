@@ -89,7 +89,7 @@ export default function ProjectSprints() {
       });
   };
 
-  if (loading) return <p className="text-center mt-8">Cargando…</p>;
+  if (loading) return <p className="text-center mt-8 text-white">Cargando…</p>;
   if (error)   return <p className="text-center mt-8 text-red-500">{error}</p>;
 
   // Filtrado para developers
@@ -100,7 +100,7 @@ export default function ProjectSprints() {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">
+      <h1 className="text-3xl font-bold mb-6 text-center text-white">
         Sprints del Proyecto {projectId}
       </h1>
 
@@ -151,7 +151,7 @@ export default function ProjectSprints() {
                 <input
                   value={newName}
                   onChange={e => setNewName(e.target.value)}
-                  className="w-full rounded-full p-2 border dark:bg-customDark"
+                  className="w-full rounded-full p-2 border bg-customDark"
                 />
               </div>
               <div>
@@ -160,7 +160,7 @@ export default function ProjectSprints() {
                   type="date"
                   value={newDate}
                   onChange={e => setNewDate(e.target.value)}
-                  className="w-full rounded-full p-2 border dark:bg-customDark"
+                  className="w-full rounded-full p-2 border bg-customDark"
                 />
               </div>
               <div>
@@ -168,7 +168,7 @@ export default function ProjectSprints() {
                 type='hidden'
                   value={newDesc}
                   onChange={e => setNewDesc(e.target.value)}
-                  className="w-full rounded-full p-2 border dark:bg-customDark"
+                  className="w-full rounded-full p-2 border bg-customDark"
                 />
               </div>
             </div>

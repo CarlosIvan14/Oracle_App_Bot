@@ -20,12 +20,12 @@ export default function AllTasksCalendar() {
       .finally(() => setLoading(false));
   }, [sprintId]);
 
-  if (loading) return <p className="text-center mt-8">Cargando tareas…</p>;
+  if (loading) return <p className="text-center mt-8 text-white">Cargando tareas…</p>;
   if (error)   return <p className="text-center mt-8 text-red-500">{error}</p>;
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Todas las tareas del Sprint {sprintId}</h1>
+      <h1 className="text-3xl font-bold mb-4 text-white">Todas las tareas del Sprint {sprintId}</h1>
 
       {/* Estilos para transparentar el track en Webkit */}
       <style>{`

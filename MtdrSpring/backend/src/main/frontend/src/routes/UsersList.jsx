@@ -332,7 +332,7 @@
     };
 
     if (loading) {
-      return <p className="text-center mt-8">Cargando usuarios...</p>;
+      return <p className="text-center mt-8 text-white">Cargando usuarios...</p>;
     }
     if (error) {
       return <p className="text-center mt-8 text-red-500">{error}</p>;
@@ -340,26 +340,26 @@
 
     return (
       <div className="p-6">
-        <h1 className="text-3xl font-bold mb-4">Lista de Usuarios</h1>
+        <h1 className="text-3xl font-bold mb-4 text-white">Lista de Usuarios</h1>
         <table className="min-w-full bg-black bg-opacity-20 rounded-2xl overflow-hidden">
           <thead className="bg-black bg-opacity-30">
             <tr>
-              <th className="px-4 py-2 text-left">ID</th>
-              <th className="px-4 py-2 text-left">Nombre</th>
-              <th className="px-4 py-2 text-left">Rol</th>
-              <th className="px-4 py-2 text-left">Acciones</th>
+              <th className="px-4 py-2 text-left text-white">ID</th>
+              <th className="px-4 py-2 text-left text-white">Nombre</th>
+              <th className="px-4 py-2 text-left text-white">Rol</th>
+              <th className="px-4 py-2 text-left text-white">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {users.map((u) => (
               <tr key={u.idUser} className="border-b border-gray-600">
-                <td className="px-4 py-2">{u.idUser}</td>
-                <td className="px-4 py-2">{u.name}</td>
-                <td className="px-4 py-2">{u.role}</td>
+                <td className="px-4 py-2 text-white">{u.idUser}</td>
+                <td className="px-4 py-2 text-white">{u.name}</td>
+                <td className="px-4 py-2 text-white">{u.role}</td>
                 <td className="px-4 py-2">
                   <button
                     onClick={() => openModal(u)}
-                    className="rounded-full border border-gray-300 px-3 py-1 hover:bg-gray-700"
+                    className="rounded-full border border-gray-300 px-3 py-1 hover:bg-gray-700 text-white"
                   >
                     Ver Skills
                   </button>

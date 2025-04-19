@@ -46,7 +46,7 @@ function Home({ user }) {
   };
 
   if (loading) {
-    return <p className="text-center mt-8">Cargando proyectos...</p>;
+    return <p className="text-center text-white mt-8">Cargando proyectos...</p>;
   }
 
   if (error) {
@@ -56,7 +56,7 @@ function Home({ user }) {
   return (      
     <div className="p-6 ">
       <div className="mb-4 flex items-center justify-center">
-        <h1 className="text-3xl font-bold mb-4">Tus Proyectos</h1>
+        <h1 className="text-3xl text-white font-bold mb-4">Tus Proyectos</h1>
       </div>
       <div className="mb-4 flex items-center justify-center">
         <input
@@ -77,7 +77,7 @@ function Home({ user }) {
               className="bg-black bg-opacity-20 p-4 rounded-2xl cursor-pointer hover:bg-opacity-30"
               onClick={() => handleProjectClick(proj.id_project)}
             >
-              <h2 className="text-xl font-semibold">{proj.name}</h2>
+              <h2 className="text-xl text-white font-semibold">{proj.name}</h2>
               {proj.description && (
                 <p className="mt-2 text-sm text-gray-300">
                   {proj.description}

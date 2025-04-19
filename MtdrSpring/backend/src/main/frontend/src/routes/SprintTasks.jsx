@@ -75,7 +75,7 @@
       await patchTask(t.id, { status: 'COMPLETED', realHours: rh });
     };
 
-    if (loading) return <p className="text-center mt-8">Cargando tareas…</p>;
+    if (loading) return <p className="text-center mt-8 text-white">Cargando tareas…</p>;
     if (error)   return <p className="text-center mt-8 text-red-500">{error}</p>;
 
     const renderCard = (task, isFree) => (
@@ -165,7 +165,7 @@
     return (
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-3xl font-bold text-white">
           Tareas del Sprint {sprintId}
         </h1>
           <NewTaskModal
@@ -176,7 +176,7 @@
       </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <section className='bg-black bg-opacity-10 rounded-xl p-4'>
-            <h2 className="text-xl font-bold mb-2">Free Team Tasks</h2>
+            <h2 className="text-xl font-bold mb-2 text-white">Free Team Tasks</h2>
             {freeTasks.length
               ? freeTasks.map(t => renderCard(t, true))
               : <p className="text-gray-400">No hay tareas libres</p>
@@ -184,7 +184,7 @@
           </section>
 
           <section className='bg-black bg-opacity-10 rounded-xl p-4'>
-            <h2 className="text-xl font-bold mb-2">My Assigned Tasks</h2>
+            <h2 className="text-xl font-bold mb-2 text-white">My Assigned Tasks</h2>
             {myAssigned.length
               ? myAssigned.map(t => renderCard(t, false))
               : <p className="text-gray-400">No tienes tareas asignadas</p>
@@ -192,7 +192,7 @@
           </section>
 
           <section className='bg-black bg-opacity-10 rounded-xl p-4'>
-            <h2 className="text-xl font-bold mb-2">In Progress Tasks</h2>
+            <h2 className="text-xl font-bold mb-2 text-white">In Progress Tasks</h2>
             {inProgress.length
               ? inProgress.map(t => renderCard(t, false))
               : <p className="text-gray-400">No hay tareas en progreso</p>
@@ -200,7 +200,7 @@
           </section>
 
           <section className='bg-black bg-opacity-10 rounded-xl p-4'>
-            <h2 className="text-xl font-bold mb-2">Completed Tasks</h2>
+            <h2 className="text-xl font-bold mb-2 text-white">Completed Tasks</h2>
             {completed.length
               ? completed.map(t => renderCard(t, false))
               : <p className="text-gray-400">No hay tareas completadas</p>
