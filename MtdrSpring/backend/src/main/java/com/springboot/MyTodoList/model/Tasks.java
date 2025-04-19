@@ -3,11 +3,9 @@ package com.springboot.MyTodoList.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
@@ -23,9 +21,6 @@ public class Tasks {
     @JoinColumn(name = "ID_SPRINT", nullable = false)
     private Sprint sprint;
 
-    @JsonManagedReference
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TaskAssignees> assignees;
 
     @Column(name = "CREATION_IS")
     private LocalDateTime creationTs;
@@ -150,13 +145,4 @@ public class Tasks {
     public void setEstimatedHours(Double estimatedHours) {
         this.estimatedHours = estimatedHours;
     }
-
-    public List<TaskAssignees> getAssignees() {
-        return assignees;
-    }
-
-    public void setAssignees(List<TaskAssignees> assignees) {
-        this.assignees = assignees;
-    }
-
 }

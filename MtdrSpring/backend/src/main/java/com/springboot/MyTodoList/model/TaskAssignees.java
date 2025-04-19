@@ -2,8 +2,6 @@ package com.springboot.MyTodoList.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
@@ -19,7 +17,6 @@ public class TaskAssignees {
     @JoinColumn(name = "ID_PROJECT_USER", nullable = false)
     private ProjectUser projectUser;
 
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_TASK", nullable = false)
     private Tasks task;
