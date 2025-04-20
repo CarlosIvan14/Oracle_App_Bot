@@ -20,7 +20,7 @@ export default function Navbar({ onLogout }) {
   const matchSprintTasks = useMatch('/projects/:projectId/sprint/:sprintId');
   const matchAllTasks    = useMatch('/projects/:projectId/sprint/:sprintId/all');
   const matchUsers       = useMatch('/projects/:projectId/users');
-  const matchReports     = useMatch('/reports');
+  const matchReports = useMatch('/projects/:projectId/reports');
 
   // Obtener rol solo en la ruta raíz de sprints
   const [roleUser, setRoleUser] = useState(null);
@@ -72,7 +72,17 @@ export default function Navbar({ onLogout }) {
                 }`}
               />
             </NavLink>
-
+            <NavLink
+                  to={`/projects/${projectId}/reports`}
+                  className="relative font-bold text-white"
+                >
+                  Reportes
+                  <span
+                    className={`absolute bottom-[-2px] left-0 h-[2px] bg-white transition-all ${
+                      matchReports ? 'w-full' : 'w-0'
+                    }`}
+                  />
+            </NavLink>
             {roleUser === 'manager' && (
               <>
                 <button
@@ -117,6 +127,27 @@ export default function Navbar({ onLogout }) {
             </NavLink>
           </>
         )}
+      {/* RUTA: /projects/:projectId/reports */}
+      {matchReports && (
+        <>
+          {/* enlace al tablero de sprints */}
+          <NavLink
+            to={`/projects/${projectId}`}
+            className="relative font-bold text-white"
+          >
+            Sprints del Proyecto {projectId}
+          </NavLink>
+
+          {/* enlace al propio reporte (marcado como activo) */}
+          <NavLink
+            to={`/projects/${projectId}/reports`}
+            className="relative font-bold text-white"
+          >
+            Reportes
+            <span className="absolute bottom-[-2px] left-0 h-[2px] bg-white w-full" />
+          </NavLink>
+        </>
+      )}
 
         {/* RUTA: /projects/:projectId/sprint/:sprintId */}
         {matchSprintTasks && !matchAllTasks && (
@@ -138,17 +169,7 @@ export default function Navbar({ onLogout }) {
                 }`}
               />
             </NavLink>
-            <NavLink
-              to="/reports"
-              className="relative font-bold text-white"
-            >
-              Reportes
-              <span
-                className={`absolute bottom-[-2px] left-0 h-[2px] bg-white transition-all ${
-                  matchReports ? 'w-full' : 'w-0'
-                }`}
-              />
-            </NavLink>
+           
           </>
         )}
 

@@ -4,10 +4,6 @@ package com.springboot.MyTodoList.service;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.springboot.MyTodoList.dto.AssigneeDTO;
-import com.springboot.MyTodoList.dto.ProjectUserDTO;
-import com.springboot.MyTodoList.dto.TaskDTO;
-import com.springboot.MyTodoList.dto.UserDTO;
 import com.springboot.MyTodoList.model.Tasks;
 import com.springboot.MyTodoList.repository.TasksRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class TasksService {
@@ -81,69 +76,8 @@ public class TasksService {
         return tasksRepository.findBySprintId(sprintId);
     }
 
-    // Get all unassigned tasks for a sprint
-    public List<Tasks> getUnassignedTasksBySprint(int sprintId) {
-        return tasksRepository.findUnassignedTasksBySprint(sprintId);
-    }
-
-    public List<TaskDTO> getTasksBySprintWithAssignees(int sprintId) {
-        // Fetch tasks with their assignees and related user information in a single query
-        List<Tasks> tasks = tasksRepository.findTasksWithAssigneesBySprintId(sprintId);
-        
-        // Convert to DTOs
-        return tasks.stream()
-                .map(this::convertToTaskDTO)
-                .collect(Collectors.toList());
-    }
-
-
-    private TaskDTO convertToTaskDTO(Tasks task) {
-        TaskDTO dto = new TaskDTO();
-        dto.setId(task.getId());
-        dto.setCreationTs(task.getCreationTs());
-        dto.setName(task.getName());
-        dto.setStatus(task.getStatus());
-        dto.setDescription(task.getDescription());
-        dto.setStoryPoints(task.getStoryPoints());
-        dto.setDeadline(task.getDeadline());
-        dto.setRealHours(task.getRealHours());
-        dto.setEstimatedHours(task.getEstimatedHours());
-        
-        // Convert assignees if they exist
-        if (task.getAssignees() != null) {
-            dto.setAssignees(task.getAssignees().stream()
-                    .map(assignee -> {
-                        AssigneeDTO assigneeDTO = new AssigneeDTO();
-                        assigneeDTO.setIdTaskAssignees(assignee.getIdTaskAssignees());
-                        
-                        // Set ProjectUserDTO if it exists
-                        if (assignee.getProjectUser() != null) {
-                            ProjectUserDTO projectUserDTO = new ProjectUserDTO();
-                            projectUserDTO.setIdProjectUser(assignee.getProjectUser().getIdProjectUser());
-                            projectUserDTO.setRoleUser(assignee.getProjectUser().getRoleUser());
-                            projectUserDTO.setStatus(assignee.getProjectUser().getStatus());
-                            
-                            // Set UserDTO if it exists
-                            if (assignee.getProjectUser().getUser() != null) {
-                                UserDTO userDTO = new UserDTO();
-                                userDTO.setIdUser(assignee.getProjectUser().getUser().getIdUser());
-                                userDTO.setName(assignee.getProjectUser().getUser().getName());
-                                userDTO.setEmail(assignee.getProjectUser().getUser().getEmail());
-                                userDTO.setStatus(assignee.getProjectUser().getUser().getStatus());
-                                userDTO.setTelegramId(assignee.getProjectUser().getUser().getTelegramId());
-                                userDTO.setPhoneNumber(assignee.getProjectUser().getUser().getPhoneNumber());
-                                
-                                projectUserDTO.setUser(userDTO);
-                            }
-                            
-                            assigneeDTO.setProjectUser(projectUserDTO);
-                        }
-                        
-                        return assigneeDTO;
-                    })
-                    .collect(Collectors.toList()));
+        // Get all unassigned tasks for a sprint
+        public List<Tasks> getUnassignedTasksBySprint(int sprintId) {
+            return tasksRepository.findUnassignedTasksBySprint(sprintId);
         }
-        
-        return dto;
-    }
 }
