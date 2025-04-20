@@ -82,7 +82,7 @@ public class ProjectUserController {
         return ResponseEntity.ok(projects);
     }
 
-    @GetMapping("project-user-id/project-id/{projectId}/user-id/{userId}")
+    @GetMapping("/project-id/{projectId}/user-id/{userId}")
     public ResponseEntity<Integer> getProjectUserId(@PathVariable int userId, @PathVariable int projectId) {
         Integer id = projectUserService.getProjectUserIdByUserIdAndProjectId(userId, projectId);
         return id != null ? ResponseEntity.ok(id) : ResponseEntity.notFound().build();

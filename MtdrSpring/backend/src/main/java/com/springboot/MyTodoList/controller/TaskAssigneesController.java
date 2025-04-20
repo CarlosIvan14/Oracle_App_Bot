@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.springboot.MyTodoList.dto.TaskAssigneeResponseDTO;
 import com.springboot.MyTodoList.model.TaskAssignees;
+import com.springboot.MyTodoList.repository.TaskAssigneesRepository;
 import com.springboot.MyTodoList.service.TaskAssigneesService;
 
 @RestController
@@ -82,6 +84,12 @@ public class TaskAssigneesController {
             @PathVariable int projectUserId, @PathVariable int sprintId) {
         List<TaskAssignees> taskAssignees = taskAssigneesService.getTaskAssigneesByUserAndSprint(projectUserId, sprintId);
         return new ResponseEntity<>(taskAssignees, HttpStatus.OK);
+    }
+
+    @GetMapping("/by-sprint/{sprintId}")
+    public ResponseEntity<List<TaskAssigneeResponseDTO>> getAssigneesBySprintId(@PathVariable int sprintId) {
+        List<TaskAssigneeResponseDTO> assignees = taskAssigneesService.getTaskAssigneesBySprintId(sprintId);
+        return ResponseEntity.ok(assignees);
     }
     
     // REPORTES Tasks 01-06
