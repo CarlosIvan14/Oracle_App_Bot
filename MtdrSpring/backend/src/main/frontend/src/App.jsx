@@ -48,7 +48,7 @@ function App() {
             {/* Lista de usuarios */}
             <Route path="projects/:projectId/users" element={<UsersList />} />
 
-            <Route path="reports" element={<Reports />} />
+            <Route path="projects/:projectId/reports" element={<Reports />} /> 
             <Route path="profile" element={<Profile user={user} />} />
           </Route>
 

@@ -219,10 +219,10 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
 
       {/* modal */}
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
+        <div className="fixed inset-0 z-50 flex items-center justify-center "
              onClick={() => !sending && setOpen(false)}>
           <div
-            className="max-w-lg w-full bg-gray-900 text-white p-6 rounded-2xl relative"
+            className="max-w-lg w-full bg-customDark  text-white p-6 rounded-2xl relative"
             onClick={e => e.stopPropagation()}
           >
             <button className="absolute top-3 right-3" onClick={() => !sending && setOpen(false)}>✕</button>
@@ -240,14 +240,14 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
             <div className="space-y-3">
               <input
                 placeholder="Nombre / título"
-                className="w-full bg-gray-700 rounded-lg p-2"
+                className="w-full bg-customDarkligth bg-opac rounded-lg p-2"
                 value={name}
                 onChange={e => setName(e.target.value)}
               />
               <textarea
                 rows={3}
                 placeholder="Descripción"
-                className="w-full bg-gray-700 rounded-lg p-2 resize-none"
+                className="w-full bg-customDarkligth bg-opac rounded-lg p-2 resize-none"
                 value={description}
                 onChange={e => setDescription(e.target.value)}
               />
@@ -257,7 +257,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                   Story Points
                   <input
                     type="number" min={1} max={10}
-                    className="bg-gray-700 rounded-lg p-2 mt-1"
+                    className="bg-customDarkligth bg-opac rounded-lg p-2 mt-1"
                     value={storyPoints}
                     onChange={e => setStoryPoints(e.target.value)}
                   />
@@ -266,7 +266,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                   Horas estimadas
                   <input
                     type="number" min={1}
-                    className="bg-gray-700 rounded-lg p-2 mt-1"
+                    className="bg-customDarkligth bg-opac rounded-lg p-2 mt-1"
                     value={estimated}
                     onChange={e => setEstimated(e.target.value)}
                   />
@@ -278,7 +278,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                 onChange={setDeadline}
                 placeholderText="Deadline"
                 dateFormat="yyyy-MM-dd"
-                className="w-full bg-gray-700 rounded-lg p-2 text-center"
+                className="w-full bg-customDarkligth bg-opac rounded-lg p-2 text-center"
                 wrapperClassName="w-full"
               />
 
@@ -287,7 +287,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                 <select
                   value={selectedUserId}
                   onChange={e => setSelectedUserId(e.target.value)}
-                  className="w-full bg-gray-700 rounded-lg p-2"
+                  className="w-full bg-customDarkligth bg-opac rounded-lg p-2"
                 >
                   <option value="">— Selecciona usuario —</option>
                   {allUsers.map(u => (
@@ -318,7 +318,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                     <select
                       value={selectedUserId}
                       onChange={e => setSelectedUserId(e.target.value)}
-                      className="w-full bg-gray-700 rounded-lg p-2"
+                      className="w-full bg-customDarkligth bg-opac rounded-lg p-2"
                     >
                       <option value="">— Selecciona usuario recomendado —</option>
                       {aiUsers.map(u => (

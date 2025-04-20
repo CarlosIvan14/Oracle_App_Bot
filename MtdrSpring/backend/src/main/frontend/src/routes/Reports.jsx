@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
-
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import { useParams }       from 'react-router-dom';
 function Reports() {
+  const { projectId } = useParams(); 
   const [sprints, setSprints] = useState([]);
   const [members, setMembers] = useState([]);
   const [filterType, setFilterType] = useState('sprint');
@@ -10,7 +13,7 @@ function Reports() {
   const [reportData, setReportData] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:8081/api/sprints/project/41')
+    fetch(`http://localhost:8081/api/sprints/project/${projectId}`)
       .then(res => res.json())
       .then(data => {
         const simplified = data.map(s => ({
@@ -23,7 +26,7 @@ function Reports() {
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:8081/api/projects/41')
+    fetch(`http://localhost:8081/api/projects/${projectId}`)
       .then(res => res.json())
       .then(data => {
         const users = data.projectUsers.map(pu => ({
@@ -71,15 +74,15 @@ function Reports() {
         return;
       }
       doneTasksCountEndpoint = isTeam
-        ? `http://localhost:8081/api/task-assignees/team-week/${selectedDate}/project/41/done/count`
+        ? `http://localhost:8081/api/task-assignees/team-week/${selectedDate}/project/${projectId}/done/count`
         : `http://localhost:8081/api/task-assignees/user/${selectedMember}/week/${selectedDate}/done/count`;
 
       doneTasksDataEndpoint = isTeam
-        ? `http://localhost:8081/api/task-assignees/team-week/${selectedDate}/project/41/done`
+        ? `http://localhost:8081/api/task-assignees/team-week/${selectedDate}/project/${projectId}/done`
         : `http://localhost:8081/api/task-assignees/user/${selectedMember}/week/${selectedDate}/done`;
 
       // realHoursEndpoint = isTeam
-      //   ? `http://localhost:8081/api/timelogs/team-week/${selectedDate}/41/real-hours`
+      //   ? `http://localhost:8081/api/timelogs/team-week/${selectedDate}/${projectId}/real-hours`
       //   : `http://localhost:8081/api/timelogs/individual-week/${selectedDate}/${selectedMember}/real-hours`;
 
     } else if (filterType === 'month') {
@@ -88,15 +91,15 @@ function Reports() {
         return;
       }
       doneTasksCountEndpoint = isTeam
-        ? `http://localhost:8081/api/task-assignees/team-month/${selectedDate}/project/41/done/count`
+        ? `http://localhost:8081/api/task-assignees/team-month/${selectedDate}/project/${projectId}/done/count`
         : `http://localhost:8081/api/task-assignees/user/${selectedMember}/month/${selectedDate}/done/count`;
 
       doneTasksDataEndpoint = isTeam
-        ? `http://localhost:8081/api/task-assignees/team-month/${selectedDate}/project/41/done`
+        ? `http://localhost:8081/api/task-assignees/team-month/${selectedDate}/project/${projectId}/done`
         : `http://localhost:8081/api/task-assignees/user/${selectedMember}/month/${selectedDate}/done`;
 
       // realHoursEndpoint = isTeam
-      //   ? `http://localhost:8081/api/timelogs/team-month/${selectedDate}/41/real-hours`
+      //   ? `http://localhost:8081/api/timelogs/team-month/${selectedDate}/${projectId}/real-hours`
       //   : `http://localhost:8081/api/timelogs/individual-month/${selectedDate}/${selectedMember}/real-hours`;
     }
 
@@ -154,29 +157,29 @@ function Reports() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Reportes</h1>
+      <h1 className="text-3xl font-bold text-white">Reportes</h1>
 
       <div className="flex flex-wrap items-end gap-4">
         <div>
-          <label className="block mb-1 text-sm text-gray-300">Filtrar por</label>
+          <label className="block mb-1 text-sm text-gray-200 font-bold">Filtrar por</label>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="bg-white text-black px-3 py-2 rounded-md"
+            className="bg-customDark bg-opacity-30 text-white px-3 py-2 rounded-xl"
           >
-            <option value="sprint">Sprint</option>
-            <option value="week">Semana</option>
-            <option value="month">Mes</option>
+            <option value="sprint" >Sprint</option>
+            <option value="week" >Semana</option>
+            <option value="month" >Mes</option>
           </select>
         </div>
 
         {filterType === 'sprint' && (
           <div>
-            <label className="block mb-1 text-sm text-gray-300">Sprint</label>
+            <label className="block mb-1 text-sm text-gray-200 font-bold">Sprint</label>
             <select
               value={selectedSprint ?? ''}
               onChange={(e) => setSelectedSprint(e.target.value)}
-              className="bg-white text-black px-3 py-2 rounded-md"
+              className="bg-customDark bg-opacity-30 rounded-xl text-white px-3 py-2"
             >
               <option value="" disabled>Selecciona un sprint</option>
               {sprints.map((s) => (
@@ -188,24 +191,32 @@ function Reports() {
 
         {filterType !== 'sprint' && (
           <div>
-            <label className="block mb-1 text-sm text-gray-300">
+            <label className="block mb-1 text-sm text-gray-200 font-bold">
               {filterType === 'week' ? 'Semana' : 'Mes'}
             </label>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-white text-black px-3 py-2 rounded-md"
+            <DatePicker
+              selected={selectedDate ? new Date(selectedDate) : null}
+              onChange={date =>
+                setSelectedDate(date ? date.toISOString().slice(0,10) : '')
+              }
+              /* — apariencia del input “cerrado” — */
+              className='bg-customDark bg-opacity-30 rounded-xl text-white px-3 py-2'
+              placeholderText="Selecciona fecha"
+              dateFormat="yyyy-MM-dd"
+              /* — apariencia del pop‑over — */
+              calendarClassName="!bg-customDark !bg-opacity-30 text-white rounded-xl p-2"
+              dayClassName={() =>
+                "rounded-full transition hover:bg-black hover:bg-opacity-40"}
             />
           </div>
         )}
 
         <div>
-          <label className="block mb-1 text-sm text-gray-300">Miembro</label>
+          <label className="block mb-1 text-sm text-gray-200 font-bold">Miembro</label>
           <select
             value={selectedMember ?? ''}
             onChange={(e) => setSelectedMember(e.target.value)}
-            className="bg-white text-black px-3 py-2 rounded-md"
+            className="bg-customDark bg-opacity-30 text-white px-3 py-2 rounded-xl"
           >
             <option value="" disabled>Selecciona un miembro</option>
             {members.map((m) => (
@@ -216,7 +227,7 @@ function Reports() {
 
         <button
           onClick={handleGenerateReport}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+          className="bg-transparent text-white px-3 py-2 rounded-xl hover:border-2  hover:border-cyan-500 hover:text-white transition"
         >
           Generar Reporte
         </button>
@@ -255,10 +266,10 @@ function Reports() {
       {/* TASKS TABLE with rows: member, task, storypoints, status, realHours, estimatedHours, kpi score */}
       {reportData?.tasksData?.length > 0 && (
         <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-4">Tareas Completadas</h2>
+          <h2 className="text-xl font-semibold mb-4 text-white">Tareas Completadas</h2>
           <div className="overflow-auto rounded-lg shadow ring-1 ring-black ring-opacity-5">
-            <table className="min-w-full bg-white text-black text-sm">
-              <thead className="bg-gray-100 text-left text-xs font-semibold uppercase tracking-wider">
+            <table className="min-w-full bg-black bg-opacity-50 text-white text-sm">
+              <thead className="bg-black bg-opacity-30 text-left text-xs font-semibold uppercase tracking-wider">
                 <tr>
                   <th className="px-6 py-3">Miembro</th>
                   <th className="px-6 py-3">Tarea</th>
@@ -278,7 +289,7 @@ function Reports() {
                   const kpi = Math.min((realHours / estimatedHours) * 100, 200).toFixed(0);
 
                   return (
-                    <tr key={idx} className="hover:bg-gray-50">
+                    <tr key={idx} className="hover:bg-black bg-opacity-50 transition duration-200">
                       <td className="px-6 py-4">{user}</td>
                       <td className="px-6 py-4">{task.name}</td>
                       <td className="px-6 py-4">{task.storyPoints}</td>
@@ -289,7 +300,7 @@ function Reports() {
                     </tr>
                   );
                 })}
-                    <tr className="font-semibold bg-gray-200">
+                    <tr className="font-semibold bg-black ">
                       <td className="px-6 py-4">Total</td>
                       <td className="px-6 py-4"></td>
                       <td className="px-6 py-4">
@@ -307,7 +318,7 @@ function Reports() {
                           const kpis = reportData.tasksData.map(row => {
                             const real = row.task.realHours || 0;
                             const est = row.task.estimatedHours || 1;
-                            return Math.min((real / est) * 100, 200);
+                            return (est / real) * 100;
                           });
                           const avgKPI = kpis.length ? (kpis.reduce((a, b) => a + b, 0) / kpis.length) : 0;
                           return `${avgKPI.toFixed(0)}%`;

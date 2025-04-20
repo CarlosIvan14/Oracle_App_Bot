@@ -7,19 +7,23 @@
 /* Contenedor principal y fondo */
 .react-datepicker,
 .react-datepicker__month-container {
-  background-color: #2d3748 !important; /* gris oscuro */
+  border-radius: 10px !important; /* Bordes redondeados */
+  background-color: #000000 !important; /* gris oscuro */
+  opacity: 0.95!important; /* opacidad */
   color: #fff !important;
   border: 1px solid #4a5568 !important;
 }
 
 /* Triángulo del popup */
 .react-datepicker__triangle {
-  border-bottom-color: #2d3748 !important;
+  border-bottom-color: #000000 !important;
+  opacity: 0.7!important;
 }
 
 /* Encabezado (barra superior con mes/año) */
 .react-datepicker__header {
-  background-color: #2d3748 !important;
+  background-color: #000000 !important;
+  opacity: 0.7!important;
   border-bottom: 1px solid #4a5568 !important;
 }
 
@@ -41,7 +45,8 @@
 /* Días del calendario */
 .react-datepicker__day {
   color: #fff !important; /* Texto blanco */
-  background-color: #2d3748 !important;
+  background-color: #000000 !important;
+  opacity: 0.7!important;
 }
 
 /* Días fuera del mes actual */
@@ -53,16 +58,19 @@
 .react-datepicker__day--selected,
 .react-datepicker__day--keyboard-selected {
   background-color: #06b6d4 !important; /* cyan-500 */
+  opacity: 0.7!important;
   color: #fff !important;
 }
 
 /* Día hover */
 .react-datepicker__day:hover {
   background-color: #4a5568 !important; /* hover un poco más claro */
+  opacity: 0.7!important;
 }
 
 /* Día de hoy (opcional, si quieres resaltarlo) */
 .react-datepicker__day--today {
   border: 1px solid #06b6d4 !important;
+  opacity: 0.7!important;
   color: #fff !important;
 }
