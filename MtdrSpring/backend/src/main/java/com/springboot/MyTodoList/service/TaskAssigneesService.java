@@ -3,10 +3,14 @@ package com.springboot.MyTodoList.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.springboot.MyTodoList.dto.ProjectUserDTO;
+import com.springboot.MyTodoList.dto.TaskAssigneeResponseDTO;
+import com.springboot.MyTodoList.dto.TaskDTO;
 import com.springboot.MyTodoList.model.ProjectUser;
 import com.springboot.MyTodoList.model.TaskAssignees;
 import com.springboot.MyTodoList.model.Tasks;
@@ -91,6 +95,45 @@ public class TaskAssigneesService {
     public List<TaskAssignees> getTaskAssigneesByUser(int idUser) {
         return taskAssigneesRepository.findByProjectUserUserIdUser(idUser);
     }
+
+    public List<TaskAssigneeResponseDTO> getTaskAssigneesBySprintId(int sprintId) {
+        List<TaskAssignees> taskAssignees = taskAssigneesRepository.findByTaskSprintId(sprintId);
+        
+        return taskAssignees.stream()
+                .map(this::convertToTaskAssigneeResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    private TaskAssigneeResponseDTO convertToTaskAssigneeResponseDTO(TaskAssignees taskAssignee) {
+        TaskAssigneeResponseDTO dto = new TaskAssigneeResponseDTO();
+        dto.setIdTaskAssignees(taskAssignee.getIdTaskAssignees());
+        
+        // Convert ProjectUser
+        if (taskAssignee.getProjectUser() != null) {
+            ProjectUserDTO projectUserDTO = new ProjectUserDTO(taskAssignee.getProjectUser());
+            dto.setProjectUser(projectUserDTO);
+        }
+        
+        // Convert Task (simplified version)
+        if (taskAssignee.getTask() != null) {
+            Tasks task = taskAssignee.getTask();
+            TaskDTO taskDTO = new TaskDTO(
+                task.getId(),
+                task.getCreationTs(),
+                task.getName(),
+                task.getStatus(),
+                task.getDescription(),
+                task.getStoryPoints(),
+                task.getDeadline(),
+                task.getRealHours(),
+                task.getEstimatedHours()
+            );
+            dto.setTask(taskDTO);
+        }
+        
+        return dto;
+    }
+
     
     // Obtener asignaciones para un ProjectUser y un Sprint específico
     public List<TaskAssignees> getTaskAssigneesByUserAndSprint(int projectUserId, int sprintId) {

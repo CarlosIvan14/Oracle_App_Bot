@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.springboot.MyTodoList.model.TaskAssignees;
@@ -18,6 +19,10 @@ public interface TaskAssigneesRepository extends JpaRepository<TaskAssignees, In
     // Método con @Query para obtener asignaciones por ProjectUser y Sprint
     @Query("select ta from TaskAssignees ta where ta.projectUser.idProjectUser = ?1 and ta.task.sprint.id = ?2")
     List<TaskAssignees> findByProjectUserIdAndSprintId(int projectUserId, int sprintId);
+
+   // Basic version
+    @Query("SELECT ta FROM TaskAssignees ta JOIN ta.task t WHERE t.sprint.sprintId = :sprintId")
+    List<TaskAssignees> findByTaskSprintId(@Param("sprintId") int sprintId);
 
     // Reportes de tasks.
 

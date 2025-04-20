@@ -6,6 +6,7 @@
 
   export default function SprintTasks() {
     const { projectId, sprintId } = useParams();
+    const [projectUserId, setprojectUserId] = useState();
     const [loading, setLoading]         = useState(true);
     const [error, setError]             = useState('');
     const [freeTasks, setFreeTasks]     = useState([]);
@@ -22,10 +23,11 @@
 
         // 1) Obtener projectUserId
         const puRes = await fetch(
-          `/api/project-users/project-user-id/project-id/${projectId}/user-id/${user.idUser}`
+          `/api/project-users/project-id/${projectId}/user-id/${user.idUser}`
         );
         if (!puRes.ok) throw new Error("Error al obtener projectUserId");
         const projectUserId = await puRes.json();
+        setprojectUserId(projectUserId)
 
         // 2) Traer asignadas y libres
         const [assignedList, unassignedList] = await Promise.all([
@@ -65,7 +67,30 @@
       await loadTasks();
     };
 
-    const handleTake    = t => patchTask(t.id, { status: 'ASSIGNED' });
+    const handleTake = async (task) => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) throw new Error("Usuario no logueado");
+    
+        // 2. Create the task assignment
+        const assignRes = await fetch('/api/task-assignees', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            projectUser: { idProjectUser: projectUserId },
+            task: { id: task.id }
+          }),
+        });
+        
+        if (!assignRes.ok) throw new Error('Error asignando la tarea');
+    
+        // 3. Update task status
+        await patchTask(task.id, { status: 'ASSIGNED' });
+        
+      } catch (error) {
+        setError(error.message);
+      }
+    };
     const handleStart   = t => patchTask(t.id, { status: 'IN_PROGRESS' });
     const handleUndo    = t => patchTask(t.id, { status: 'IN_PROGRESS' });
     const handleStop    = t => alert('Función "Parar" no implementada aún');

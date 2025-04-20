@@ -1,10 +1,7 @@
 package com.springboot.MyTodoList.dto;
 
-import com.springboot.MyTodoList.model.TaskAssignees;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class TaskDTO {
     private int id;
@@ -22,15 +19,14 @@ public class TaskDTO {
     
     private Double realHours;
     private Double estimatedHours;
-    private List<AssigneeDTO> assignees;
+    //private List<AssigneeDTO> assignees;
 
     // Constructors
     public TaskDTO() {
     }
 
     public TaskDTO(int id, LocalDateTime creationTs, String name, String status, String description, 
-                  Integer storyPoints, LocalDateTime deadline, Double realHours, Double estimatedHours, 
-                  List<TaskAssignees> assignees) {
+                  Integer storyPoints, LocalDateTime deadline, Double realHours, Double estimatedHours) {
         this.id = id;
         this.creationTs = creationTs;
         this.name = name;
@@ -40,9 +36,6 @@ public class TaskDTO {
         this.deadline = deadline;
         this.realHours = realHours;
         this.estimatedHours = estimatedHours;
-        this.assignees = assignees.stream()
-            .map(AssigneeDTO::new)
-            .collect(Collectors.toList());
     }
 
     // Getters and Setters
@@ -116,13 +109,5 @@ public class TaskDTO {
 
     public void setEstimatedHours(Double estimatedHours) {
         this.estimatedHours = estimatedHours;
-    }
-
-    public List<AssigneeDTO> getAssignees() {
-        return assignees;
-    }
-
-    public void setAssignees(List<AssigneeDTO> assignees) {
-        this.assignees = assignees;
     }
 }

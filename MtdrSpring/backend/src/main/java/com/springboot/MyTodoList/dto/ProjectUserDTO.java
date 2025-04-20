@@ -1,7 +1,6 @@
 package com.springboot.MyTodoList.dto;
 
 import com.springboot.MyTodoList.model.ProjectUser;
-import com.springboot.MyTodoList.model.OracleUser;
 
 public class ProjectUserDTO {
     private int idProjectUser;
