@@ -286,7 +286,7 @@ function Reports() {
                   const user = row.projectUser?.user?.name || '—';
                   const realHours = task.realHours || 0;
                   const estimatedHours = task.estimatedHours || 1; // Avoid division by 0
-                  const kpi = Math.min((realHours / estimatedHours) * 100, 200).toFixed(0);
+                  const kpi = (estimatedHours / realHours) * 100 || 0; // Avoid division by 0
 
                   return (
                     <tr key={idx} className="hover:bg-black bg-opacity-50 transition duration-200">
