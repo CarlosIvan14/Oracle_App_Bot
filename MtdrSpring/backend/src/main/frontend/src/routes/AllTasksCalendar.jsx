@@ -13,8 +13,7 @@ export default function AllTasksCalendar() {
     const fetchTasks = async () => {
       try {
         setLoading(true);
-        
-        // Fetch both endpoints in parallel
+
         const [assignedResponse, unassignedResponse] = await Promise.all([
           fetch(`http://localhost:8081/api/task-assignees/by-sprint/${sprintId}`),
           fetch(`http://localhost:8081/api/tasks/unassigned/${sprintId}`)
@@ -24,10 +23,9 @@ export default function AllTasksCalendar() {
           throw new Error('Error al cargar las tareas');
         }
 
-        const assignedData = await assignedResponse.json();
+        const assignedData   = await assignedResponse.json();
         const unassignedData = await unassignedResponse.json();
 
-        // Transform assigned tasks to match the expected format
         const transformedAssigned = assignedData.map(item => ({
           ...item.task,
           assignee: item.projectUser.user.name,
@@ -47,9 +45,9 @@ export default function AllTasksCalendar() {
   }, [sprintId]);
 
   if (loading) return <p className="text-center mt-8 text-white">Cargando tareas…</p>;
-  if (error) return <p className="text-center mt-8 text-red-500">{error}</p>;
+  if (error)   return <p className="text-center mt-8 text-red-500">{error}</p>;
 
-  const renderTaskCard = (task) => (
+  const renderTaskCard = task => (
     <div
       key={task.id}
       className="bg-black bg-opacity-20 p-4 rounded-2xl flex flex-col space-y-2"
@@ -69,12 +67,8 @@ export default function AllTasksCalendar() {
           {task.storyPoints}
         </span>
       </p>
-      <p className="text-gray-400 text-sm">
-        Estimadas: {task.estimatedHours}h
-      </p>
-      <p className="text-gray-400 text-sm">
-        Reales: {task.realHours || 0}h
-      </p>
+      <p className="text-gray-400 text-sm">Estimadas: {task.estimatedHours}h</p>
+      <p className="text-gray-400 text-sm">Reales: {task.realHours || 0}h</p>
       <button
         className="mt-auto self-end text-blue-300 underline"
         onClick={() => setSelectedTask(task)}
@@ -86,52 +80,43 @@ export default function AllTasksCalendar() {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4 text-white">Todas las tareas del Sprint {sprintId}</h1>
+      <h1 className="text-3xl font-bold mb-4 text-white">
+        Todas las tareas del Sprint {sprintId}
+      </h1>
 
-      {/* Scroll container styles */}
-      <style>{`
-        .no-white-scrollbar::-webkit-scrollbar { width: 8px; }
-        .no-white-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .no-white-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(107,114,128,0.6); border-radius: 4px; }
-      `}</style>
-
-      {/* Assigned Tasks Section */}
-      <h2 className="text-xl font-semibold mb-2 text-white">Tareas Asignadas</h2>
+      {/* ==== CONTENEDOR ÚNICO ==== */}
+      <h2 className="text-xl font-semibold mb-2 text-white">Tareas</h2>
       <div
-        className="no-white-scrollbar overflow-y-auto max-h-[calc(50vh-150px)] pr-2 mb-6"
+        className="no-white-scrollbar overflow-y-auto max-h-[calc(100vh-220px)] pr-2"
         style={{
           scrollbarWidth: 'thin',
-          scrollbarColor: 'rgba(107,114,128,0.6) transparent',
+          scrollbarColor: 'rgba(107,114,128,0.6) transparent'
         }}
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {assignedTasks.length > 0 ? (
-            assignedTasks.map(renderTaskCard)
-          ) : (
-            <p className="text-gray-400">No hay tareas asignadas</p>
-          )}
-        </div>
+        {/* Asignadas primero */}
+        {assignedTasks.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2 text-white">
+              Tareas Asignadas
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {assignedTasks.map(renderTaskCard)}
+            </div>
+          </div>
+        )}
+
+        {/* Libres al final */}
+        {unassignedTasks.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-2 text-white">Tareas Libres</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {unassignedTasks.map(renderTaskCard)}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Unassigned Tasks Section */}
-      <h2 className="text-xl font-semibold mb-2 text-white">Tareas Libres</h2>
-      <div
-        className="no-white-scrollbar overflow-y-auto max-h-[calc(50vh-150px)] pr-2"
-        style={{
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'rgba(107,114,128,0.6) transparent',
-        }}
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {unassignedTasks.length > 0 ? (
-            unassignedTasks.map(renderTaskCard)
-          ) : (
-            <p className="text-gray-400">No hay tareas libres</p>
-          )}
-        </div>
-      </div>
-
-      {/* Task Details Modal */}
+      {/* ==== MODAL ==== */}
       {selectedTask && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70"
@@ -143,14 +128,13 @@ export default function AllTasksCalendar() {
           >
             <h2 className="text-2xl font-bold mb-4">{selectedTask.name}</h2>
             <p className="mb-2">
-              <span className="font-semibold">Status:</span>{' '}
-              {selectedTask.status}
+              <span className="font-semibold">Status:</span> {selectedTask.status}
             </p>
             <p className="mb-2">
               <span className="font-semibold">Desarrollador:</span>{' '}
               {selectedTask.assignee}
             </p>
-            
+
             {selectedTask.assigneeDetails && (
               <>
                 <p className="mb-2">
@@ -163,13 +147,16 @@ export default function AllTasksCalendar() {
                 </p>
               </>
             )}
-            
+
             <p className="mb-2">
               <span className="font-semibold">Story Points:</span>{' '}
               <span
                 className={`inline-block px-2 py-0.5 rounded-full text-white ${
-                  selectedTask.storyPoints <= 3 ? 'bg-green-500' :
-                  selectedTask.storyPoints <= 6 ? 'bg-yellow-500' : 'bg-red-500'
+                  selectedTask.storyPoints <= 3
+                    ? 'bg-green-500'
+                    : selectedTask.storyPoints <= 6
+                    ? 'bg-yellow-500'
+                    : 'bg-red-500'
                 }`}
               >
                 {selectedTask.storyPoints}

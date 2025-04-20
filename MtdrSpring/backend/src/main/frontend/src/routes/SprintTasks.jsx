@@ -113,7 +113,7 @@
         {isFree ? (
           <>
             <p className="text-gray-300 truncate">{task.description}</p>
-            <p>
+            <p className="text-gray-300">
               Story Points:
               <span
                 className={`ml-1 inline-block px-2 py-0.5 rounded-full text-white ${
