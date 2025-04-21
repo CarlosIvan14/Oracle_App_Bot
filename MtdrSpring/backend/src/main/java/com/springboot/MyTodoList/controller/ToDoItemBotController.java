@@ -76,7 +76,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         List<OracleUser> oracleUsers;
 
         /* reports */
-        String rFilter; String rDateOrSprint; String rMemberId;
+        String rFilter; String rDateOrSprint; String rMemberId; String rUserId;
 
         /* telegram */
         Long telegramId; String phone;
@@ -463,7 +463,20 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                 int idx;
                 try{ idx=Integer.parseInt(txt);}catch(Exception e){ send(chatId,"Número",false);return; }
                 if(idx==0) st.rMemberId="all";
-                else if(idx>0&&idx<=st.oracleUsers.size()) st.rMemberId=String.valueOf(st.oracleUsers.get(idx-1).getIdUser());
+                else if(idx > 0 && idx <= st.oracleUsers.size()) {
+                    OracleUser selectedUser = st.oracleUsers.get(idx - 1);
+                    
+                    Integer userId = selectedUser.getIdUser(); // Synchronous call
+                    System.out.println("Selected user index: " + idx + ", User ID: " + userId);
+                    
+                    String puIdEpt = baseUrl+"/api/project-users/project-id/"+st.currentProjectId+"/user-id/"+userId;
+                    Integer projectUserId=Optional.ofNullable(rest.getForObject(puIdEpt,Integer.class)).orElse(0);
+                    System.out.println("Project ID: " + st.currentProjectId + ", Project User ID: " + projectUserId);
+                
+                    st.rUserId = String.valueOf(userId);
+                    st.rMemberId = String.valueOf(projectUserId);
+                    System.out.println("st.rMemberId set to: " + st.rMemberId);
+                }                
                 else { send(chatId,"Fuera de rango",false); return; }
                 sendReport(chatId,st); reset(st);
                 break;
@@ -506,7 +519,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             real+=ta.getTask().getRealHours()==null?0:ta.getTask().getRealHours();
         }
         String who=team?"Todo el equipo":
-                st.oracleUsers.stream().filter(u->u.getIdUser()==Integer.parseInt(st.rMemberId))
+                st.oracleUsers.stream().filter(u->u.getIdUser()==Integer.parseInt(st.rUserId))
                                .findFirst().map(OracleUser::getName).orElse("—");
 
         StringBuilder sb=new StringBuilder("*Reporte*\n");
