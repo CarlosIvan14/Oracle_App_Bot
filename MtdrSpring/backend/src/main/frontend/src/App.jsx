@@ -1,59 +1,158 @@
-// src/App.js
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 
-import Login from './routes/Login';
-import Home from './routes/Home';
-import ProjectSprints from './routes/ProjectSprints';
-import SprintTasks from './routes/SprintTasks';
-import AllTasksCalendar from './routes/AllTasksCalendar';
-import UsersList from './routes/UsersList';
-import Reports from './routes/Reports';
-import Profile from './routes/Profile';
-import PrivateLayout from './components/PrivateLayout';
+const Login = React.lazy(() => import('./routes/Login'));
+const Home = React.lazy(() => import('./routes/Home'));
+const ProjectSprints = React.lazy(() => import('./routes/ProjectSprints'));
+const SprintTasks = React.lazy(() => import('./routes/SprintTasks'));
+const AllTasksCalendar = React.lazy(() => import('./routes/AllTasksCalendar'));
+const UsersList = React.lazy(() => import('./routes/UsersList'));
+const Reports = React.lazy(() => import('./routes/Reports'));
+const Profile = React.lazy(() => import('./routes/Profile'));
+const PrivateLayout = React.lazy(() => import('./components/PrivateLayout'));
 
-function App() {
+
+// Custom hook for auth management
+function useAuth() {
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const stored = localStorage.getItem('user');
-    if (stored) setUser(JSON.parse(stored));
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Failed to parse user data', e);
+        localStorage.removeItem('user');
+      }
+    }
   }, []);
 
-  const handleLogin = u => {
-    setUser(u);
-    localStorage.setItem('user', JSON.stringify(u));
+  const handleLogin = (userData) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+    navigate('/home');
   };
+
   const handleLogout = () => {
-    setUser(null);
     localStorage.removeItem('user');
-    // opcional: localStorage.removeItem('projectUser')
+    setUser(null);
+    navigate('/');
   };
+
+  return { user, handleLogin, handleLogout };
+}
+
+function AppRoutes() {
+  const { user, handleLogin, handleLogout } = useAuth();
+
+  return (
+    <Routes>
+      <Route 
+        path="/" 
+        element={
+          <React.Suspense>
+            <Login onLogin={handleLogin} />
+          </React.Suspense>
+        } 
+      />
+
+      <Route 
+        path="/" 
+        element={
+          <React.Suspense>
+            <PrivateLayout user={user} onLogout={handleLogout} />
+          </React.Suspense>
+        }
+      >
+        <Route 
+          path="home" 
+          element={
+            <React.Suspense>
+              <Home />
+            </React.Suspense>
+          } 
+        />
+
+        <Route 
+          path="projects/:projectId" 
+          element={
+            <React.Suspense>
+              <ProjectSprints />
+            </React.Suspense>
+          } 
+        />
+
+        <Route 
+          path="projects/:projectId/sprint/:sprintId" 
+          element={
+            <React.Suspense>
+              <SprintTasks />
+            </React.Suspense>
+          } 
+        />
+
+        <Route 
+          path="projects/:projectId/sprint/:sprintId/all" 
+          element={
+            <React.Suspense>
+              <AllTasksCalendar />
+            </React.Suspense>
+          } 
+        />
+
+        <Route 
+          path="projects/:projectId/users" 
+          element={
+            <React.Suspense>
+              <UsersList />
+            </React.Suspense>
+          } 
+        />
+
+        <Route 
+          path="projects/:projectId/reports" 
+          element={
+            <React.Suspense>
+              <Reports />
+            </React.Suspense>
+          } 
+        />
+
+        <Route 
+          path="profile" 
+          element={
+            <React.Suspense>
+              <Profile user={user} />
+            </React.Suspense>
+          } 
+        />
+      </Route>
+
+      <Route 
+        path="*" 
+        element={
+          <React.Suspense>
+            <div>NOT FOUND</div>
+          </React.Suspense>
+        } 
+      />
+    </Routes>
+  );
+}
+
+function App() {
+  // Added initialization logging
+  useEffect(() => {
+    console.log('App initialized at path:', window.location.pathname);
+  }, []);
 
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Login onLogin={handleLogin} />} />
-
-          <Route path="/" element={<PrivateLayout user={user} onLogout={handleLogout} />}>
-            <Route path="home" element={<Home />} />
-
-            {/* 1) Ficha normal de sprints */}
-            <Route path="projects/:projectId" element={<ProjectSprints />} />
-
-            <Route path="projects/:projectId/sprint/:sprintId" element={<SprintTasks />} />
-            <Route path="projects/:projectId/sprint/:sprintId/all" element={<AllTasksCalendar />} />
-            {/* Lista de usuarios */}
-            <Route path="projects/:projectId/users" element={<UsersList />} />
-
-            <Route path="projects/:projectId/reports" element={<Reports />} /> 
-            <Route path="profile" element={<Profile user={user} />} />
-          </Route>
-
-          <Route path="*" element={<div className="p-6">Página no encontrada</div>} />
-        </Routes>
+      <BrowserRouter basename="/">
+        <AppRoutes />
       </BrowserRouter>
     </ThemeProvider>
   );
