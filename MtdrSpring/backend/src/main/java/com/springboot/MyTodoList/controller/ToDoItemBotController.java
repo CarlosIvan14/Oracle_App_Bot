@@ -325,36 +325,66 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         switch(st.step){
 
             case 1:
-                st.tName=txt; st.step=2;
-                send(chatId,"2) Descripción:",false);
+                st.tName = txt;
+                st.step = 2;
+                send(chatId, "2) Descripción:", false);
                 break;
 
             case 2:
-                st.tDesc=txt; st.step=3;
-                send(chatId,"3) Deadline (YYYY-MM-DD):",false);
+                st.tDesc = txt;
+                st.step = 3;
+                send(chatId, "3) Deadline (YYYY-MM-DD):", false);
                 break;
 
             case 3:
-                try{ st.tDeadline = LocalDate.parse(txt); }
-                catch(DateTimeParseException e){ send(chatId,"Fecha inválida",false);return; }
-                st.step=4; send(chatId,"4) Story Points:",false);
+                try {
+                    st.tDeadline = LocalDate.parse(txt);
+                } catch (DateTimeParseException e) {
+                    send(chatId, "Fecha inválida. Formato: YYYY-MM-DD", false);
+                    return; // sigue en step 3
+                }
+                st.step = 4;
+                send(chatId, "4) Story Points (1–7):", false);
                 break;
 
             case 4:
-                try{ st.tSP=Integer.parseInt(txt); }
-                catch(NumberFormatException e){ send(chatId,"Número",false);return; }
-                st.step=5; send(chatId,"5) Horas estimadas (e.g. 2.5):",false);
+                int sp;
+                try {
+                    sp = Integer.parseInt(txt);
+                } catch (NumberFormatException e) {
+                    send(chatId, "Número inválido. Ingresa un entero entre 1 y 7:", false);
+                    return; // sigue en step 4
+                }
+                if (sp < 1 || sp > 7) {
+                    send(chatId, "Story Points fuera de rango. Ingresa un valor entre 1 y 7:", false);
+                    return; // sigue en step 4
+                }
+                st.tSP = sp;
+                st.step = 5;
+                send(chatId, "5) Horas estimadas (0–4):", false);
                 break;
 
             case 5:
-                try{ st.tEst=Double.parseDouble(txt); }
-                catch(NumberFormatException e){ send(chatId,"Número",false);return; }
+                double est;
+                try {
+                    est = Double.parseDouble(txt);
+                } catch (NumberFormatException e) {
+                    send(chatId, "Número inválido. Ingresa un decimal entre 0 y 4:", false);
+                    return; // sigue en step 5
+                }
+                if (est < 0 || est > 4) {
+                    send(chatId, "Horas estimadas fuera de rango. Ingresa un valor entre 0 y 4:", false);
+                    return; // sigue en step 5
+                }
+                st.tEst = est;
 
-                boolean mgr=roleSvc.isManagerInProject(st.currentProjectId, st.loggedUser.getIdUser());
-                if(!mgr){ createTask(chatId,st); return; }
-
-                st.step=6;
-                send(chatId,"6) Tipo:\n1) Free\n2) Asignar usuario\n3) IA",false);
+                boolean mgr = roleSvc.isManagerInProject(st.currentProjectId, st.loggedUser.getIdUser());
+                if (!mgr) {
+                    createTask(chatId, st);
+                    return;
+                }
+                st.step = 6;
+                send(chatId, "6) Tipo:\n1) Free\n2) Asignar usuario\n3) IA", false);
                 break;
 
             case 6:

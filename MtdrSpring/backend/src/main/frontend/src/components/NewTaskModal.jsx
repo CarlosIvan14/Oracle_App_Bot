@@ -113,7 +113,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
       deadline      : deadline.toISOString(),
       storyPoints   : Number(storyPoints),
       sprint        : { id_sprint : Number(sprintId) },
-      creation_ts   : (new Date().toISOString()).split('.')[0],
+      creationTs    : new Date().toISOString().split('.')[0],
       realHours     : 0,
       estimatedHours: Number(estimated)
     };
@@ -193,8 +193,8 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
       onClick={() => setMode(value)}
       className={`rounded-full px-3 py-1 border text-sm transition
         ${mode===value
-          ? 'bg-cyan-500 text-white border-cyan-500'
-          : 'border-gray-500 text-gray-300 hover:bg-cyan-500 hover:text-white'}`}
+          ? 'bg-red-500 text-white border-red-500'
+          : 'border-gray-500 text-gray-300 hover:bg-red-500 hover:text-white'}`}
     >
       {children}
     </button>
@@ -209,7 +209,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
       <button
         onClick={() => setOpen(true)}
         className="ml-4 flex items-center bg-transparent text-white font-semibold py-2 px-4 rounded-full
-                   transition hover:scale-105 hover:border hover:border-cyan-500"
+                   transition hover:scale-105 hover:border hover:border-red-500"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none"
              viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -257,21 +257,33 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                 <label className="flex flex-col text-sm">
                   Story Points
                   <input
-                    type="number" min={1} max={10}
+                    type="number"
+                    min={1}
+                    max={7}                           
                     className="bg-customDarkligth bg-opac rounded-lg p-2 mt-1"
                     value={storyPoints}
-                    onChange={e => setStoryPoints(e.target.value)}
+                    onChange={e => {
+                      const val = Number(e.target.value)
+                      setStoryPoints(val > 7 ? 7 : val)   
+                    }}
                   />
                 </label>
                 <label className="flex flex-col text-sm">
-                  Horas estimadas
-                  <input
-                    type="number" min={1}
-                    className="bg-customDarkligth bg-opac rounded-lg p-2 mt-1"
-                    value={estimated}
-                    onChange={e => setEstimated(e.target.value)}
-                  />
-                </label>
+                Horas estimadas
+                <input
+                  type="number"
+                  min={1}
+                  max={4}                                           // límite superior
+                  className="bg-customDarkligth bg-opac rounded-lg p-2 mt-1"
+                  value={estimated}
+                  onChange={e => {
+                    const val = Number(e.target.value)
+                    // Si pasan de 4, fuerza a 4; si bajan de 1, fuerza a 1
+                    const clamped = Math.max(1, Math.min(4, val))
+                    setEstimated(clamped)
+                  }}
+                />
+              </label>
               </div>
 
               <DatePicker
@@ -310,7 +322,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                       className={`w-full rounded-full border py-1 ${
                         aiLoading
                           ? 'border-gray-600 text-gray-500 cursor-wait'
-                          : 'border-cyan-500 hover:bg-cyan-500 hover:text-white transition'
+                          : 'border-red-500 hover:bg-red-500 hover:text-white transition'
                       }`}
                     >
                       {aiLoading ? 'Consultando IA…' : 'Obtener recomendación IA'}
@@ -341,7 +353,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
               className={`mt-6 w-full rounded-full py-2 border
                 ${sending
                   ? 'border-gray-600 text-gray-500 cursor-not-allowed'
-                  : 'border-cyan-500 hover:bg-cyan-500 hover:text-white transition'}`}
+                  : 'border-red-500 hover:bg-red-500 hover:text-white transition'}`}
             >
               {sending ? 'Creando…' : 'Crear Tarea'}
             </button>

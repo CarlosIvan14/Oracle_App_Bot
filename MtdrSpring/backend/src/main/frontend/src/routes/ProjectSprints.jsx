@@ -120,13 +120,17 @@ export default function ProjectSprints() {
               </div>
               {roleUser === 'manager' && (
                 <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    toggle(s);
-                  }}
-                  className="rounded-full bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2"
-                >
-                  {s.description === 'Active' ? 'Deshabilitar' : 'Habilitar'}
+                onClick={e => {
+                  e.stopPropagation();
+                  toggle(s);
+                }}
+                className={`rounded-full text-white font-bold py-1 px-2 ${
+                  s.description === 'Active'
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : 'bg-green-600 hover:bg-green-700'
+                }`}
+              >
+                {s.description === 'Active' ? 'Deshabilitar' : 'Habilitar'}
                 </button>
               )}
             </div>
