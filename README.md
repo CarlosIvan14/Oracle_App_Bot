@@ -24,4 +24,4 @@ The lab executes scripts that require the following software to run properly: (T
 mvn clean install
 mvn spring-boot:run
 ```
-5. Wait for 30 seconds to let it run and go to http://localhost:8081
+5. Wait for 30 seconds to let it run and go to http://159.54.153.189

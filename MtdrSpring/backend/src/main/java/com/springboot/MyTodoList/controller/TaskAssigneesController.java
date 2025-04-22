@@ -1,14 +1,28 @@
 package com.springboot.MyTodoList.controller;
 
-import com.springboot.MyTodoList.model.TaskAssignees;
-import com.springboot.MyTodoList.service.TaskAssigneesService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.springboot.MyTodoList.dto.TaskAssigneeResponseDTO;
+import com.springboot.MyTodoList.model.TaskAssignees;
+import com.springboot.MyTodoList.repository.TaskAssigneesRepository;
+import com.springboot.MyTodoList.service.TaskAssigneesService;
 
 @RestController
 @RequestMapping("/api/task-assignees")
@@ -71,7 +85,16 @@ public class TaskAssigneesController {
         List<TaskAssignees> taskAssignees = taskAssigneesService.getTaskAssigneesByUserAndSprint(projectUserId, sprintId);
         return new ResponseEntity<>(taskAssignees, HttpStatus.OK);
     }
-    // Nuevo endpoint: obtener la cantidad de tareas "Done" para un usuario (ProjectUser) en un sprint específico
+
+    @GetMapping("/by-sprint/{sprintId}")
+    public ResponseEntity<List<TaskAssigneeResponseDTO>> getAssigneesBySprintId(@PathVariable int sprintId) {
+        List<TaskAssigneeResponseDTO> assignees = taskAssigneesService.getTaskAssigneesBySprintId(sprintId);
+        return ResponseEntity.ok(assignees);
+    }
+    
+    // REPORTES Tasks 01-06
+
+    // R01: obtener las tareas completadas (Done) para un usuario (ProjectUser) en un sprint específico
     @GetMapping("/user/{projectUserId}/sprint/{sprintId}/done/count")
     public ResponseEntity<Long> getDoneTasksCountByUserAndSprint(
             @PathVariable int projectUserId, @PathVariable int sprintId) {
@@ -83,6 +106,105 @@ public class TaskAssigneesController {
             @PathVariable int projectUserId, @PathVariable int sprintId) {
         List<TaskAssignees> taskAssignees = taskAssigneesService.getCompletedTasksByUserAndSprint(projectUserId, sprintId);
         return new ResponseEntity<>(taskAssignees, HttpStatus.OK);
+    }
+
+    // R02: tareas completadas por usuario en semana
+    @GetMapping("/user/{projectUserId}/week/{date}/done/count")
+    public ResponseEntity<Long> getDoneTasksCountByUserAndWeek(
+            @PathVariable int projectUserId, 
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate from = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate to = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        long count = taskAssigneesService.getCountDoneTasksByUserByDateRange(projectUserId, from, to);
+        return new ResponseEntity<>(count, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{projectUserId}/week/{date}/done")
+    public ResponseEntity<List<TaskAssignees>> getCompletedTasksByUserAndWeek(
+            @PathVariable int projectUserId, 
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate from = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate to = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        List<TaskAssignees> tasks = taskAssigneesService.getCompletedTasksByUserByDateRange(projectUserId, from, to);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
+    }
+
+    // R03: tareas completadas por usuario en mes
+    @GetMapping("/user/{projectUserId}/month/{date}/done/count")
+    public ResponseEntity<Long> getDoneTasksCountByUserAndMonth(
+            @PathVariable int projectUserId, 
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate from = date.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate to = date.with(TemporalAdjusters.lastDayOfMonth());
+        long count = taskAssigneesService.getCountDoneTasksByUserByDateRange(projectUserId, from, to);
+        return new ResponseEntity<>(count, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{projectUserId}/month/{date}/done")
+    public ResponseEntity<List<TaskAssignees>> getCompletedTasksByUserAndMonth(
+            @PathVariable int projectUserId, 
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate from = date.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate to = date.with(TemporalAdjusters.lastDayOfMonth());
+        List<TaskAssignees> tasks = taskAssigneesService.getCompletedTasksByUserByDateRange(projectUserId, from, to);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
+    }
+
+    // R04: tareas completadas por equipo en sprint
+    @GetMapping("/team-sprint/{sprintId}/done/count")
+    public ResponseEntity<Long> getDoneTasksCountByTeamAndSprint(
+            @PathVariable int sprintId) {
+        long count = taskAssigneesService.getCountDoneTasksByTeamAndSprint(sprintId);
+        return new ResponseEntity<>(count, HttpStatus.OK);
+    }
+
+    @GetMapping("/team-sprint/{sprintId}/done")
+    public ResponseEntity<List<TaskAssignees>> getCompletedTasksByTeamAndSprint(
+            @PathVariable int sprintId) {
+        List<TaskAssignees> tasks = taskAssigneesService.getCompletedTasksByTeamAndSprint(sprintId);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
+    }
+
+    // R05: tareas completadas por equipo en semana
+    @GetMapping("/team-week/{date}/project/{projectId}/done/count")
+    public ResponseEntity<Long> getDoneTasksCountByTeamAndWeek(
+            @PathVariable int projectId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate from = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate to = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        long count = taskAssigneesService.getCountDoneTasksByTeamByDateRange(projectId, from, to);
+        return new ResponseEntity<>(count, HttpStatus.OK);
+    }
+
+    @GetMapping("/team-week/{date}/project/{projectId}/done")
+    public ResponseEntity<List<TaskAssignees>> getCompletedTasksByTeamAndWeek(
+            @PathVariable int projectId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate from = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate to = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        List<TaskAssignees> tasks = taskAssigneesService.getCompletedTasksByTeamByDateRange(projectId, from, to);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
+    }
+
+    // R06: tareas completadas por equipo en mes
+    @GetMapping("/team-month/{date}/project/{projectId}/done/count")
+    public ResponseEntity<Long> getDoneTasksCountByTeamAndMonth(
+            @PathVariable int projectId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate from = date.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate to = date.with(TemporalAdjusters.lastDayOfMonth());
+        long count = taskAssigneesService.getCountDoneTasksByTeamByDateRange(projectId, from, to);
+        return new ResponseEntity<>(count, HttpStatus.OK);
+    }
+
+    @GetMapping("/team-month/{date}/project/{projectId}/done")
+    public ResponseEntity<List<TaskAssignees>> getCompletedTasksByTeamAndMonth(
+            @PathVariable int projectId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate from = date.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate to = date.with(TemporalAdjusters.lastDayOfMonth());
+        List<TaskAssignees> tasks = taskAssigneesService.getCompletedTasksByTeamByDateRange(projectId, from, to);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
 }

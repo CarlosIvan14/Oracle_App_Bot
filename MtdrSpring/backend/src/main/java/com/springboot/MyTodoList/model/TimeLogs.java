@@ -1,7 +1,16 @@
 package com.springboot.MyTodoList.model;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "TIME_LOGS")
@@ -23,11 +32,14 @@ public class TimeLogs {
     @Column(name = "END_TS")
     private LocalDateTime endTs;
 
-    public TimeLogs() {
+    public TimeLogs() {}
+
+    public TimeLogs(TaskAssignees taskAssignees) {
+        this.taskAssignees = taskAssignees;
+        this.startTs = LocalDateTime.now();
     }
 
-    public TimeLogs(int idTimeLogs, TaskAssignees taskAssignees, LocalDateTime startTs, LocalDateTime endTs) {
-        this.idTimeLogs = idTimeLogs;
+    public TimeLogs(TaskAssignees taskAssignees, LocalDateTime startTs, LocalDateTime endTs) {
         this.taskAssignees = taskAssignees;
         this.startTs = startTs;
         this.endTs = endTs;

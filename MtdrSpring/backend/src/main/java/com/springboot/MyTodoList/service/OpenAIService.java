@@ -1,6 +1,7 @@
 package com.springboot.MyTodoList.service;
 
 import com.springboot.MyTodoList.model.OracleUser;
+import com.springboot.MyTodoList.model.Skills;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -8,103 +9,133 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
+/**
+ *   Dado:
+ *   • projectId
+ *   • nombre y descripción de la tarea
+ *
+ *   Devuelve la lista de usuarios que PERTENECEN al proyecto,
+ *   ordenados de mejor → peor match según sus skills.
+ */
 @Service
 public class OpenAIService {
 
+    /* ========== configuración ========== */
     @Value("${openai.api.key}")
-    private String openaiApiKey; // Configura este valor en application.properties o mediante .env
+    private String openaiApiKey;
 
-    private final OracleUserService oracleUserService;
+    @Value("${backend.base-url:http://159.54.153.189}")
+    private String backendBaseUrl;                    // <‑‑ configurable
 
-    public OpenAIService(OracleUserService oracleUserService) {
-        this.oracleUserService = oracleUserService;
+    private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+
+    /* ========== dependencias ========== */
+    private final SkillsService skillsService;
+    private final RestTemplate  restTemplate = new RestTemplate();
+
+    public OpenAIService(SkillsService skillsService) {
+        this.skillsService = skillsService;
     }
 
-    public List<OracleUser> getAssignedUsers(String taskDescription) {
-        // Obtiene todos los usuarios con sus campos relevantes
-        List<OracleUser> allUsers = oracleUserService.getAllUsers();
+    /* ========================================================= */
+    public List<OracleUser> rankUsersForTask(int projectId,
+                                             String taskName,
+                                             String taskDescription) {
 
-        // Construir el prompt para OpenAI
-        StringBuilder prompt = new StringBuilder();
-        prompt.append("Tarea: ").append(taskDescription).append("\n");
-        prompt.append("Lista de usuarios (ID, Role, Name, Skill):\n");
-        for (OracleUser user : allUsers) {
-            prompt.append("ID: ").append(user.getIdUser())
-                  .append(", Name: ").append(user.getName())
-                  .append("\n");
+        /* 1) Traer SOLO los usuarios del proyecto */
+        String urlUsers = backendBaseUrl + "/api/project-users/project/" + projectId + "/users";
+        ResponseEntity<OracleUser[]> respUsers =
+                restTemplate.getForEntity(urlUsers, OracleUser[].class);
+
+        OracleUser[] projectUsersArr = respUsers.getBody();
+        if (projectUsersArr == null || projectUsersArr.length == 0)
+            return Collections.emptyList();
+
+        List<OracleUser> projectUsers = Arrays.asList(projectUsersArr);
+
+        /* 2) skills por usuario */
+        Map<Integer,List<Skills>> skillsByUser = new HashMap<>();
+        for (OracleUser u : projectUsers) {
+            skillsByUser.put(
+                u.getIdUser(),
+                skillsService.getSkillsByOracleUser(u.getIdUser())
+            );
         }
-        // Solicitar una salida precisa: una lista de IDs separados por coma sin texto adicional
-        prompt.append("Ordena los usuarios de mejor a peor perfil basándote en el usuario que tenga las skills más adecuadas de acuerdo a la descripción de la tarea. ");
-        prompt.append("Si no hay un match directo, ordénalos en base solo a las skills. ");
-        prompt.append("Ordena los usuarios de mejor a peor perfil basándote en sus skills en relación con la tarea.");
-        prompt.append(" Devuelve ÚNICAMENTE una lista de IDs en el siguiente formato: 'ID1,ID2,ID3,ID4,ID5'.");
-        prompt.append(" No incluyas ninguna otra palabra, explicación, ni comentarios. SOLO la lista de IDs. Y no omitas ninguno de los IDs que se te pasaron.");
-        prompt.append(" Ejemplo de salida válida: '53,54,30,50,1,41,52'.");
 
+        /* 3) Construir prompt */
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Tienes que asignar una tarea en un proyecto de software.\n")
+              .append("Nombre de la tarea: ").append(taskName).append('\n')
+              .append("Descripción de la tarea: ").append(taskDescription).append("\n\n")
+              .append("A continuación la lista de usuarios disponibles en el proyecto y sus skills:\n");
 
-        // Preparar la llamada a la API de OpenAI utilizando el endpoint de chat completions
-        RestTemplate restTemplate = new RestTemplate();
-        String url = "https://api.openai.com/v1/chat/completions";
+        for (OracleUser u : projectUsers) {
+            prompt.append("ID=").append(u.getIdUser())
+                  .append(", Nombre=").append(u.getName()).append('\n');
 
+            List<Skills> ss = skillsByUser.get(u.getIdUser());
+            if (ss.isEmpty()) {
+                prompt.append("  • (sin skills registradas)\n");
+            } else {
+                for (Skills s : ss) {
+                    prompt.append("  • ")
+                          .append(s.getName())
+                          .append(" → ")
+                          .append(s.getDescription())
+                          .append('\n');
+                }
+            }
+        }
+
+        prompt.append("\nOrdena **todos** los IDs anteriores de mejor a peor match.\n")
+              .append("Devuelve **solo** la lista separada por comas, sin texto extra.");
+
+        /* 4) Llamada a OpenAI */
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(openaiApiKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        // El cuerpo de la solicitud ahora debe tener "messages"
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "gpt-4o");
-        // Aumentamos max_tokens y configuramos temperature para respuestas más deterministas
-        requestBody.put("max_tokens", 100);
-        requestBody.put("temperature", 0);
-        
-        List<Map<String, String>> messages = new ArrayList<>();
-        Map<String, String> userMessage = new HashMap<>();
-        userMessage.put("role", "user");
-        userMessage.put("content", prompt.toString());
-        messages.add(userMessage);
-        requestBody.put("messages", messages);
+        Map<String,Object> body = new HashMap<>();
+        body.put("model", "gpt-4o");
+        body.put("temperature", 0);
+        body.put("max_tokens", 50);
+        body.put("messages", List.of(
+                Map.of("role","user",
+                       "content", prompt.toString())
+        ));
 
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<Map> respOA = restTemplate.postForEntity(
+                OPENAI_URL, new HttpEntity<>(body, headers), Map.class);
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Error al llamar a OpenAI");
+        if (!respOA.getStatusCode().is2xxSuccessful())
+            throw new RuntimeException("OpenAI error " + respOA.getStatusCode());
+
+        String content = Optional.ofNullable(respOA.getBody())
+                .map(m -> (List<?>) m.get("choices"))
+                .filter(l -> !l.isEmpty())
+                .map(l -> (Map<?,?>) l.get(0))
+                .map(c -> (Map<?,?>) c.get("message"))
+                .map(m -> (String)  m.get("content"))
+                .orElseThrow(() -> new RuntimeException("Respuesta vacía OpenAI"));
+
+        /* 5) Parsear IDs */
+        List<Integer> orderedIds = new ArrayList<>();
+        for (String part : content.split(",")) {
+            try { orderedIds.add(Integer.parseInt(part.trim())); } catch (NumberFormatException ignore) {}
         }
 
-        // Extraer la respuesta del endpoint de chat completions
-        List choices = (List) response.getBody().get("choices");
-        if (choices == null || choices.isEmpty()) {
-            throw new RuntimeException("Respuesta vacía de OpenAI");
+        /* 6) Construir lista ordenada de usuarios  */
+        List<OracleUser> ordered = new ArrayList<>();
+        for (Integer id : orderedIds) {
+            projectUsers.stream()
+                        .filter(u -> u.getIdUser()==id)
+                        .findFirst()
+                        .ifPresent(ordered::add);
         }
-        Map firstChoice = (Map) choices.get(0);
-        Map message = (Map) firstChoice.get("message");
-        String textResponse = (String) message.get("content");
-        
-        // Si la respuesta está vacía, imprime el prompt y la respuesta para depuración
-        if (textResponse == null || textResponse.trim().isEmpty()) {
-            throw new RuntimeException("La respuesta de OpenAI está vacía. Prompt enviado: " + prompt.toString());
-        }
+        /* por seguridad incluir los que falten */
+        for (OracleUser u : projectUsers)
+            if (!ordered.contains(u)) ordered.add(u);
 
-        // Parsear la respuesta para obtener los IDs
-        List<Long> sortedIds = new ArrayList<>();
-        for (String s : textResponse.split(",")) {
-            try {
-                sortedIds.add(Long.parseLong(s.trim()));
-            } catch (NumberFormatException e) {
-                // Se ignoran valores no numéricos, también podrías loguear el error para depuración
-            }
-        }
-
-        // Construir la lista de usuarios ordenada según los IDs devueltos
-        List<OracleUser> sortedUsers = new ArrayList<>();
-        for (Long id : sortedIds) {
-            for (OracleUser user : allUsers) {
-                if (user.getIdUser() == id.intValue()) {
-                    sortedUsers.add(user);
-                    break;
-                }
-            }
-        }
-        return sortedUsers;
+        return ordered;
     }
 }

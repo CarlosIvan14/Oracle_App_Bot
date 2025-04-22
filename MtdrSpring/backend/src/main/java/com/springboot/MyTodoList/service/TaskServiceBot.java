@@ -10,6 +10,8 @@ import org.springframework.web.client.RestTemplate;
 
 import org.springframework.http.*;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.ArrayList;
 import java.util.Arrays; 
 import java.util.Collections;
 import java.util.List;
@@ -79,5 +81,15 @@ public class TaskServiceBot {
         );
 
         return response.getBody();
+    }
+     public List<TaskAssignees> getTaskAssigneesBySprint(int sprintId) {
+        String url = apiBaseUrl + "/task-assignees/by-sprint/" + sprintId;
+
+        ResponseEntity<TaskAssignees[]> resp =
+            restTemplate.getForEntity(url, TaskAssignees[].class);
+
+        TaskAssignees[] arr = resp.getBody();
+        return (arr != null) ? Arrays.asList(arr)
+                             : new ArrayList<TaskAssignees>();
     }
 }

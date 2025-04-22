@@ -23,7 +23,7 @@ function NewItemModal({ addItem, isInserting }) {
       return;
     }
     setIsFetching(true);
-    fetch("http://localhost:8081/assignment/by-ai", {
+    fetch("http://159.54.153.189/assignment/by-ai", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ description })
