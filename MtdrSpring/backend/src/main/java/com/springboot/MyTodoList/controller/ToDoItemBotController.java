@@ -759,25 +759,47 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         return out;
     }
 
-    private void showAllTasks(long chatId,int sprintId){
+    private void showAllTasks(long chatId, int sprintId) {
         List<TaskAssignees> assigned = taskSvc.getTaskAssigneesBySprint(sprintId);
-        List<SimplifiedTaskDTO> unassigned = taskSvc.getUnassignedTasksBySprint(sprintId);
-
-        StringBuilder sb=new StringBuilder("*Sprint ").append(sprintId).append("*\n\n");
-        sb.append("📥 *Asignadas*\n");
-        if(assigned.isEmpty()) sb.append("— vacías —\n");
-        else for(TaskAssignees ta:assigned)
-            sb.append("• ").append(ta.getTask().getName())
-              .append(" (").append(ta.getProjectUser().getUser().getName()).append(")\n");
-
-        sb.append("\n📭 *Libres*\n");
-        if(unassigned.isEmpty()) sb.append("— vacías —");
-        else for(SimplifiedTaskDTO t:unassigned)
-            sb.append("• ").append(t.getDescription())
-              .append(" (SP ").append(t.getStoryPoints()).append(")\n");
-
-        send(chatId,sb.toString(),true);
+        List<SimplifiedTaskDTO> free = taskSvc.getUnassignedTasksBySprint(sprintId);
+    
+        // 1) Construyo y envío la sección de asignadas
+        StringBuilder sbAssigned = new StringBuilder();
+        sbAssigned.append("*Sprint ").append(sprintId).append(" — Asignadas*\n\n");
+        if (assigned.isEmpty()) {
+            sbAssigned.append("— vacías —\n");
+        } else {
+            for (TaskAssignees ta : assigned) {
+                Tasks t    = ta.getTask();
+                String dev = ta.getProjectUser().getUser().getName();
+                sbAssigned
+                  .append("_Nombre Task:_ ").append(t.getName()).append("\n")
+                  .append("_Desarrollador:_ ").append(dev).append("\n")
+                  .append("_HR:_ ").append(t.getRealHours() != null ? t.getRealHours() : 0).append(" ")
+                  .append("_HE:_ ").append(t.getEstimatedHours()).append("h\n")
+                  .append("-----------------\n");
+            }
+        }
+        send(chatId, sbAssigned.toString(), true);
+    
+        // 2) Construyo y envío la sección de libres
+        StringBuilder sbFree = new StringBuilder();
+        sbFree.append("*Sprint ").append(sprintId).append(" — Libres*\n\n");
+        if (free.isEmpty()) {
+            sbFree.append("— vacías —");
+        } else {
+            for (SimplifiedTaskDTO t : free) {
+                sbFree
+                  .append("_Nombre Task:_ ").append(t.getDescription()).append("\n")
+                  .append("_Horas Estimadas:_ ").append(t.getEstimatedHours()).append("h\n")
+                  .append("_Story Points:_ ").append(t.getStoryPoints()).append("\n")
+                  .append("-----------------\n");
+            }
+        }
+        send(chatId, sbFree.toString(), true);
     }
+    
+    
 
     /* ========================================================= */
     /* ===============  ADMIN USERS  =========================== */

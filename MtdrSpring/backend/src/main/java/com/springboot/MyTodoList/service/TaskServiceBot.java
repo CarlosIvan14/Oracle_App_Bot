@@ -83,7 +83,7 @@ public class TaskServiceBot {
         return response.getBody();
     }
      public List<TaskAssignees> getTaskAssigneesBySprint(int sprintId) {
-        String url = apiBaseUrl + "/task-assignees/sprint/" + sprintId;
+        String url = apiBaseUrl + "/task-assignees/by-sprint/" + sprintId;
 
         ResponseEntity<TaskAssignees[]> resp =
             restTemplate.getForEntity(url, TaskAssignees[].class);
