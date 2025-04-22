@@ -646,12 +646,17 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         send(chatId,"Menú:",kb);
     }
 
-    private boolean selectProject(long chatId,String txt,ChatState st){
-        Matcher m=Pattern.compile("\\(ID: (\\d+)\\)").matcher(txt);
-        if(!m.find()) return false;
-        st.currentProjectId=Integer.parseInt(m.group(1));
-        boolean mgr=roleSvc.isManagerInProject(st.currentProjectId, st.loggedUser.getIdUser());
-        showSprintsForProject(chatId,st.currentProjectId,mgr);
+    private boolean selectProject(long chatId, String txt, ChatState st){
+        // sólo proyectos (icono 📁)
+        if (!txt.startsWith("📁 ")) return false;
+        Matcher m = Pattern.compile("\\(ID: (\\d+)\\)").matcher(txt);
+        if (!m.find()) return false;
+    
+        st.currentProjectId = Integer.parseInt(m.group(1));
+        boolean mgr = roleSvc.isManagerInProject(
+                          st.currentProjectId,
+                          st.loggedUser.getIdUser());
+        showSprintsForProject(chatId, st.currentProjectId, mgr);
         return true;
     }
     private boolean selectSprint(long chatId,String txt,ChatState st){

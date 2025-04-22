@@ -34,7 +34,7 @@ public class TaskCreationServiceBot {
     }
     // Get project user ID for automatic assignment
     public Integer getProjectUserId(int projectId, int userId) {
-        String url = apiBaseUrl + "/project-users/project-user-id/project-id/" + projectId + "/user-id/" + userId;
+        String url = apiBaseUrl + "/project-users/project-id/" + projectId + "/user-id/" + userId;
         ResponseEntity<Integer> response = restTemplate.exchange(
             url,
             HttpMethod.GET,

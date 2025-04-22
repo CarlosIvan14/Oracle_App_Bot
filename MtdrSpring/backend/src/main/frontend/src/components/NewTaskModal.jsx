@@ -146,7 +146,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
         // manager
         try {
           const resPU = await fetch(
-            `http://localhost:8081/api/project-users/project-user-id/project-id/${projectId}/user-id/${selectedUserId}`
+            `http://localhost:8081/api/project-users/project-id/${projectId}/user-id/${selectedUserId}`
           );
           if (resPU.ok) {
             const txt = await resPU.text();
