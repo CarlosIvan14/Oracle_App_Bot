@@ -1,15 +1,24 @@
 package com.springboot.MyTodoList.controller;
 
-import com.springboot.MyTodoList.dto.SimplifiedTaskDTO;
-import com.springboot.MyTodoList.model.*;
-import com.springboot.MyTodoList.service.ProjectsServiceBot;
-import com.springboot.MyTodoList.service.SprintsServiceBot;
-import com.springboot.MyTodoList.service.TaskCreationServiceBot;
-import com.springboot.MyTodoList.service.TaskServiceBot;
-import com.springboot.MyTodoList.service.UserRoleServiceBot;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -21,13 +30,18 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import com.springboot.MyTodoList.dto.SimplifiedTaskDTO;
+import com.springboot.MyTodoList.model.LoginRequest;
+import com.springboot.MyTodoList.model.OracleUser;
+import com.springboot.MyTodoList.model.Projects;
+import com.springboot.MyTodoList.model.Sprint;
+import com.springboot.MyTodoList.model.TaskAssignees;
+import com.springboot.MyTodoList.model.Tasks;
+import com.springboot.MyTodoList.service.ProjectsServiceBot;
+import com.springboot.MyTodoList.service.SprintsServiceBot;
+import com.springboot.MyTodoList.service.TaskCreationServiceBot;
+import com.springboot.MyTodoList.service.TaskServiceBot;
+import com.springboot.MyTodoList.service.UserRoleServiceBot;
 
 public class ToDoItemBotController extends TelegramLongPollingBot {
 
@@ -447,7 +461,22 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                 else if("3".equals(txt)) st.rFilter="month";
                 else{ send(chatId,"1/2/3",false); return; }
                 st.step=2;
-                send(chatId, st.rFilter.equals("sprint")?"ID del sprint:":"Fecha (yyyy-MM-dd):",false);
+                if (st.rFilter.equals("sprint")) {
+                    // Show all sprints.
+                    List<Sprint> sprints=sprintsSvc.getSprintsByProjectId(st.currentProjectId);
+                    StringBuilder sprintListMsg = new StringBuilder("Sprints del proyecto:\n");
+                    for (Sprint sprint : sprints) {
+                        sprintListMsg.append("ID: ")
+                                     .append(sprint.getId())
+                                     .append(" - ")
+                                     .append(sprint.getName())
+                                     .append("\n");
+                    }
+                    send(chatId, sprintListMsg.toString(), false);
+                    send(chatId, "ID del sprint:", false);
+                } else {
+                    send(chatId, "Fecha (yyyy-MM-dd):", false);
+                }
                 break;
 
             case 2:
@@ -514,19 +543,27 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         TaskAssignees[] arr=rest.getForObject(dataEpt,TaskAssignees[].class);
 
         double est=0,real=0;
+        Integer sp=0;
         if(arr!=null) for(TaskAssignees ta:arr){
             est+=ta.getTask().getEstimatedHours();
             real+=ta.getTask().getRealHours()==null?0:ta.getTask().getRealHours();
+            sp+=ta.getTask().getStoryPoints();
         }
         String who=team?"Todo el equipo":
                 st.oracleUsers.stream().filter(u->u.getIdUser()==Integer.parseInt(st.rUserId))
                                .findFirst().map(OracleUser::getName).orElse("—");
 
         StringBuilder sb=new StringBuilder("*Reporte*\n");
+        double kpi1 = (real != 0) ? (est / real) * 100 : 0;
+        kpi1 = Math.round(kpi1 * 100.0) / 100.0;
+        double kpi2 = (done != 0) ? (sp / done) : 0;
+        kpi2 = Math.round(kpi2 * 100.0) / 100.0;
         sb.append("Miembro: ").append(who).append("\n")
           .append("Completadas: ").append(done).append("\n")
           .append("Horas est.: ").append(est).append("\n")
-          .append("Horas reales: ").append(real);
+          .append("Horas reales: ").append(real).append("\n")
+          .append("kpi 1 time-efficiency: ").append(kpi1).append("%").append("\n")
+          .append("kpi 2 tryhard: ").append(kpi2).append("/7.0");
 
         send(chatId,sb.toString(),true);
     }
