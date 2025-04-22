@@ -411,8 +411,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             t.setName(st.tName); t.setDescription(st.tDesc);
             t.setDeadline(st.tDeadline.atStartOfDay());
             t.setStoryPoints(st.tSP); t.setEstimatedHours(st.tEst);
-            t.setRealHours(0.0); t.setCreationTs(LocalDateTime.now());
-            Sprint s=new Sprint(); s.setId(st.currentSprintId); t.setSprint(s);
+            t.setRealHours(0.0); 
+            t.setCreationTs(LocalDateTime.now());
+            Sprint s=new Sprint(); 
+            s.setId(st.currentSprintId); 
+            t.setSprint(s);
 
             boolean mgr=roleSvc.isManagerInProject(st.currentProjectId, st.loggedUser.getIdUser());
             t.setStatus(mgr? ("FREE".equals(st.mode)?"UNASSIGNED":"ASSIGNED"):"ASSIGNED");
@@ -719,7 +722,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             rows.add(titleRow("==📭 NO ASIGNADAS 📭=="));
             for(SimplifiedTaskDTO t:unassigned){
                 KeyboardRow r=new KeyboardRow();
-                r.add(t.getDescription()+" [ID: "+t.getId()+"]");
+                r.add(t.getName()+" [ID: "+t.getId()+"]");
                 r.add("👤 ASSIGN-"+t.getId());
                 rows.add(r);
             }
@@ -728,7 +731,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         /* assigned */
         if(!assigned.isEmpty()){
             rows.add(titleRow("==📥 ASIGNADAS 📥=="));
-            for(Tasks t:assigned) rows.add(row(t.getDescription()+" [ID: "+t.getId()+"]","▶ START-"+t.getId()));
+            for(Tasks t:assigned) rows.add(row(t.getName()+" [ID: "+t.getId()+"]","▶ START-"+t.getId()));
         }
 
         /* in progress */
@@ -736,7 +739,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             rows.add(titleRow("==⏳ EN PROGRESO ⏳=="));
             for(Tasks t:prog){
                 KeyboardRow r=new KeyboardRow();
-                r.add(t.getDescription()+" [ID: "+t.getId()+"]");
+                r.add(t.getName()+" [ID: "+t.getId()+"]");
                 r.add("❌ CANCEL-"+t.getId());
                 r.add("✅ DONE-"+t.getId());
                 rows.add(r);
@@ -746,7 +749,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         /* done */
         if(!done.isEmpty()){
             rows.add(titleRow("==✅ COMPLETADAS ✅=="));
-            for(Tasks t:done) rows.add(row(t.getDescription()+" [ID: "+t.getId()+"]","↩ UNDO-"+t.getId()));
+            for(Tasks t:done) rows.add(row(t.getName()+" [ID: "+t.getId()+"]","↩ UNDO-"+t.getId()));
         }
 
         kb.setKeyboard(rows);
@@ -790,7 +793,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         } else {
             for (SimplifiedTaskDTO t : free) {
                 sbFree
-                  .append("_Nombre Task:_ ").append(t.getDescription()).append("\n")
+                  .append("_Nombre Task:_ ").append(t.getName()).append("\n")
                   .append("_Horas Estimadas:_ ").append(t.getEstimatedHours()).append("h\n")
                   .append("_Story Points:_ ").append(t.getStoryPoints()).append("\n")
                   .append("-----------------\n");

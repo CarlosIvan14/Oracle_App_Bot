@@ -466,15 +466,7 @@ function Reports() {
                         {reportData.tasksData.reduce((sum, row) => sum + (row.task.estimatedHours || 0), 0)}
                       </td>
                       <td className="px-6 py-4">
-                        {(() => {
-                          const kpis = reportData.tasksData.map(row => {
-                            const real = row.task.realHours || 0;
-                            const est = row.task.estimatedHours || 1;
-                            return (est / real) * 100;
-                          });
-                          const avgKPI = kpis.length ? (kpis.reduce((a, b) => a + b, 0) / kpis.length) : 0;
-                          return `${avgKPI.toFixed(0)}%`;
-                        })()}
+                        {reportData.kpi1}
                       </td>
                     </tr>
 

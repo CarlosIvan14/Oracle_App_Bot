@@ -47,7 +47,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
       .catch(()  => setRole(null));
 
     /* 2. mi idProjectUser (dev) */
-    fetch(`http://localhost:8081/api/project-users/project-user-id/project-id/${projectId}/user-id/${user.idUser}`)
+    fetch(`http://localhost:8081/api/project-users/project-id/${projectId}/user-id/${user.idUser}`)
       .then(r => r.ok ? r.text() : null)
       .then(txt => setMyProjectUserId(txt ? Number(txt) : null))
       .catch(() => setMyProjectUserId(null));
@@ -113,13 +113,14 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
       deadline      : deadline.toISOString(),
       storyPoints   : Number(storyPoints),
       sprint        : { id_sprint : Number(sprintId) },
-      creation_ts   : new Date().toISOString(),
+      creation_ts   : (new Date().toISOString()).split('.')[0],
       realHours     : 0,
       estimatedHours: Number(estimated)
     };
 
     let createdTask;
     try {
+      console.log(taskPayload.creation_ts)
       const res = await fetch('http://localhost:8081/api/tasks', {
         method :'POST',
         headers:{ 'Content-Type':'application/json' },

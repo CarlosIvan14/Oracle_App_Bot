@@ -1,15 +1,20 @@
 // src/routes/Login.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 function Login({ onLogin }) {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    
     try {
       const response = await fetch("http://localhost:8081/users/login", {
         method: "POST",
@@ -31,6 +36,8 @@ function Login({ onLogin }) {
       navigate('/home');
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,6 +55,7 @@ function Login({ onLogin }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
           <div>
@@ -58,13 +66,15 @@ function Login({ onLogin }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
           <button
             type="submit"
-            className="bg-red-600 w-full text-white py-2 rounded-full mt-4 hover:bg-red-700"
+            className="bg-red-600 w-full text-white py-2 rounded-full mt-4 hover:bg-red-700 flex justify-center items-center"
+            disabled={isLoading}
           >
-            Ingresar
+            {isLoading ? <LoadingSpinner /> : 'Ingresar'}
           </button>
         </form>
       </div>
