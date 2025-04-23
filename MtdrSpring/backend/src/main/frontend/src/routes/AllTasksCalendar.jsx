@@ -15,8 +15,8 @@ export default function AllTasksCalendar() {
         setLoading(true);
 
         const [assignedResponse, unassignedResponse] = await Promise.all([
-          fetch(`http://159.54.153.189/api/task-assignees/by-sprint/${sprintId}`),
-          fetch(`http://159.54.153.189/api/tasks/unassigned/${sprintId}`)
+          fetch(`http://159.54.138.76/api/task-assignees/by-sprint/${sprintId}`),
+          fetch(`http://159.54.138.76/api/tasks/unassigned/${sprintId}`)
         ]);
 
         if (!assignedResponse.ok || !unassignedResponse.ok) {

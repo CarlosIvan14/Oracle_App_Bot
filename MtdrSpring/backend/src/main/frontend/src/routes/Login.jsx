@@ -16,7 +16,7 @@ function Login({ onLogin }) {
     setError('');
     
     try {
-      const response = await fetch("http://159.54.153.189/users/login", {
+      const response = await fetch("http://159.54.138.76/users/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

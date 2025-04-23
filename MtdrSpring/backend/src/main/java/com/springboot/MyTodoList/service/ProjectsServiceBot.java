@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 public class ProjectsServiceBot {
     private final RestTemplate restTemplate;
-    private final String apiBaseUrl = "http://159.54.153.189/api";
+    private final String apiBaseUrl = "http://159.54.138.76/api";
 
     @Autowired
     public ProjectsServiceBot(RestTemplateBuilder restTemplateBuilder) {
