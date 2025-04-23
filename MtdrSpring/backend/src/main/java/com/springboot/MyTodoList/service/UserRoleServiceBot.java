@@ -11,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
 public class UserRoleServiceBot {
 
     private final RestTemplate rest;
-    private final String apiBase = "http://159.54.138.76/api";
+    private final String apiBase = "http://140.84.170.68/api";
 
     @Autowired
     public UserRoleServiceBot(RestTemplateBuilder builder) {

@@ -28,7 +28,7 @@ export default function Navbar({ onLogout }) {
     if (matchSprintRoot && projectId) {
       const u = JSON.parse(localStorage.getItem('user'));
       fetch(
-        `http://159.54.138.76/api/project-users/role-user/project-id/${projectId}/user-id/${u.idUser}`
+        `http://140.84.170.68/api/project-users/role-user/project-id/${projectId}/user-id/${u.idUser}`
       )
         .then(r => r.ok ? r.text() : Promise.reject())
         .then(txt => setRoleUser(txt.trim()))

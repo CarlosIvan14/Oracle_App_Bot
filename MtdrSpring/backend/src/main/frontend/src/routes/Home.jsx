@@ -20,7 +20,7 @@ function Home({ user }) {
     }
 
     // Usamos el id del usuario activo para obtener sus proyectos
-    fetch(`http://159.54.138.76/api/project-users/user/${currentUser.idUser}/projects`)
+    fetch(`http://140.84.170.68/api/project-users/user/${currentUser.idUser}/projects`)
       .then((response) => {
         if (!response.ok) {
           throw new Error('Error al obtener proyectos');

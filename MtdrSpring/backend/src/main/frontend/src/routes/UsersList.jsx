@@ -163,7 +163,7 @@
 
     useEffect(() => {
       // Obtener la lista de usuarios del proyecto
-      fetch(`http://159.54.138.76/api/project-users/project/${projectId}/users`)
+      fetch(`http://140.84.170.68/api/project-users/project/${projectId}/users`)
         .then((response) => {
           if (!response.ok) {
             throw new Error("Error al obtener los usuarios del proyecto");
@@ -173,7 +173,7 @@
         .then((usersData) => {
           return Promise.all(
             usersData.map((user) =>
-              fetch(`http://159.54.138.76/api/project-users/role-user/project-id/${projectId}/user-id/${user.idUser}`)
+              fetch(`http://140.84.170.68/api/project-users/role-user/project-id/${projectId}/user-id/${user.idUser}`)
                 .then((respRole) => {
                   if (!respRole.ok) {
                     throw new Error("Error al obtener el rol de usuario");
@@ -181,7 +181,7 @@
                   return respRole.text();
                 })
                 .then((roleText) =>
-                  fetch(`http://159.54.138.76/api/skills/oracleuser/${user.idUser}`)
+                  fetch(`http://140.84.170.68/api/skills/oracleuser/${user.idUser}`)
                     .then((respSkill) => {
                       if (!respSkill.ok) {
                         throw new Error("Error al obtener las skills del usuario");
@@ -235,7 +235,7 @@
     const saveEditSkill = async (skillId, newName, newDesc) => {
       if (!selectedUser) return;
       try {
-        const response = await fetch(`http://159.54.138.76/api/skills/${skillId}`, {
+        const response = await fetch(`http://140.84.170.68/api/skills/${skillId}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -268,7 +268,7 @@
       const confirmDel = window.confirm("¿Eliminar esta skill?");
       if (!confirmDel) return;
       try {
-        const response = await fetch(`http://159.54.138.76/api/skills/${skillId}`, {
+        const response = await fetch(`http://140.84.170.68/api/skills/${skillId}`, {
           method: "DELETE",
         });
         if (!response.ok) {
@@ -306,7 +306,7 @@
         description: newDesc,
       };
       try {
-        const response = await fetch(`http://159.54.138.76/api/skills`, {
+        const response = await fetch(`http://140.84.170.68/api/skills`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
