@@ -12,7 +12,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
 import "@testing-library/jest-dom";
-import AllTasksCalendar from "../components/AllTasksCalendar";
+import AllTasksCalendar from "../routes/AllTasksCalendar";
 
 // Mock server data
 const assignedTasksMock = [
@@ -81,6 +81,15 @@ const renderWithRouter = (ui, { route = "/calendar/123" } = {}) => {
 };
 
 describe("AllTasksCalendar Component", () => {
+  beforeAll(() => {
+    jest.spyOn(console, 'warn').mockImplementation((msg) => {
+      if (
+        msg.includes('React Router Future Flag Warning')
+      ) return;
+      // Si no es el warning específico, lo imprimimos
+      console.warn(msg);
+    });
+  });  
   test("renders assigned and unassigned tasks correctly", async () => {
     renderWithRouter(<AllTasksCalendar />);
 
