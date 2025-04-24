@@ -1,39 +1,39 @@
 // src/routes/Login.js
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import LoadingSpinner from '../components/LoadingSpinner';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 function Login({ onLogin }) {
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
-    
+    setError("");
+
     try {
       const response = await fetch("http://localhost:8081/users/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, password })
+        body: JSON.stringify({ name, password }),
       });
 
       if (!response.ok) {
-        throw new Error('Usuario/contraseña inválidos');
+        throw new Error("Usuario/contraseña inválidos");
       }
 
       const data = await response.json();
       // Guardamos el usuario en el almacenamiento local
-      localStorage.setItem('user', JSON.stringify(data));
+      localStorage.setItem("user", JSON.stringify(data));
       // Actualiza el estado global o del componente padre si es necesario
       onLogin(data);
-      navigate('/home');
+      navigate("/home");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -74,7 +74,7 @@ function Login({ onLogin }) {
             className="bg-red-600 w-full text-white py-2 rounded-full mt-4 hover:bg-red-700 flex justify-center items-center"
             disabled={isLoading}
           >
-            {isLoading ? <LoadingSpinner /> : 'Ingresar'}
+            {isLoading ? <LoadingSpinner /> : "Ingresar"}
           </button>
         </form>
       </div>

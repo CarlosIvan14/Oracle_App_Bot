@@ -1,6 +1,6 @@
 // src/routes/Profile.js
-import React from 'react';
-import { FaUser } from 'react-icons/fa';
+import React from "react";
+import { FaUser } from "react-icons/fa";
 
 function Profile({ user }) {
   if (!user) {
@@ -32,7 +32,6 @@ function Profile({ user }) {
 
       {/* Contenedor principal (dos columnas en pantallas medianas) */}
       <div className="flex flex-col md:flex-row gap-8 w-full max-w-4xl">
-        
         {/* Columna izquierda: Ícono + "Acerca de mí" */}
         <div className="flex-1 flex flex-col items-center bg-black bg-opacity-50 p-6 rounded-lg">
           {/* Ícono de usuario en círculo */}
@@ -40,9 +39,7 @@ function Profile({ user }) {
             <FaUser className="text-6xl text-gray-400" />
           </div>
           <h2 className="text-xl font-semibold mb-2">About me</h2>
-          <p className="text-center text-gray-300">
-            {userSkills}
-          </p>
+          <p className="text-center text-gray-300">{userSkills}</p>
         </div>
 
         {/* Columna derecha: Detalles */}

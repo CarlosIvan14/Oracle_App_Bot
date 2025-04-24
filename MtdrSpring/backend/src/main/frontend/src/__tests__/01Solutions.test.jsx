@@ -24,16 +24,16 @@ const assignedTasksMock = [
       estimatedHours: 8,
       realHours: 6,
       status: "In Progress",
-      deadline: "2025-04-30T10:00:00Z"
+      deadline: "2025-04-30T10:00:00Z",
     },
     projectUser: {
       user: {
         name: "Alice",
         email: "alice@example.com",
-        role: "Developer"
-      }
-    }
-  }
+        role: "Developer",
+      },
+    },
+  },
 ];
 
 const unassignedTasksMock = [
@@ -44,18 +44,24 @@ const unassignedTasksMock = [
     estimatedHours: 3,
     realHours: 0,
     status: "To Do",
-    deadline: "2025-05-01T15:00:00Z"
-  }
+    deadline: "2025-05-01T15:00:00Z",
+  },
 ];
 
 // Setup MSW handlers
 const server = setupServer(
-  rest.get("http://localhost:8081/api/task-assignees/by-sprint/:sprintId", (req, res, ctx) => {
-    return res(ctx.json(assignedTasksMock));
-  }),
-  rest.get("http://localhost:8081/api/tasks/unassigned/:sprintId", (req, res, ctx) => {
-    return res(ctx.json(unassignedTasksMock));
-  })
+  rest.get(
+    "http://localhost:8081/api/task-assignees/by-sprint/:sprintId",
+    (req, res, ctx) => {
+      return res(ctx.json(assignedTasksMock));
+    },
+  ),
+  rest.get(
+    "http://localhost:8081/api/tasks/unassigned/:sprintId",
+    (req, res, ctx) => {
+      return res(ctx.json(unassignedTasksMock));
+    },
+  ),
 );
 
 beforeAll(() => server.listen());
@@ -70,7 +76,7 @@ const renderWithRouter = (ui, { route = "/calendar/123" } = {}) => {
       <Routes>
         <Route path="/calendar/:sprintId" element={ui} />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 };
 
@@ -82,7 +88,9 @@ describe("AllTasksCalendar Component", () => {
     expect(screen.getByText(/cargando tareas/i)).toBeInTheDocument();
 
     // Wait for loading to finish
-    await waitFor(() => expect(screen.queryByText(/cargando tareas/i)).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.queryByText(/cargando tareas/i)).not.toBeInTheDocument(),
+    );
 
     // Assigned task should show assignee name
     expect(screen.getByText("Implement login")).toBeInTheDocument();

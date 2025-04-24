@@ -1,16 +1,17 @@
 // src/routes/Home.js
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Home({ user }) {
   const [projects, setProjects] = useState([]);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   // Si no viene el usuario en props, intenta obtenerlo desde localStorage.
-  const currentUser = user || JSON.parse(localStorage.getItem('user') || 'null');
+  const currentUser =
+    user || JSON.parse(localStorage.getItem("user") || "null");
 
   useEffect(() => {
     if (!currentUser || !currentUser.idUser) {
@@ -20,10 +21,12 @@ function Home({ user }) {
     }
 
     // Usamos el id del usuario activo para obtener sus proyectos
-    fetch(`http://localhost:8081/api/project-users/user/${currentUser.idUser}/projects`)
+    fetch(
+      `http://localhost:8081/api/project-users/user/${currentUser.idUser}/projects`,
+    )
       .then((response) => {
         if (!response.ok) {
-          throw new Error('Error al obtener proyectos');
+          throw new Error("Error al obtener proyectos");
         }
         return response.json();
       })
@@ -38,7 +41,7 @@ function Home({ user }) {
   }, [currentUser]);
 
   const filtered = projects.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
+    p.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleProjectClick = (id) => {
@@ -53,7 +56,7 @@ function Home({ user }) {
     return <p className="text-center mt-8 text-red-500">{error}</p>;
   }
 
-  return (      
+  return (
     <div className="p-6 ">
       <div className="mb-4 flex items-center justify-center">
         <h1 className="text-3xl text-white font-bold mb-4">Tus Proyectos</h1>
@@ -79,9 +82,7 @@ function Home({ user }) {
             >
               <h2 className="text-xl text-white font-semibold">{proj.name}</h2>
               {proj.description && (
-                <p className="mt-2 text-sm text-gray-300">
-                  {proj.description}
-                </p>
+                <p className="mt-2 text-sm text-gray-300">{proj.description}</p>
               )}
               {proj.creationTs && (
                 <p className="mt-1 text-xs text-gray-500">
