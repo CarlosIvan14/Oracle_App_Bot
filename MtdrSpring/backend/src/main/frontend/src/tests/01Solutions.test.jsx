@@ -2,9 +2,8 @@
 
 /* 
     Involved files: 
-        - App.jsx
-        - AllTasksCalendar.jsx
-        
+        - src/App.jsx
+        - src/routes/AllTasksCalendar.jsx
 */
 
 import React from "react";
