@@ -2,7 +2,6 @@
 import { setupServer } from "msw/node";
 import { rest } from "msw";
 import { assignedTasksMock, mockProject, mockSprints, mockTasks, unassignedTasksMock } from "./mocks";
-
 // Define all default handlers here
 const handlers = [
   rest.get("http://localhost:8081/api/task-assignees/by-sprint/:sprintId", (req, res, ctx) => {

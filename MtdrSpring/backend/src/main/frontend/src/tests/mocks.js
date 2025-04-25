@@ -31,7 +31,10 @@ export const unassignedTasksMock = [
     },
 ];
 
-export const mockSprints = [{ id: 1, name: "Sprint 1" }];
+export const mockSprints = [
+  { id_sprint: 1, name: "Sprint 1" },
+  { id_sprint: 2, name: "Sprint 2" }
+];
 
 export const mockProject = {
   creationTs: "2025-04-01T12:00:00.000",
@@ -131,6 +134,7 @@ export const mockProject = {
 export const mockTasks = [
   {
     task: {
+      id: 1,
       name: "Implement Login",
       storyPoints: 5,
       status: "Completed",

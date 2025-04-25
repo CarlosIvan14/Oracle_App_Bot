@@ -250,35 +250,37 @@ function Reports() {
 
       <div className="flex flex-wrap items-end gap-4">
         <div>
-          <label className="block mb-1 text-sm text-gray-200 font-bold">
+          <label htmlFor="filterTypeSelect" className="block mb-1 text-sm text-gray-200 font-bold">
             Filtrar por
           </label>
           <select
+            id="filterTypeSelect"
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
             className="bg-customDark bg-opacity-30 text-white px-3 py-2 rounded-xl"
           >
-            <option value="sprint">Sprint</option>
-            <option value="week">Semana</option>
-            <option value="month">Mes</option>
+            <option value="sprint">sprint</option>
+            <option value="week">semana</option>
+            <option value="month">mes</option>
           </select>
         </div>
 
         {filterType === "sprint" && (
           <div>
-            <label className="block mb-1 text-sm text-gray-200 font-bold">
+            <label htmlFor="sprintSelect" className="block mb-1 text-sm text-gray-200 font-bold">
               Sprint
             </label>
             <select
+              id="sprintSelect"
               value={selectedSprint ?? ""}
               onChange={(e) => setSelectedSprint(e.target.value)}
               className="bg-customDark bg-opacity-30 rounded-xl text-white px-3 py-2"
             >
-              <option key="none" value="" disabled>
+              <option key="sprint-none" value="" disabled>
                 Selecciona un sprint
               </option>
               {sprints.map((s) => (
-                <option key={s.id} value={s.id}>
+                <option key={`sprint-${s.id}`} value={s.id}>
                   {s.name}
                 </option>
               ))}
@@ -310,10 +312,11 @@ function Reports() {
         )}
 
         <div>
-          <label className="block mb-1 text-sm text-gray-200 font-bold">
+          <label htmlFor="memberSelect" className="block mb-1 text-sm text-gray-200 font-bold">
             Miembro
           </label>
           <select
+            id="memberSelect"
             value={selectedMember ?? ""}
             onChange={(e) => setSelectedMember(e.target.value)}
             className="bg-customDark bg-opacity-30 text-white px-3 py-2 rounded-xl"
@@ -322,7 +325,7 @@ function Reports() {
               Selecciona un miembro
             </option>
             {members.map((m) => (
-              <option key={m.id} value={m.id}>
+              <option key={`sprint-${m.id}`} value={m.id}>
                 {m.name}
               </option>
             ))}
@@ -465,7 +468,7 @@ function Reports() {
       {reportData?.tasksData?.length > 0 && (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4 text-white">
-            Tareas Completadas
+            Tareas Completadas:
           </h2>
           <div className="overflow-auto rounded-lg shadow ring-1 ring-black ring-opacity-5">
             <table className="min-w-full bg-black bg-opacity-50 text-white text-sm">
@@ -481,7 +484,7 @@ function Reports() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {reportData.tasksData.map((row, idx) => {
+                {reportData.tasksData.map((row) => {
                   const task = row.task;
                   const user = row.projectUser?.user?.name || "—";
                   const realHours = task.realHours || 0;
@@ -490,7 +493,7 @@ function Reports() {
 
                   return (
                     <tr
-                      key={idx}
+                      key={`row-task-${row.task.id}`}
                       className="hover:bg-black bg-opacity-50 transition duration-200"
                     >
                       <td className="px-6 py-4">{user}</td>

@@ -50,7 +50,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-
 import Reports from "../../routes/Reports";
 
 import { server } from "../testServer";
@@ -85,20 +84,21 @@ describe("Completed Tasks List in Sprint Reports", () => {
       
         // Wait for initial data load
         await waitFor(() => {
-          expect(screen.getByLabelText("Sprint")).toBeInTheDocument();
+          expect(screen.getByText("Sprint 1")).toBeInTheDocument();
         });
         
         // Select filters
-        await userEvent.selectOptions(screen.getByLabelText("Filtrar por"), "sprint");
-        await userEvent.selectOptions(screen.getByLabelText("Sprint"), "1");
-        await userEvent.selectOptions(screen.getByLabelText("Miembro"), "all");
+        userEvent.selectOptions(screen.getByLabelText("Filtrar por"), "sprint");
+        userEvent.selectOptions(screen.getByLabelText("Sprint"), "1");
+        userEvent.selectOptions(screen.getByLabelText("Miembro"), "all");
         
         // Generate report and wait for data
         userEvent.click(screen.getByText("Generar Reporte"));
         
         // Wait for table to render
+        // [ ] WORKING UNTIL HERE
         await waitFor(() => {
-          expect(screen.getByText("Tareas Completadas")).toBeInTheDocument();
+          expect(screen.getByText("Tareas Completadas:")).toBeInTheDocument();
         });
         
         // Verify table contents
