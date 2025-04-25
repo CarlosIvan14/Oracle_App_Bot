@@ -274,7 +274,7 @@ function Reports() {
               onChange={(e) => setSelectedSprint(e.target.value)}
               className="bg-customDark bg-opacity-30 rounded-xl text-white px-3 py-2"
             >
-              <option value="" disabled>
+              <option key="none" value="" disabled>
                 Selecciona un sprint
               </option>
               {sprints.map((s) => (
