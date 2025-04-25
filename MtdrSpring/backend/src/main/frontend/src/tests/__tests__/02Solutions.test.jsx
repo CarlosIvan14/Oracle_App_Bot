@@ -6,13 +6,11 @@
         - src/routes/SprintTasks.jsx
 */
 
-// tests/SprintTasks.test.jsx
-
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import "@testing-library/jest-dom";
-import SprintTasks from "../routes/SprintTasks";
+import SprintTasks from "../../routes/SprintTasks";
 
 global.fetch = jest.fn();
 
@@ -99,7 +97,7 @@ describe("AllTasksCalendar Component", () => {
   
     const startButton = screen.getByText("Start");
     fireEvent.click(startButton);
-  
+    
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith("/api/tasks/101", expect.objectContaining({
         method: "PATCH",
