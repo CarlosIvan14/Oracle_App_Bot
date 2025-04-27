@@ -4,49 +4,15 @@
     Involved files: 
         - src/App.jsx
         - src/routes/Reports.jsx
-
-    Flow on Reports.jsx:
-        1. click on 
 */
+global.ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
 
-// import React from "react";
-// import { render, screen } from "@testing-library/react";
-// import { MemoryRouter, Route, Routes } from "react-router-dom";
-// import "@testing-library/jest-dom";
-// import Reports from "../../routes/Reports";
-
-// const renderWithRouter = (ui, { route = "/projects/123/reports" } = {}) => {
-//   return render(
-//     <MemoryRouter initialEntries={[route]}>
-//       <Routes>
-//         <Route path="/projects/:projectId/reports" element={
-//           <React.Suspense fallback={<div>Loading...</div>}>
-//             {ui}
-//           </React.Suspense>
-//         } />
-//       </Routes>
-//     </MemoryRouter>
-//   );
-// };
-// describe("Reports Component", () => {
-//   beforeAll(() => {
-//     jest.spyOn(console, 'warn').mockImplementation((msg) => {
-//         if (
-//         msg.includes('React Router Future Flag Warning')
-//         ) return;
-//         // Si no es el warning específico, lo imprimimos
-//         console.warn(msg);
-//     });
-//   });
-//   test("renders the Reports component (loads static UI)", () => {
-//     renderWithRouter(<Reports />);
-//     expect(screen.getByRole("heading", { name: /reportes/i })).toBeInTheDocument();
-//   });
-// });
-
-// src/__tests__/03ReportsTasks.test.jsx
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
@@ -96,15 +62,23 @@ describe("Completed Tasks List in Sprint Reports", () => {
         userEvent.click(screen.getByText("Generar Reporte"));
         
         // Wait for table to render
-        // [ ] WORKING UNTIL HERE
         await waitFor(() => {
-          expect(screen.getByText("Tareas Completadas:")).toBeInTheDocument();
+          expect(screen.getByRole('table')).toBeInTheDocument();
         });
         
         // Verify table contents
-        expect(screen.getByText("Implement Login")).toBeInTheDocument();
-        expect(screen.getByText("John Doe")).toBeInTheDocument();
-        expect(screen.getByText("8")).toBeInTheDocument(); // Estimated
-        expect(screen.getByText("6")).toBeInTheDocument(); // Real
+        const table = screen.getByRole('table');
+        const rows = within(table).getAllByRole('row');
+        const taskRow = rows.find(row =>
+          within(row).queryByText(/implement login/i)
+        );
+        expect(taskRow).toBeTruthy();
+        const cells = within(taskRow).getAllByRole('cell');
+        expect(cells[0]).toHaveTextContent(/john doe/i); // User Name
+        expect(cells[1]).toHaveTextContent(/implement login/i); // Task Name
+        expect(cells[2]).toHaveTextContent('5'); // Story Points
+        expect(cells[3]).toHaveTextContent(/completed/i); // Status
+        expect(cells[4]).toHaveTextContent('6'); // Horas Reales
+        expect(cells[5]).toHaveTextContent('8'); // Horas Estimadas
       });         
 });

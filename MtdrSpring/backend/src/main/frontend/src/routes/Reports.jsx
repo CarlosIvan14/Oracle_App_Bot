@@ -204,8 +204,6 @@ function Reports() {
       //   };
       // });
 
-      console.log("spFrequency:", spFrequencyChartData);
-
       setReportData({
         user: selectedUser?.name || "—",
         tasksDone: doneCount ?? "—",

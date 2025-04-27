@@ -139,7 +139,8 @@ export const mockTasks = [
       storyPoints: 5,
       status: "Completed",
       estimatedHours: 8,
-      realHours: 6
+      realHours: 6,
+      sprint: { id: 1, name: "Sprint 1" } // Will be stripped in processing
     },
     projectUser: { user: { name: "John Doe" } }
   }
