@@ -74,11 +74,11 @@ describe("Completed Tasks List in Sprint Reports", () => {
         );
         expect(taskRow).toBeTruthy();
         const cells = within(taskRow).getAllByRole('cell');
-        expect(cells[0]).toHaveTextContent(/john doe/i); // User Name
+        expect(cells[0]).toHaveTextContent(/alex lozoya/i); // User Name
         expect(cells[1]).toHaveTextContent(/implement login/i); // Task Name
         expect(cells[2]).toHaveTextContent('5'); // Story Points
         expect(cells[3]).toHaveTextContent(/completed/i); // Status
         expect(cells[4]).toHaveTextContent('6'); // Horas Reales
         expect(cells[5]).toHaveTextContent('8'); // Horas Estimadas
-      });         
+      });
 });

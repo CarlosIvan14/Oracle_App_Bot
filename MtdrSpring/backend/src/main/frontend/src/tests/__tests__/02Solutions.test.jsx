@@ -11,6 +11,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import "@testing-library/jest-dom";
 import SprintTasks from "../../routes/SprintTasks";
+import userEvent from "@testing-library/user-event";
 
 global.fetch = jest.fn();
 
@@ -95,9 +96,8 @@ describe("AllTasksCalendar Component", () => {
   
     expect(await screen.findByText("Test Task")).toBeInTheDocument();
   
-    const startButton = screen.getByText("Start");
-    fireEvent.click(startButton);
-    
+    userEvent.click(screen.getByText("Start"));
+
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith("/api/tasks/101", expect.objectContaining({
         method: "PATCH",

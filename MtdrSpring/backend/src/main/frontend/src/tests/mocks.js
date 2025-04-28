@@ -46,8 +46,8 @@ export const mockProject = {
       idProjectUser: 101,
       user: {
         idUser: 201,
-        name: "María López García",
-        email: "maria.lopez@example.com",
+        name: "Alex Lozoya",
+        email: "alex.lozoya@example.com",
         status: "Active",
         telegramId: 1234567890,
         phoneNumber: "5551234567",
@@ -142,6 +142,6 @@ export const mockTasks = [
       realHours: 6,
       sprint: { id: 1, name: "Sprint 1" } // Will be stripped in processing
     },
-    projectUser: { user: { name: "John Doe" } }
-  }
+    projectUser: { user: { name: "Alex Lozoya" } }
+  },
 ];
