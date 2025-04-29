@@ -14,33 +14,14 @@ import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
 import SprintTasks from "../../routes/SprintTasks";
+import { mockAssignedTasks, mockUnassignedTasks } from "../mocks";
 
 global.fetch = jest.fn();
 
 const mockUser = { idUser: 1 };
 const mockProjectUserId = 5;
 
-// Tareas asignadas al usuario, con estado inicial ASSIGNED
-const mockAssignedTasks = [
-  {
-    task: {
-      id: 101,
-      name: "Test Task",
-      description: "Some description",
-      storyPoints: 3,
-      estimatedHours: 4,
-      realHours: null,
-      status: "ASSIGNED",
-    },
-    projectUser: {
-      user: {
-        name: "Test User",
-      },
-    },
-  },
-];
 
-const mockUnassignedTasks = [];
 
 describe("SprintTasks Component", () => {
   beforeAll(() => {

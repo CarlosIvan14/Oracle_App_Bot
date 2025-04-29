@@ -1,36 +1,3 @@
-export const assignedTasksMock = [
-    {
-      task: {
-        id: 1,
-        name: "Implement login",
-        storyPoints: 5,
-        estimatedHours: 8,
-        realHours: 6,
-        status: "In Progress",
-        deadline: "2025-04-30T10:00:00Z",
-      },
-      projectUser: {
-        user: {
-          name: "Alice",
-          email: "alice@example.com",
-          role: "Developer",
-        },
-      },
-    },
-];
-  
-export const unassignedTasksMock = [
-    {
-      id: 2,
-      name: "Fix logout bug",
-      storyPoints: 2,
-      estimatedHours: 3,
-      realHours: 0,
-      status: "To Do",
-      deadline: "2025-05-01T15:00:00Z",
-    },
-];
-
 export const mockSprints = [
   { id_sprint: 1, name: "Sprint 1" },
   { id_sprint: 2, name: "Sprint 2" }
@@ -130,6 +97,61 @@ export const mockProject = {
   id_project: 501
 };
 
+
+// TAREAS CON TASK Y PROJECT USER
+
+// Tareas no asignadas
+export const mockUnassignedTasks = [
+  {
+    id: 2,
+    name: "Fix logout bug",
+    storyPoints: 2,
+    estimatedHours: 3,
+    realHours: 0,
+    status: "To Do",
+    deadline: "2025-05-01T15:00:00Z",
+  },
+];
+
+// Tareas asignadas al usuario, con estado inicial ASSIGNED
+export const mockAssignedTasks = [
+  {
+    task: {
+      id: 101,
+      name: "Test Task",
+      description: "Some description",
+      storyPoints: 3,
+      estimatedHours: 4,
+      realHours: null,
+      status: "ASSIGNED",
+    },
+    projectUser: {
+      user: {
+        name: "Test User",
+      },
+    },
+  },
+];
+
+// Tareas asignadas al usuario, con estado inicial ASSIGNED
+export const mockInProgressTask = [
+  {
+    task: {
+      id: 101,
+      name: "Test Task",
+      description: "Some description",
+      storyPoints: 3,
+      estimatedHours: 4,
+      realHours: null,
+      status: "IN_PROGRESS",
+    },
+    projectUser: {
+      user: {
+        name: "Test User",
+      },
+    },
+  },
+];
 
 export const mockTasks = [
   {

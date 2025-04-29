@@ -66,8 +66,8 @@ describe("Componente AllTasksCalendar", () => {
     expect(asFragment()).toMatchSnapshot();
 
     // Confirma tarea con desarrollador asignado
-    expect(screen.getByText("Implement login")).toBeInTheDocument();
-    expect(screen.getByText(/Desarrollador: Alice/i)).toBeInTheDocument();
+    expect(screen.getByText("Test Task")).toBeInTheDocument();
+    expect(screen.getByText(/Desarrollador: Test User/i)).toBeInTheDocument();
 
     // Confirma tarea sin desarrollador (Libre)
     expect(screen.getByText("Fix logout bug")).toBeInTheDocument();

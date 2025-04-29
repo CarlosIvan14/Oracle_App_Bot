@@ -14,6 +14,7 @@ import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
 import SprintTasks from "../../routes/SprintTasks";
+import { mockInProgressTask, mockUnassignedTasks } from "../mocks";
 
 global.fetch = jest.fn();
 
@@ -21,26 +22,6 @@ const mockUser = { idUser: 1 };
 const mockProjectUserId = 5;
 
 // Tareas asignadas al usuario, con estado inicial IN_PROGRESS
-const mockAssignedTasks = [
-  {
-    task: {
-      id: 101,
-      name: "Test Task",
-      description: "Some description",
-      storyPoints: 3,
-      estimatedHours: 4,
-      realHours: null,
-      status: "IN_PROGRESS",
-    },
-    projectUser: {
-      user: {
-        name: "Test User",
-      },
-    },
-  },
-];
-
-const mockUnassignedTasks = [];
 
 describe("SprintTasks Component", () => {
   beforeAll(() => {
@@ -66,7 +47,7 @@ describe("SprintTasks Component", () => {
       if (url.includes("/api/task-assignees/user")) {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve(mockAssignedTasks),
+          json: () => Promise.resolve(mockInProgressTask),
         });
       }
       if (url.includes("/api/tasks/unassigned")) {

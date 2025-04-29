@@ -1,15 +1,15 @@
 // src/__tests__/testServer.js
 import { setupServer } from "msw/node";
 import { rest } from "msw";
-import { assignedTasksMock, mockProject, mockSprints, mockTasks, unassignedTasksMock } from "./mocks";
+import { mockInProgressTask, mockProject, mockSprints, mockTasks, mockUnassignedTasks } from "./mocks";
 // Define all default handlers here
 const handlers = [
   rest.get("http://localhost:8081/api/task-assignees/by-sprint/:sprintId", (req, res, ctx) => {
-    return res(ctx.json(assignedTasksMock));
+    return res(ctx.json(mockInProgressTask));
   }),
 
   rest.get("http://localhost:8081/api/tasks/unassigned/:sprintId", (req, res, ctx) => {
-    return res(ctx.json(unassignedTasksMock));
+    return res(ctx.json(mockUnassignedTasks));
   }),
 
   rest.get("http://localhost:8081/api/sprints/project/:projectId", (req, res, ctx) => {
