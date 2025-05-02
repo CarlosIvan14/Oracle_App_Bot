@@ -1,12 +1,13 @@
 export const mockSprints = [
   { id_sprint: 1, name: "Sprint 1" },
-  { id_sprint: 2, name: "Sprint 2" }
+  { id_sprint: 2, name: "Sprint 2" },
 ];
 
 export const mockProject = {
   creationTs: "2025-04-01T12:00:00.000",
   deletedTs: null,
-  description: "Proyecto demo para gestión de equipos y tareas con bot de Telegram y dashboard React/Java en la nube.",
+  description:
+    "Proyecto demo para gestión de equipos y tareas con bot de Telegram y dashboard React/Java en la nube.",
   name: "Demo Task Management Tool",
   projectUsers: [
     {
@@ -18,10 +19,10 @@ export const mockProject = {
         status: "Active",
         telegramId: 1234567890,
         phoneNumber: "5551234567",
-        password: "mocked_password_1"
+        password: "mocked_password_1",
       },
       roleUser: "manager",
-      status: "active"
+      status: "active",
     },
     {
       idProjectUser: 102,
@@ -32,10 +33,10 @@ export const mockProject = {
         status: "Active",
         telegramId: 2345678901,
         phoneNumber: "5552345678",
-        password: "mocked_password_2"
+        password: "mocked_password_2",
       },
       roleUser: "developer",
-      status: "active"
+      status: "active",
     },
     {
       idProjectUser: 103,
@@ -46,10 +47,10 @@ export const mockProject = {
         status: "Active",
         telegramId: null,
         phoneNumber: "5553456789",
-        password: "mocked_password_3"
+        password: "mocked_password_3",
       },
       roleUser: "developer",
-      status: "active"
+      status: "active",
     },
     {
       idProjectUser: 104,
@@ -60,10 +61,10 @@ export const mockProject = {
         status: "Active",
         telegramId: 3456789012,
         phoneNumber: "5554567890",
-        password: "mocked_password_4"
+        password: "mocked_password_4",
       },
       roleUser: "developer",
-      status: "active"
+      status: "active",
     },
     {
       idProjectUser: 105,
@@ -74,10 +75,10 @@ export const mockProject = {
         status: "Active",
         telegramId: null,
         phoneNumber: "5555678901",
-        password: "mocked_password_5"
+        password: "mocked_password_5",
       },
       roleUser: "developer",
-      status: "active"
+      status: "active",
     },
     {
       idProjectUser: 106,
@@ -88,15 +89,14 @@ export const mockProject = {
         status: "Active",
         telegramId: null,
         phoneNumber: "5556789012",
-        password: "mocked_password_6"
+        password: "mocked_password_6",
       },
       roleUser: "developer",
-      status: "active"
-    }
+      status: "active",
+    },
   ],
-  id_project: 501
+  id_project: 501,
 };
-
 
 // TAREAS CON TASK Y PROJECT USER
 
@@ -162,8 +162,8 @@ export const mockTasks = [
       status: "Completed",
       estimatedHours: 8,
       realHours: 6,
-      sprint: { id: 1, name: "Sprint 1" } // Will be stripped in processing
+      sprint: { id: 1, name: "Sprint 1" }, // Will be stripped in processing
     },
-    projectUser: { user: { name: "Alex Lozoya" } }
+    projectUser: { user: { name: "Alex Lozoya" } },
   },
 ];

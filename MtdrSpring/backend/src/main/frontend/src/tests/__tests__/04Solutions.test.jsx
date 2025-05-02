@@ -72,7 +72,7 @@ describe("SprintTasks Component", () => {
     // Mock del prompt y alert
     window.prompt = jest.fn().mockReturnValue("3.5");
     window.alert = jest.fn();
-  
+
     render(
       <MemoryRouter initialEntries={["/project/1/sprint/10"]}>
         <Routes>
@@ -81,15 +81,15 @@ describe("SprintTasks Component", () => {
             element={<SprintTasks />}
           />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
-  
+
     // Esperar a que la tarea aparezca y termine la carga inicial
     await screen.findByText("Test Task");
-    
+
     // Simular clic en "Completar" y esperar operaciones asíncronas
     userEvent.click(screen.getByText("Completar"));
-  
+
     // Verificar llamada al PATCH y esperar recarga de datos
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
@@ -98,14 +98,13 @@ describe("SprintTasks Component", () => {
           method: "PATCH",
           body: JSON.stringify({
             status: "COMPLETED",
-            realHours: 3.5
-          })
-        })
+            realHours: 3.5,
+          }),
+        }),
       );
     });
-  
+
     // Esperar a que termine la recarga de tareas
-    await screen.findByText("Test Task"); 
+    await screen.findByText("Test Task");
   });
-  
 });

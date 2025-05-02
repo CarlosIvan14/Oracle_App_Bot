@@ -37,7 +37,7 @@ const renderWithRouter = (ui, { route = "/calendar/123" } = {}) => {
       <Routes>
         <Route path="/calendar/:sprintId" element={ui} />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 };
 
@@ -59,7 +59,7 @@ describe("Componente AllTasksCalendar", () => {
 
     // Espera a que termine la carga
     await waitFor(() =>
-      expect(screen.queryByText(/cargando tareas/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/cargando tareas/i)).not.toBeInTheDocument(),
     );
 
     // Captura el snapshot de la UI cargada

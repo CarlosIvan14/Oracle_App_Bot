@@ -44,7 +44,7 @@ const renderWithRouter = (ui, { route = "/projects/123/reports" } = {}) => {
       <Routes>
         <Route path="/projects/:projectId/reports" element={ui} />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 };
 
@@ -82,16 +82,16 @@ describe("Lista de tareas completadas en Reports", () => {
     const table = screen.getByRole("table");
     const rows = within(table).getAllByRole("row");
     const taskRow = rows.find((row) =>
-      within(row).queryByText(/implement login/i)
+      within(row).queryByText(/implement login/i),
     );
     expect(taskRow).toBeTruthy();
 
     const cells = within(taskRow).getAllByRole("cell");
-    expect(cells[0]).toHaveTextContent(/alex lozoya/i);   // Nombre de desarrollador
+    expect(cells[0]).toHaveTextContent(/alex lozoya/i); // Nombre de desarrollador
     expect(cells[1]).toHaveTextContent(/implement login/i); // Nombre de tarea
-    expect(cells[2]).toHaveTextContent("5");               // Story Points
-    expect(cells[3]).toHaveTextContent(/completed/i);      // Estado
-    expect(cells[4]).toHaveTextContent("6");               // Horas Reales
-    expect(cells[5]).toHaveTextContent("8");               // Horas Estimadas
+    expect(cells[2]).toHaveTextContent("5"); // Story Points
+    expect(cells[3]).toHaveTextContent(/completed/i); // Estado
+    expect(cells[4]).toHaveTextContent("6"); // Horas Reales
+    expect(cells[5]).toHaveTextContent("8"); // Horas Estimadas
   });
 });
