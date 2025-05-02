@@ -11,109 +11,109 @@ import {
 // Define all default handlers here
 const handlers = [
   rest.get(
-    "http://localhost:8081/api/task-assignees/by-sprint/:sprintId",
+    "http://140.84.170.68/api/task-assignees/by-sprint/:sprintId",
     (req, res, ctx) => {
       return res(ctx.json(mockInProgressTask));
     },
   ),
 
   rest.get(
-    "http://localhost:8081/api/tasks/unassigned/:sprintId",
+    "http://140.84.170.68/api/tasks/unassigned/:sprintId",
     (req, res, ctx) => {
       return res(ctx.json(mockUnassignedTasks));
     },
   ),
 
   rest.get(
-    "http://localhost:8081/api/sprints/project/:projectId",
+    "http://140.84.170.68/api/sprints/project/:projectId",
     (req, res, ctx) => {
       return res(ctx.json(mockSprints));
     },
   ),
 
-  rest.get("http://localhost:8081/api/projects/:projectId", (req, res, ctx) => {
+  rest.get("http://140.84.170.68/api/projects/:projectId", (req, res, ctx) => {
     return res(ctx.json(mockProject));
   }),
 
   rest.get(
-    "http://localhost:8081/api/task-assignees/team-sprint/:sprintId/done/count",
+    "http://140.84.170.68/api/task-assignees/team-sprint/:sprintId/done/count",
     (req, res, ctx) => {
       return res(ctx.json(mockTasks.length));
     },
   ),
 
   rest.get(
-    "http://localhost:8081/api/task-assignees/user/:userId/sprint/:sprintId/done/count",
+    "http://140.84.170.68/api/task-assignees/user/:userId/sprint/:sprintId/done/count",
     (req, res, ctx) => {
       return res(ctx.json(mockTasks.length));
     },
   ),
 
   rest.get(
-    "http://localhost:8081/api/task-assignees/team-sprint/:sprintId/done",
+    "http://140.84.170.68/api/task-assignees/team-sprint/:sprintId/done",
     (req, res, ctx) => {
       return res(ctx.json(mockTasks));
     },
   ),
 
   rest.get(
-    "http://localhost:8081/api/task-assignees/user/:userId/sprint/:sprintId/done",
+    "http://140.84.170.68/api/task-assignees/user/:userId/sprint/:sprintId/done",
     (req, res, ctx) => {
       return res(ctx.json(mockTasks));
     },
   ),
 
   rest.get(
-    "http://localhost:8081/api/task-assignees/team-week/:selectedDate/project/:projectId/done/count",
+    "http://140.84.170.68/api/task-assignees/team-week/:selectedDate/project/:projectId/done/count",
     (req, res, ctx) => {
       return res(ctx.json(mockTasks.length));
     },
   ),
 
   rest.get(
-    "http://localhost:8081/api/task-assignees/user/:userId/week/:selectedDate/done/count",
+    "http://140.84.170.68/api/task-assignees/user/:userId/week/:selectedDate/done/count",
     (req, res, ctx) => {
       return res(ctx.json(mockTasks.length));
     },
   ),
 
   rest.get(
-    "http://localhost:8081/api/task-assignees/team-week/:selectedDate/project/:projectId/done",
+    "http://140.84.170.68/api/task-assignees/team-week/:selectedDate/project/:projectId/done",
     (req, res, ctx) => {
       return res(ctx.json(mockTasks));
     },
   ),
 
   rest.get(
-    "http://localhost:8081/api/task-assignees/user/:userId/week/:selectedDate/done",
+    "http://140.84.170.68/api/task-assignees/user/:userId/week/:selectedDate/done",
     (req, res, ctx) => {
       return res(ctx.json(mockTasks));
     },
   ),
 
   rest.get(
-    "http://localhost:8081/api/task-assignees/team-month/:selectedDate/project/:projectId/done/count",
+    "http://140.84.170.68/api/task-assignees/team-month/:selectedDate/project/:projectId/done/count",
     (req, res, ctx) => {
       return res(ctx.json(mockTasks.length));
     },
   ),
 
   rest.get(
-    "http://localhost:8081/api/task-assignees/user/:userId/month/:selectedDate/done/count",
+    "http://140.84.170.68/api/task-assignees/user/:userId/month/:selectedDate/done/count",
     (req, res, ctx) => {
       return res(ctx.json(mockTasks.length));
     },
   ),
 
   rest.get(
-    "http://localhost:8081/api/task-assignees/team-month/:selectedDate/project/:projectId/done",
+    "http://140.84.170.68/api/task-assignees/team-month/:selectedDate/project/:projectId/done",
     (req, res, ctx) => {
       return res(ctx.json(mockTasks));
     },
   ),
 
   rest.get(
-    "http://localhost:8081/api/task-assignees/user/:userId/month/:selectedDate/done",
+    "http://140.84.170.68/api/task-assignees/user/:userId/month/:selectedDate/done",
     (req, res, ctx) => {
       return res(ctx.json(mockTasks));
     },
