@@ -62,7 +62,7 @@ function AppRoutes() {
         path="/"
         element={
           <React.Suspense>
-                          <PrivateLayout user={user} onLogout={handleLogout} />
+            <PrivateLayout user={user} onLogout={handleLogout} />
           </React.Suspense>
         }
       >

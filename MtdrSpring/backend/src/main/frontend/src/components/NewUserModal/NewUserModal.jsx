@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 function NewUserModal({ isOpen, onClose, isRegistering }) {
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [skill, setSkill] = useState('');
-  const [telegramId, setTelegramId] = useState('');
-  const [telegramUsername, setTelegramUsername] = useState('');
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [skill, setSkill] = useState("");
+  const [telegramId, setTelegramId] = useState("");
+  const [telegramUsername, setTelegramUsername] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -36,11 +36,11 @@ function NewUserModal({ isOpen, onClose, isRegistering }) {
       })
       .then((result) => {
         // Reiniciar campos y cerrar modal
-        setName('');
-        setPassword('');
-        setSkill('');
-        setTelegramId('');
-        setTelegramUsername('');
+        setName("");
+        setPassword("");
+        setSkill("");
+        setTelegramId("");
+        setTelegramUsername("");
         onClose(); // Cerrar el modal después de registrar
       })
       .catch((error) => {
@@ -221,7 +221,9 @@ function NewUserModal({ isOpen, onClose, isRegistering }) {
           </div>
 
           <div>
-            <label className="block mb-1 font-semibold">Telegram Username</label>
+            <label className="block mb-1 font-semibold">
+              Telegram Username
+            </label>
             <input
               type="text"
               value={telegramUsername}

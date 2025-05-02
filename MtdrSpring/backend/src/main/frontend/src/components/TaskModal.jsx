@@ -1,5 +1,5 @@
 // src/components/TaskModal.js
-import React from 'react';
+import React from "react";
 
 function TaskModal({ task, onClose }) {
   if (!task) return null;
@@ -14,18 +14,18 @@ function TaskModal({ task, onClose }) {
           X
         </button>
         <div className="flex justify-center">
-            <h2 className="text-2xl font-bold mb-2">{task.title}</h2>
+          <h2 className="text-2xl font-bold mb-2">{task.title}</h2>
         </div>
         <p className="mb-2">Asignado a: {task.assignee}</p>
         <p className="mb-2">Estado: {task.status}</p>
         <p className="mb-4">Descripción: {task.description}</p>
         <div className="flex justify-center">
-            <button
+          <button
             onClick={onClose}
             className="bg-red-600 px-4 py-2 rounded-full hover:bg-red-700"
-            >
+          >
             Cerrar
-            </button>
+          </button>
         </div>
       </div>
     </div>

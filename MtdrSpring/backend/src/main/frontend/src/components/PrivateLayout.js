@@ -1,7 +1,7 @@
 // src/components/PrivateLayout.js
-import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-import Navbar from './Navbar';
+import React from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import Navbar from "./Navbar";
 
 function PrivateLayout({ user, onLogout }) {
   if (!user) {
