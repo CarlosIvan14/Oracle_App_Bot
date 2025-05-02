@@ -22,13 +22,14 @@ export default function ProjectSprints() {
   // 1) Carga sprints + rol
   useEffect(() => {
     Promise.all([
-      fetch(`http://140.84.170.68/api/sprints/project/${projectId}`)
-        .then(r => r.ok ? r.json() : Promise.reject('Error sprints')),
+      fetch(`http://140.84.170.68/api/sprints/project/${projectId}`).then(
+        (r) => (r.ok ? r.json() : Promise.reject("Error sprints")),
+      ),
       fetch(
         `http://140.84.170.68/api/project-users/role-user/project-id/${projectId}/user-id/${
-          JSON.parse(localStorage.getItem('user')).idUser
-        }`
-      ).then(r => r.ok ? r.text() : Promise.reject('Error rol')),
+          JSON.parse(localStorage.getItem("user")).idUser
+        }`,
+      ).then((r) => (r.ok ? r.text() : Promise.reject("Error rol"))),
     ])
       .then(([ss, roleText]) => {
         setSprints(ss);
@@ -46,11 +47,11 @@ export default function ProjectSprints() {
   }, []);
 
   // 3) Toggle estado
-  const toggle = sprint => {
-    const d = sprint.description === 'Active' ? 'idle' : 'Active';
+  const toggle = (sprint) => {
+    const d = sprint.description === "Active" ? "idle" : "Active";
     fetch(`http://140.84.170.68/api/sprints/${sprint.id_sprint}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ description: d }),
     })
       .then((r) => {
@@ -73,9 +74,9 @@ export default function ProjectSprints() {
       name: newName,
       project: { id_project: +projectId },
     };
-    fetch('http://140.84.170.68/api/sprints', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    fetch("http://140.84.170.68/api/sprints", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     })
       .then((r) => (r.ok ? r.json() : Promise.reject("Error crear")))

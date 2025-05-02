@@ -41,20 +41,24 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
     if (!open) return;
 
     /* 1. Rol */
-    fetch(`http://140.84.170.68/api/project-users/role-user/project-id/${projectId}/user-id/${user.idUser}`)
-      .then(r => r.ok ? r.text() : Promise.reject())
-      .then(txt => setRole(txt.trim()))
-      .catch(()  => setRole(null));
+    fetch(
+      `http://140.84.170.68/api/project-users/role-user/project-id/${projectId}/user-id/${user.idUser}`,
+    )
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((txt) => setRole(txt.trim()))
+      .catch(() => setRole(null));
 
     /* 2. mi idProjectUser (dev) */
-    fetch(`http://140.84.170.68/api/project-users/project-id/${projectId}/user-id/${user.idUser}`)
-      .then(r => r.ok ? r.text() : null)
-      .then(txt => setMyProjectUserId(txt ? Number(txt) : null))
+    fetch(
+      `http://140.84.170.68/api/project-users/project-id/${projectId}/user-id/${user.idUser}`,
+    )
+      .then((r) => (r.ok ? r.text() : null))
+      .then((txt) => setMyProjectUserId(txt ? Number(txt) : null))
       .catch(() => setMyProjectUserId(null));
 
     /* 3. lista de usuarios del proyecto */
     fetch(`http://140.84.170.68/api/project-users/project/${projectId}/users`)
-      .then(r => r.ok ? r.json() : [])
+      .then((r) => (r.ok ? r.json() : []))
       .then(setAllUsers)
       .catch(() => setAllUsers([]));
 
@@ -73,10 +77,10 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
     }
     setAiLoading(true);
     try {
-      const res = await fetch('http://140.84.170.68/assignment/by-ai', {
-        method : 'POST',
-        headers: { 'Content-Type':'application/json' },
-        body   : JSON.stringify({ projectId, name, description })
+      const res = await fetch("http://140.84.170.68/assignment/by-ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId, name, description }),
       });
       if (!res.ok) throw new Error();
       const list = await res.json(); // [{idUser, name, ...}]
@@ -127,11 +131,11 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
 
     let createdTask;
     try {
-      console.log(taskPayload.creation_ts)
-      const res = await fetch('http://140.84.170.68/api/tasks', {
-        method :'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body   : JSON.stringify(taskPayload)
+      console.log(taskPayload.creation_ts);
+      const res = await fetch("http://140.84.170.68/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(taskPayload),
       });
       if (!res.ok) throw new Error();
       createdTask = await res.json();
@@ -154,7 +158,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
         // manager
         try {
           const resPU = await fetch(
-            `http://140.84.170.68/api/project-users/project-id/${projectId}/user-id/${selectedUserId}`
+            `http://140.84.170.68/api/project-users/project-id/${projectId}/user-id/${selectedUserId}`,
           );
           if (resPU.ok) {
             const txt = await resPU.text();
@@ -167,13 +171,13 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
 
       if (idProjectUser) {
         try {
-          await fetch('http://140.84.170.68/api/task-assignees', {
-            method :'POST',
-            headers:{ 'Content-Type':'application/json' },
-            body   : JSON.stringify({
-              projectUser:{ idProjectUser },
-              task      :{ id: createdTask.id }
-            })
+          await fetch("http://140.84.170.68/api/task-assignees", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              projectUser: { idProjectUser },
+              task: { id: createdTask.id },
+            }),
           });
         } catch {
           alert("Tarea creada, pero falló la asignación automática.");

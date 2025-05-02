@@ -161,53 +161,57 @@ function UsersList() {
   const [editingSkillId, setEditingSkillId] = useState(null);
   const [newSkillRow, setNewSkillRow] = useState(false);
 
-    useEffect(() => {
-      // Obtener la lista de usuarios del proyecto
-      fetch(`http://140.84.170.68/api/project-users/project/${projectId}/users`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Error al obtener los usuarios del proyecto");
-          }
-          return response.json();
-        })
-        .then((usersData) => {
-          return Promise.all(
-            usersData.map((user) =>
-              fetch(`http://140.84.170.68/api/project-users/role-user/project-id/${projectId}/user-id/${user.idUser}`)
-                .then((respRole) => {
-                  if (!respRole.ok) {
-                    throw new Error("Error al obtener el rol de usuario");
-                  }
-                  return respRole.text();
-                })
-                .then((roleText) =>
-                  fetch(`http://140.84.170.68/api/skills/oracleuser/${user.idUser}`)
-                    .then((respSkill) => {
-                      if (!respSkill.ok) {
-                        throw new Error("Error al obtener las skills del usuario");
-                      }
-                      return respSkill.json();
-                    })
-                    .then((skillsData) => ({
-                      ...user,
-                      role: roleText.trim(),
-                      skills: Array.isArray(skillsData) ? skillsData : [],
-                    }))
-                )
+  useEffect(() => {
+    // Obtener la lista de usuarios del proyecto
+    fetch(`http://140.84.170.68/api/project-users/project/${projectId}/users`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Error al obtener los usuarios del proyecto");
+        }
+        return response.json();
+      })
+      .then((usersData) => {
+        return Promise.all(
+          usersData.map((user) =>
+            fetch(
+              `http://140.84.170.68/api/project-users/role-user/project-id/${projectId}/user-id/${user.idUser}`,
             )
-          );
-        })
-        .then((usersWithDetails) => {
-          setUsers(usersWithDetails);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setError(err.message);
-          setLoading(false);
-        });
-    }, [projectId]);
-
-
+              .then((respRole) => {
+                if (!respRole.ok) {
+                  throw new Error("Error al obtener el rol de usuario");
+                }
+                return respRole.text();
+              })
+              .then((roleText) =>
+                fetch(
+                  `http://140.84.170.68/api/skills/oracleuser/${user.idUser}`,
+                )
+                  .then((respSkill) => {
+                    if (!respSkill.ok) {
+                      throw new Error(
+                        "Error al obtener las skills del usuario",
+                      );
+                    }
+                    return respSkill.json();
+                  })
+                  .then((skillsData) => ({
+                    ...user,
+                    role: roleText.trim(),
+                    skills: Array.isArray(skillsData) ? skillsData : [],
+                  })),
+              ),
+          ),
+        );
+      })
+      .then((usersWithDetails) => {
+        setUsers(usersWithDetails);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [projectId]);
 
   // Abre el modal con el usuario seleccionado
   const openModal = (user) => {
@@ -224,18 +228,20 @@ function UsersList() {
     setNewSkillRow(false);
   };
 
-    // Funciones para editar skills
-    const startEditSkill = (skillId) => {
-      setEditingSkillId(skillId);
-      setNewSkillRow(false);
-    };
-    const cancelEditSkill = () => {
-      setEditingSkillId(null);
-    };
-    const saveEditSkill = async (skillId, newName, newDesc) => {
-      if (!selectedUser) return;
-      try {
-        const response = await fetch(`http://140.84.170.68/api/skills/${skillId}`, {
+  // Funciones para editar skills
+  const startEditSkill = (skillId) => {
+    setEditingSkillId(skillId);
+    setNewSkillRow(false);
+  };
+  const cancelEditSkill = () => {
+    setEditingSkillId(null);
+  };
+  const saveEditSkill = async (skillId, newName, newDesc) => {
+    if (!selectedUser) return;
+    try {
+      const response = await fetch(
+        `http://140.84.170.68/api/skills/${skillId}`,
+        {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -264,12 +270,14 @@ function UsersList() {
     }
   };
 
-    const deleteSkill = async (skillId) => {
-      if (!selectedUser) return;
-      const confirmDel = window.confirm("¿Eliminar esta skill?");
-      if (!confirmDel) return;
-      try {
-        const response = await fetch(`http://140.84.170.68/api/skills/${skillId}`, {
+  const deleteSkill = async (skillId) => {
+    if (!selectedUser) return;
+    const confirmDel = window.confirm("¿Eliminar esta skill?");
+    if (!confirmDel) return;
+    try {
+      const response = await fetch(
+        `http://140.84.170.68/api/skills/${skillId}`,
+        {
           method: "DELETE",
         },
       );
@@ -300,38 +308,38 @@ function UsersList() {
     setNewSkillRow(false);
   };
 
-    const saveNewSkill = async (newName, newDesc) => {
-      if (!selectedUser) return;
-      const payload = {
-        oracleUser: { idUser: selectedUser.idUser },
-        name: newName,
-        description: newDesc,
-      };
-      try {
-        const response = await fetch(`http://140.84.170.68/api/skills`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
-        if (!response.ok) {
-          throw new Error("Error al crear la skill");
-        }
-        const createdSkill = await response.json();
-        setUsers((prevUsers) =>
-          prevUsers.map((user) => {
-            if (user.idUser === selectedUser.idUser) {
-              return { ...user, skills: [...user.skills, createdSkill] };
-            }
-            return user;
-          })
-        );
-        setNewSkillRow(false);
-      } catch (err) {
-        alert(err.message);
-      }
+  const saveNewSkill = async (newName, newDesc) => {
+    if (!selectedUser) return;
+    const payload = {
+      oracleUser: { idUser: selectedUser.idUser },
+      name: newName,
+      description: newDesc,
     };
+    try {
+      const response = await fetch(`http://140.84.170.68/api/skills`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error("Error al crear la skill");
+      }
+      const createdSkill = await response.json();
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => {
+          if (user.idUser === selectedUser.idUser) {
+            return { ...user, skills: [...user.skills, createdSkill] };
+          }
+          return user;
+        }),
+      );
+      setNewSkillRow(false);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   if (loading) {
     return <p className="text-center mt-8 text-white">Cargando usuarios...</p>;

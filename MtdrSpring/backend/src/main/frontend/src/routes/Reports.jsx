@@ -28,9 +28,9 @@ function Reports() {
 
   useEffect(() => {
     fetch(`http://140.84.170.68/api/sprints/project/${projectId}`)
-      .then(res => res.json())
-      .then(data => {
-        const simplified = data.map(s => ({
+      .then((res) => res.json())
+      .then((data) => {
+        const simplified = data.map((s) => ({
           id: s.id_sprint,
           name: s.name,
         }));
@@ -41,9 +41,9 @@ function Reports() {
 
   useEffect(() => {
     fetch(`http://140.84.170.68/api/projects/${projectId}`)
-      .then(res => res.json())
-      .then(data => {
-        const users = data.projectUsers.map(pu => ({
+      .then((res) => res.json())
+      .then((data) => {
+        const users = data.projectUsers.map((pu) => ({
           id: pu.idProjectUser,
           name: pu.user.name,
         }));
@@ -86,8 +86,7 @@ function Reports() {
       // timeLogsEndpoint = isTeam
       //    ? `http://140.84.170.68/api/timelogs/team-sprint/${selectedSprint}/time-logs`
       //    : `http://140.84.170.68/api/timelogs/individual-sprint/${selectedSprint}/${selectedMember}/time-logs`;
-
-    } else if (filterType === 'week') {
+    } else if (filterType === "week") {
       if (!selectedDate) {
         alert("Selecciona una semana.");
         return;
@@ -107,8 +106,7 @@ function Reports() {
       // timeLogsEndpoint = isTeam
       //   ? `http://140.84.170.68/api/timelogs/team-week/${selectedDate}/${projectId}/time-logs`
       //   : `http://140.84.170.68/api/timelogs/individual-week/${selectedDate}/${selectedMember}/time-logs`;
-
-    } else if (filterType === 'month') {
+    } else if (filterType === "month") {
       if (!selectedDate) {
         alert("Selecciona un mes.");
         return;
@@ -128,7 +126,6 @@ function Reports() {
       // timeLogsEndpoint = isTeam
       //   ? `http://140.84.170.68/api/timelogs/team-month/${selectedDate}/${projectId}/time-logs`
       //   : `http://140.84.170.68/api/timelogs/individual-month/${selectedDate}/${selectedMember}/time-logs`;
-
     }
 
     try {

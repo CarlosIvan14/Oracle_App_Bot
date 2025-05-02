@@ -24,9 +24,9 @@ function NewItemModal({ addItem, isInserting }) {
     }
     setIsFetching(true);
     fetch("http://140.84.170.68/assignment/by-ai", {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description })
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ description }),
     })
       .then((response) => {
         if (!response.ok) {
