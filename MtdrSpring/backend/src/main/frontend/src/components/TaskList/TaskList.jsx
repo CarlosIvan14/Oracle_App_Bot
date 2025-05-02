@@ -1,18 +1,16 @@
-import React from 'react';
-import TaskListItem from './TaskListItem';
+import React from "react";
+import TaskListItem from "./TaskListItem";
 
+// <tbody className="divide-y divide-gray-700">
+// <div id="maincontent" className="bg-gray-800 bg-opacity-50 p-4 rounded-lg"></div>
 function TaskList({ items, toggleDone, deleteItem }) {
   return (
-<<<<<<< Updated upstream
-    <div id="maincontent" className="bg-customDark bg-opacity-50 p-4 rounded-lg">
-=======
-    <div id="maincontent" className="bg-gray-800 bg-opacity-50 p-4 rounded-lg">
->>>>>>> Stashed changes
-
+    <div
+      id="maincontent"
+      className="bg-customDark bg-opacity-50 p-4 rounded-lg"
+    >
       {/* Tareas pendientes */}
-      <h2 className="text-2xl font-semibold mb-2 text-white">
-        Pending Items
-      </h2>
+      <h2 className="text-2xl font-semibold mb-2 text-white">Pending Items</h2>
       <table
         id="itemlistNotDone"
         className="
@@ -25,14 +23,10 @@ function TaskList({ items, toggleDone, deleteItem }) {
           mb-4
         "
       >
-<<<<<<< Updated upstream
         <tbody className="divide-y divide-customDarkligth">
-=======
-        <tbody className="divide-y divide-gray-700">
->>>>>>> Stashed changes
           {items
-            .filter(item => !item.done)
-            .map(item => (
+            .filter((item) => !item.done)
+            .map((item) => (
               <TaskListItem
                 key={item.id}
                 item={item}
@@ -55,20 +49,13 @@ function TaskList({ items, toggleDone, deleteItem }) {
           w-full 
           break-words 
           divide-y 
-<<<<<<< Updated upstream
           divide-customDarkligth
         "
       >
         <tbody className="divide-y divide-customDarkligth">
-=======
-          divide-gray-700
-        "
-      >
-        <tbody className="divide-y divide-gray-700">
->>>>>>> Stashed changes
           {items
-            .filter(item => item.done)
-            .map(item => (
+            .filter((item) => item.done)
+            .map((item) => (
               <TaskListItem
                 key={item.id}
                 item={item}

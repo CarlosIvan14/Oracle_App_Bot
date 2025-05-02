@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import React, { useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function NewItemModal({ addItem, isInserting }) {
   // Estados para el modal
   const [showModal, setShowModal] = useState(false);
 
   // Estados para los campos del formulario
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState(null); // objeto Date
-  const [priority, setPriority] = useState('');
-  const [userPosition, setUserPosition] = useState('');
+  const [priority, setPriority] = useState("");
+  const [userPosition, setUserPosition] = useState("");
 
   // Estado para la lista de usuarios retornada por AI y para el indicador de carga
   const [teamMembers, setTeamMembers] = useState([]);
@@ -28,18 +28,18 @@ function NewItemModal({ addItem, isInserting }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ description })
     })
-      .then(response => {
+      .then((response) => {
         if (!response.ok) {
           throw new Error("Error al asignar por AI");
         }
         return response.json();
       })
-      .then(data => {
+      .then((data) => {
         // Se espera que data sea un arreglo de usuarios ordenados, con al menos el campo "idUser"
         setTeamMembers(data);
         setIsFetching(false);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
         alert("Error al obtener asignación AI");
         setIsFetching(false);
@@ -54,7 +54,9 @@ function NewItemModal({ addItem, isInserting }) {
       return;
     }
     if (teamMembers.length === 0) {
-      alert("Debes obtener la lista de usuarios mediante 'Assign By Ai' antes de asignar la tarea");
+      alert(
+        "Debes obtener la lista de usuarios mediante 'Assign By Ai' antes de asignar la tarea",
+      );
       return;
     }
     const pos = parseInt(userPosition, 10) - 1;
@@ -64,7 +66,7 @@ function NewItemModal({ addItem, isInserting }) {
     }
     // Se utiliza el idUser del usuario seleccionado
     const assignedUserId = teamMembers[pos].idUser;
-    const isoDate = deadline.toISOString().split('T')[0];
+    const isoDate = deadline.toISOString().split("T")[0];
     const newTask = {
       description,
       deadline: isoDate,
@@ -73,10 +75,10 @@ function NewItemModal({ addItem, isInserting }) {
     };
     addItem(newTask);
     // Limpiar campos y cerrar modal
-    setDescription('');
+    setDescription("");
     setDeadline(null);
-    setPriority('');
-    setUserPosition('');
+    setPriority("");
+    setUserPosition("");
     setTeamMembers([]);
     setShowModal(false);
   };
@@ -127,7 +129,11 @@ function NewItemModal({ addItem, isInserting }) {
                 stroke="currentColor"
                 strokeWidth={2}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
 
@@ -193,7 +199,9 @@ function NewItemModal({ addItem, isInserting }) {
               {/* Mostrar la lista de usuarios obtenida por AI */}
               {teamMembers.length > 0 && (
                 <div>
-                  <label className="block mb-1 font-semibold">Rank de Usuarios para esta tarea:</label>
+                  <label className="block mb-1 font-semibold">
+                    Rank de Usuarios para esta tarea:
+                  </label>
                   <div className="max-h-40 overflow-y-auto border border-gray-600 p-2 rounded">
                     <ul className="ml-4 mb-2 text-sm">
                       {teamMembers.map((member, index) => (
@@ -204,7 +212,8 @@ function NewItemModal({ addItem, isInserting }) {
                     </ul>
                   </div>
                   <label className="block mb-1 font-semibold">
-                    Ingresa la posición del usuario al que quieres asignar la tarea (1 - {teamMembers.length})
+                    Ingresa la posición del usuario al que quieres asignar la
+                    tarea (1 - {teamMembers.length})
                   </label>
                   <input
                     type="number"

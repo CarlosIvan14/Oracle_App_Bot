@@ -1,23 +1,23 @@
 // src/routes/ProjectSprints.js
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
-const IconPlus   = () => <span className="text-lg">＋</span>;
+const IconPlus = () => <span className="text-lg">＋</span>;
 const IconCancel = () => <span className="text-lg">✕</span>;
 
 export default function ProjectSprints() {
   const { projectId } = useParams();
-  const navigate      = useNavigate();
+  const navigate = useNavigate();
 
-  const [sprints,   setSprints]   = useState([]);
-  const [roleUser,  setRoleUser]  = useState(null);
-  const [loading,   setLoading]   = useState(true);
-  const [error,     setError]     = useState('');
+  const [sprints, setSprints] = useState([]);
+  const [roleUser, setRoleUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [showModal, setShowModal] = useState(false);
-  const [newName,   setNewName]   = useState('');
-  const [newDate,   setNewDate]   = useState('');
-  const [newDesc,   setNewDesc]   = useState('Active');
+  const [newName, setNewName] = useState("");
+  const [newDate, setNewDate] = useState("");
+  const [newDesc, setNewDesc] = useState("Active");
 
   // 1) Carga sprints + rol
   useEffect(() => {
@@ -41,8 +41,8 @@ export default function ProjectSprints() {
   // 2) Listener global para “openAddSprint”
   useEffect(() => {
     const onOpen = () => setShowModal(true);
-    window.addEventListener('openAddSprint', onOpen);
-    return () => window.removeEventListener('openAddSprint', onOpen);
+    window.addEventListener("openAddSprint", onOpen);
+    return () => window.removeEventListener("openAddSprint", onOpen);
   }, []);
 
   // 3) Toggle estado
@@ -53,12 +53,12 @@ export default function ProjectSprints() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ description: d }),
     })
-      .then(r => {
-        if (!r.ok) throw 'Error patch';
-        setSprints(s =>
-          s.map(x =>
-            x.id_sprint === sprint.id_sprint ? { ...x, description: d } : x
-          )
+      .then((r) => {
+        if (!r.ok) throw "Error patch";
+        setSprints((s) =>
+          s.map((x) =>
+            x.id_sprint === sprint.id_sprint ? { ...x, description: d } : x,
+          ),
         );
       })
       .catch(alert);
@@ -66,7 +66,7 @@ export default function ProjectSprints() {
 
   // 4) Crear sprint
   const create = () => {
-    if (!newName || !newDate) return alert('Completa los campos');
+    if (!newName || !newDate) return alert("Completa los campos");
     const payload = {
       creation_ts: newDate,
       description: newDesc,
@@ -78,24 +78,24 @@ export default function ProjectSprints() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
-      .then(r => (r.ok ? r.json() : Promise.reject('Error crear')))
-      .then(s => setSprints(ss => [...ss, s]))
+      .then((r) => (r.ok ? r.json() : Promise.reject("Error crear")))
+      .then((s) => setSprints((ss) => [...ss, s]))
       .catch(alert)
       .finally(() => {
         setShowModal(false);
-        setNewName('');
-        setNewDate('');
-        setNewDesc('Active');
+        setNewName("");
+        setNewDate("");
+        setNewDesc("Active");
       });
   };
 
   if (loading) return <p className="text-center mt-8 text-white">Cargando…</p>;
-  if (error)   return <p className="text-center mt-8 text-red-500">{error}</p>;
+  if (error) return <p className="text-center mt-8 text-red-500">{error}</p>;
 
   // Filtrado para developers
   const visible =
-    roleUser === 'developer'
-      ? sprints.filter(s => s.description !== 'idle')
+    roleUser === "developer"
+      ? sprints.filter((s) => s.description !== "idle")
       : sprints;
 
   return (
@@ -105,32 +105,34 @@ export default function ProjectSprints() {
       </h1>
 
       <div className="grid grid-cols-4 gap-4 mb-8">
-        {visible.map(s => (
+        {visible.map((s) => (
           <div
             key={s.id_sprint}
             className="bg-black bg-opacity-20 p-4 rounded-2xl hover:bg-opacity-30 cursor-pointer"
-            onClick={() => navigate(`/projects/${projectId}/sprint/${s.id_sprint}`)}
+            onClick={() =>
+              navigate(`/projects/${projectId}/sprint/${s.id_sprint}`)
+            }
           >
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-xl font-semibold text-white">{s.name}</h2>
                 <p className="text-white">
-                  Estado: {s.description === 'Active' ? '🟢' : '🔴'}
+                  Estado: {s.description === "Active" ? "🟢" : "🔴"}
                 </p>
               </div>
-              {roleUser === 'manager' && (
+              {roleUser === "manager" && (
                 <button
-                onClick={e => {
-                  e.stopPropagation();
-                  toggle(s);
-                }}
-                className={`rounded-full text-white font-bold py-1 px-2 ${
-                  s.description === 'Active'
-                    ? 'bg-red-600 hover:bg-red-700'
-                    : 'bg-green-600 hover:bg-green-700'
-                }`}
-              >
-                {s.description === 'Active' ? 'Deshabilitar' : 'Habilitar'}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggle(s);
+                  }}
+                  className={`rounded-full text-white font-bold py-1 px-2 ${
+                    s.description === "Active"
+                      ? "bg-red-600 hover:bg-red-700"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
+                >
+                  {s.description === "Active" ? "Deshabilitar" : "Habilitar"}
                 </button>
               )}
             </div>
@@ -139,14 +141,14 @@ export default function ProjectSprints() {
       </div>
 
       {/* Modal Crear Sprint */}
-      {showModal && roleUser === 'manager' && (
+      {showModal && roleUser === "manager" && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
           onClick={() => setShowModal(false)}
         >
           <div
             className="max-w-md w-full p-6 bg-customDark bg-opacity-50 text-white rounded-xl shadow-lg"
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold mb-4">Crear Sprint</h2>
             <div className="space-y-4">
@@ -154,7 +156,7 @@ export default function ProjectSprints() {
                 <label className="block mb-1">Nombre</label>
                 <input
                   value={newName}
-                  onChange={e => setNewName(e.target.value)}
+                  onChange={(e) => setNewName(e.target.value)}
                   className="w-full rounded-full p-2 border bg-customDarkligth"
                 />
               </div>
@@ -163,15 +165,15 @@ export default function ProjectSprints() {
                 <input
                   type="date"
                   value={newDate}
-                  onChange={e => setNewDate(e.target.value)}
+                  onChange={(e) => setNewDate(e.target.value)}
                   className="w-full rounded-full p-2 border bg-customDarkligth"
                 />
               </div>
               <div>
                 <input
-                type='hidden'
+                  type="hidden"
                   value={newDesc}
-                  onChange={e => setNewDesc(e.target.value)}
+                  onChange={(e) => setNewDesc(e.target.value)}
                   className="w-full rounded-full p-2 border bg-customDarkligth"
                 />
               </div>

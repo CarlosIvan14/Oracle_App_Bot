@@ -1,32 +1,32 @@
-import React from 'react';
+import React from "react";
 
 function formatDate(dateString) {
-  const options = { 
-    month: 'short', 
-    day: 'numeric', 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    second: '2-digit' 
+  const options = {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   };
-  return new Date(dateString).toLocaleString('en-US', options);
+  return new Date(dateString).toLocaleString("en-US", options);
 }
 
 function getPriorityLabel(priority) {
   switch (priority) {
-    case 1: return "Alta";
-    case 2: return "Media";
-    case 3: return "Baja";
-    default: return "Sin definir";
+    case 1:
+      return "Alta";
+    case 2:
+      return "Media";
+    case 3:
+      return "Baja";
+    default:
+      return "Sin definir";
   }
 }
 
 function TaskListItem({ item, toggleDone, deleteItem }) {
   return (
-<<<<<<< Updated upstream
     <tr className="hover:bg-customDarkligth text-white">
-=======
-    <tr className="hover:bg-gray-700 text-white">
->>>>>>> Stashed changes
       {/* Descripción con salto de línea y corte de palabras */}
       <td className="px-6 py-3 whitespace-pre-line break-words">
         {item.description}
@@ -36,9 +36,7 @@ function TaskListItem({ item, toggleDone, deleteItem }) {
         {item.createdAt ? formatDate(item.createdAt) : "--"}
       </td>
 
-      <td className="px-6 py-3 whitespace-nowrap">
-        {item.deadline || "--"}
-      </td>
+      <td className="px-6 py-3 whitespace-nowrap">{item.deadline || "--"}</td>
 
       <td className="px-6 py-3 whitespace-nowrap">
         {getPriorityLabel(item.priority)}
@@ -115,18 +113,18 @@ function TaskListItem({ item, toggleDone, deleteItem }) {
             "
             onClick={() => deleteItem(item.id)}
           >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-4 w-4 mr-1" 
-              fill="none" 
-              viewBox="0 0 24 24" 
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth="2" 
-                d="M6 18L18 6M6 6l12 12" 
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
               />
             </svg>
             Delete
