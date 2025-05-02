@@ -248,7 +248,10 @@ function Reports() {
 
       <div className="flex flex-wrap items-end gap-4">
         <div>
-          <label htmlFor="filterTypeSelect" className="block mb-1 text-sm text-gray-200 font-bold">
+          <label
+            htmlFor="filterTypeSelect"
+            className="block mb-1 text-sm text-gray-200 font-bold"
+          >
             Filtrar por
           </label>
           <select
@@ -265,7 +268,10 @@ function Reports() {
 
         {filterType === "sprint" && (
           <div>
-            <label htmlFor="sprintSelect" className="block mb-1 text-sm text-gray-200 font-bold">
+            <label
+              htmlFor="sprintSelect"
+              className="block mb-1 text-sm text-gray-200 font-bold"
+            >
               Sprint
             </label>
             <select
@@ -310,7 +316,10 @@ function Reports() {
         )}
 
         <div>
-          <label htmlFor="memberSelect" className="block mb-1 text-sm text-gray-200 font-bold">
+          <label
+            htmlFor="memberSelect"
+            className="block mb-1 text-sm text-gray-200 font-bold"
+          >
             Miembro
           </label>
           <select
@@ -341,35 +350,50 @@ function Reports() {
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-5 gap-6">
         <div className="bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">Usuario</h2>
-          <p aria-label="report-user" className="text-2xl font-semibold text-white mt-1">
+          <p
+            aria-label="report-user"
+            className="text-2xl font-semibold text-white mt-1"
+          >
             {reportData?.user ?? "—"}
           </p>
         </div>
 
         <div className="bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">Tareas Completadas</h2>
-          <p aria-label="report-tasksdone" className="text-3xl font-bold text-green-400 mt-1">
+          <p
+            aria-label="report-tasksdone"
+            className="text-3xl font-bold text-green-400 mt-1"
+          >
             {reportData?.tasksDone ?? "—"}
           </p>
         </div>
 
         <div className="bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">Story Points</h2>
-          <p aria-label="report-storypoints" className="text-3xl font-bold text-green-400 mt-1">
+          <p
+            aria-label="report-storypoints"
+            className="text-3xl font-bold text-green-400 mt-1"
+          >
             {reportData?.storyPoints ?? "—"}
           </p>
         </div>
 
         <div className="bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">Horas Reales</h2>
-          <p aria-label="report-realhours" className="text-3xl font-bold text-blue-400 mt-1">
+          <p
+            aria-label="report-realhours"
+            className="text-3xl font-bold text-blue-400 mt-1"
+          >
             {reportData?.realHours ?? "—"}
           </p>
         </div>
 
         <div className="bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">Horas Estimadas</h2>
-          <p aria-label="report-estimatedhours" className="text-3xl font-bold text-blue-400 mt-1">
+          <p
+            aria-label="report-estimatedhours"
+            className="text-3xl font-bold text-blue-400 mt-1"
+          >
             {reportData?.estimatedHours ?? "—"}
           </p>
         </div>
@@ -380,7 +404,10 @@ function Reports() {
         {/* KPI 1 Time Efficiency Score */}
         <div className="col-span-1 bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">KPI 1 Time Efficiency Score</h2>
-          <p aria-label="report-kpi1" className="text-3xl font-bold text-blue-400 mt-1">
+          <p
+            aria-label="report-kpi1"
+            className="text-3xl font-bold text-blue-400 mt-1"
+          >
             {reportData?.kpi1 ?? "—"}
           </p>
         </div>
@@ -418,7 +445,10 @@ function Reports() {
         {/* KPI 2 Tryhard Score */}
         <div className="col-span-1 bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">KPI 2 Tryhard Score</h2>
-          <p aria-label="report-kpi2" className="text-3xl font-bold text-blue-400 mt-1">
+          <p
+            aria-label="report-kpi2"
+            className="text-3xl font-bold text-blue-400 mt-1"
+          >
             {reportData?.kpi2 ?? "—"}
           </p>
         </div>

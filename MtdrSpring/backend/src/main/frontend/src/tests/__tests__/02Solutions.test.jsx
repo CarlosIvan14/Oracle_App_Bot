@@ -21,8 +21,6 @@ global.fetch = jest.fn();
 const mockUser = { idUser: 1 };
 const mockProjectUserId = 5;
 
-
-
 describe("SprintTasks Component", () => {
   beforeAll(() => {
     // Suprime warnings irrelevantes de React Router
@@ -78,7 +76,7 @@ describe("SprintTasks Component", () => {
             element={<SprintTasks />}
           />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Espera que la tarea aparezca en pantalla
@@ -94,7 +92,7 @@ describe("SprintTasks Component", () => {
         expect.objectContaining({
           method: "PATCH",
           body: JSON.stringify({ status: "IN_PROGRESS" }),
-        })
+        }),
       );
     });
   });
