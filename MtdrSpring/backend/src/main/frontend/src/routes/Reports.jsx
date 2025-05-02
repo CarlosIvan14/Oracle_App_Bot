@@ -248,11 +248,7 @@ function Reports() {
 
       <div className="flex flex-wrap items-end gap-4">
         <div>
-<<<<<<< HEAD
-          <label className="block mb-1 text-sm text-gray-200 font-bold">
-=======
           <label htmlFor="filterTypeSelect" className="block mb-1 text-sm text-gray-200 font-bold">
->>>>>>> test
             Filtrar por
           </label>
           <select
@@ -261,49 +257,28 @@ function Reports() {
             onChange={(e) => setFilterType(e.target.value)}
             className="bg-customDark bg-opacity-30 text-white px-3 py-2 rounded-xl"
           >
-<<<<<<< HEAD
-            <option value="sprint">Sprint</option>
-            <option value="week">Semana</option>
-            <option value="month">Mes</option>
-=======
             <option value="sprint">sprint</option>
             <option value="week">semana</option>
             <option value="month">mes</option>
->>>>>>> test
           </select>
         </div>
 
         {filterType === "sprint" && (
           <div>
-<<<<<<< HEAD
-            <label className="block mb-1 text-sm text-gray-200 font-bold">
-              Sprint
-            </label>
-            <select
-=======
             <label htmlFor="sprintSelect" className="block mb-1 text-sm text-gray-200 font-bold">
               Sprint
             </label>
             <select
               id="sprintSelect"
->>>>>>> test
               value={selectedSprint ?? ""}
               onChange={(e) => setSelectedSprint(e.target.value)}
               className="bg-customDark bg-opacity-30 rounded-xl text-white px-3 py-2"
             >
-<<<<<<< HEAD
-              <option value="" disabled>
-                Selecciona un sprint
-              </option>
-              {sprints.map((s) => (
-                <option key={s.id} value={s.id}>
-=======
               <option key="sprint-none" value="" disabled>
                 Selecciona un sprint
               </option>
               {sprints.map((s) => (
                 <option key={`sprint-${s.id}`} value={s.id}>
->>>>>>> test
                   {s.name}
                 </option>
               ))}
@@ -335,18 +310,11 @@ function Reports() {
         )}
 
         <div>
-<<<<<<< HEAD
-          <label className="block mb-1 text-sm text-gray-200 font-bold">
-            Miembro
-          </label>
-          <select
-=======
           <label htmlFor="memberSelect" className="block mb-1 text-sm text-gray-200 font-bold">
             Miembro
           </label>
           <select
             id="memberSelect"
->>>>>>> test
             value={selectedMember ?? ""}
             onChange={(e) => setSelectedMember(e.target.value)}
             className="bg-customDark bg-opacity-30 text-white px-3 py-2 rounded-xl"
@@ -355,11 +323,7 @@ function Reports() {
               Selecciona un miembro
             </option>
             {members.map((m) => (
-<<<<<<< HEAD
-              <option key={m.id} value={m.id}>
-=======
               <option key={`sprint-${m.id}`} value={m.id}>
->>>>>>> test
                 {m.name}
               </option>
             ))}
@@ -377,55 +341,35 @@ function Reports() {
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-5 gap-6">
         <div className="bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">Usuario</h2>
-<<<<<<< HEAD
-          <p className="text-2xl font-semibold text-white mt-1">
-=======
           <p aria-label="report-user" className="text-2xl font-semibold text-white mt-1">
->>>>>>> test
             {reportData?.user ?? "—"}
           </p>
         </div>
 
         <div className="bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">Tareas Completadas</h2>
-<<<<<<< HEAD
-          <p className="text-3xl font-bold text-green-400 mt-1">
-=======
           <p aria-label="report-tasksdone" className="text-3xl font-bold text-green-400 mt-1">
->>>>>>> test
             {reportData?.tasksDone ?? "—"}
           </p>
         </div>
 
         <div className="bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">Story Points</h2>
-<<<<<<< HEAD
-          <p className="text-3xl font-bold text-green-400 mt-1">
-=======
           <p aria-label="report-storypoints" className="text-3xl font-bold text-green-400 mt-1">
->>>>>>> test
             {reportData?.storyPoints ?? "—"}
           </p>
         </div>
 
         <div className="bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">Horas Reales</h2>
-<<<<<<< HEAD
-          <p className="text-3xl font-bold text-blue-400 mt-1">
-=======
           <p aria-label="report-realhours" className="text-3xl font-bold text-blue-400 mt-1">
->>>>>>> test
             {reportData?.realHours ?? "—"}
           </p>
         </div>
 
         <div className="bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">Horas Estimadas</h2>
-<<<<<<< HEAD
-          <p className="text-3xl font-bold text-blue-400 mt-1">
-=======
           <p aria-label="report-estimatedhours" className="text-3xl font-bold text-blue-400 mt-1">
->>>>>>> test
             {reportData?.estimatedHours ?? "—"}
           </p>
         </div>
@@ -436,11 +380,7 @@ function Reports() {
         {/* KPI 1 Time Efficiency Score */}
         <div className="col-span-1 bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">KPI 1 Time Efficiency Score</h2>
-<<<<<<< HEAD
-          <p className="text-3xl font-bold text-blue-400 mt-1">
-=======
           <p aria-label="report-kpi1" className="text-3xl font-bold text-blue-400 mt-1">
->>>>>>> test
             {reportData?.kpi1 ?? "—"}
           </p>
         </div>
@@ -478,11 +418,7 @@ function Reports() {
         {/* KPI 2 Tryhard Score */}
         <div className="col-span-1 bg-black bg-opacity-30 rounded-2xl p-6 shadow-lg">
           <h2 className="text-sm text-gray-400">KPI 2 Tryhard Score</h2>
-<<<<<<< HEAD
-          <p className="text-3xl font-bold text-blue-400 mt-1">
-=======
           <p aria-label="report-kpi2" className="text-3xl font-bold text-blue-400 mt-1">
->>>>>>> test
             {reportData?.kpi2 ?? "—"}
           </p>
         </div>
@@ -530,11 +466,7 @@ function Reports() {
       {reportData?.tasksData?.length > 0 && (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4 text-white">
-<<<<<<< HEAD
-            Tareas Completadas
-=======
             Tareas Completadas:
->>>>>>> test
           </h2>
           <div className="overflow-auto rounded-lg shadow ring-1 ring-black ring-opacity-5">
             <table className="min-w-full bg-black bg-opacity-50 text-white text-sm">
@@ -559,11 +491,7 @@ function Reports() {
 
                   return (
                     <tr
-<<<<<<< HEAD
-                      key={idx}
-=======
                       key={`row-task-${row.task.id}`}
->>>>>>> test
                       className="hover:bg-black bg-opacity-50 transition duration-200"
                     >
                       <td className="px-6 py-4">{user}</td>
