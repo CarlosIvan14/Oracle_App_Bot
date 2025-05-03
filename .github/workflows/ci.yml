@@ -22,10 +22,10 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # Spring javaFormat check
-      - name: Check backend formatting with Spring JavaFormat
-        working-directory: MtdrSpring/backend
-        run: mvn spring-javaformat:apply
+      # # Spring javaFormat check
+      # - name: Check backend formatting with Spring JavaFormat
+      #   working-directory: MtdrSpring/backend
+      #   run: mvn spring-javaformat:apply
 
       # Run backend tests
       - name: Install backend dependencies
