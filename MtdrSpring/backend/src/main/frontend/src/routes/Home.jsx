@@ -1,6 +1,7 @@
 // src/routes/Home.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import config from '../../config'
 
 function Home({ user }) {
   const [projects, setProjects] = useState([]);
@@ -22,7 +23,7 @@ function Home({ user }) {
 
     // Usamos el id del usuario activo para obtener sus proyectos
     fetch(
-      `http://140.84.170.68/api/project-users/user/${currentUser.idUser}/projects`,
+      `${config.apiBaseUrl}/api/project-users/user/${currentUser.idUser}/projects`,
     )
       .then((response) => {
         if (!response.ok) {

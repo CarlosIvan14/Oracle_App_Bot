@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import config from '../../../config';
 
 function NewItemModal({ addItem, isInserting }) {
   // Estados para el modal
@@ -23,7 +24,7 @@ function NewItemModal({ addItem, isInserting }) {
       return;
     }
     setIsFetching(true);
-    fetch("http://140.84.170.68/assignment/by-ai", {
+    fetch(`${config.apiBaseUrl}/assignment/by-ai`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ description }),

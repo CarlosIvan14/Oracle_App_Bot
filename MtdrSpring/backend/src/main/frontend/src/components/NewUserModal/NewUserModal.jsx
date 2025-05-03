@@ -23,7 +23,7 @@ function NewUserModal({ isOpen, onClose, isRegistering }) {
       telegramUsername,
     };
 
-    fetch("http://140.84.170.68/users/register", {
+    fetch(`${config.apiBaseUrl}/users/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newUser),

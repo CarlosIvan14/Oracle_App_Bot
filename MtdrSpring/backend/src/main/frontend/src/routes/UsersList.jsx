@@ -1,6 +1,7 @@
 // src/routes/UsersList.js
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import config from "../../config";
 
 /** Íconos de ejemplo. Reemplaza estos componentes con los íconos de tu elección */
 const IconEdit = () => <span>✎</span>;
@@ -161,7 +162,7 @@ function UsersList() {
 
   useEffect(() => {
     // Obtener la lista de usuarios del proyecto
-    fetch(`http://140.84.170.68/api/project-users/project/${projectId}/users`)
+    fetch(`${config.apiBaseUrl}/api/project-users/project/${projectId}/users`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Error al obtener los usuarios del proyecto");
@@ -172,7 +173,7 @@ function UsersList() {
         return Promise.all(
           usersData.map((user) =>
             fetch(
-              `http://140.84.170.68/api/project-users/role-user/project-id/${projectId}/user-id/${user.idUser}`,
+              `${config.apiBaseUrl}/api/project-users/role-user/project-id/${projectId}/user-id/${user.idUser}`,
             )
               .then((respRole) => {
                 if (!respRole.ok) {
@@ -182,7 +183,7 @@ function UsersList() {
               })
               .then((roleText) =>
                 fetch(
-                  `http://140.84.170.68/api/skills/oracleuser/${user.idUser}`,
+                  `${config.apiBaseUrl}/api/skills/oracleuser/${user.idUser}`,
                 )
                   .then((respSkill) => {
                     if (!respSkill.ok) {
@@ -238,7 +239,7 @@ function UsersList() {
     if (!selectedUser) return;
     try {
       const response = await fetch(
-        `http://140.84.170.68/api/skills/${skillId}`,
+        `${config.apiBaseUrl}/api/skills/${skillId}`,
         {
           method: "PATCH",
           headers: {
@@ -274,7 +275,7 @@ function UsersList() {
     if (!confirmDel) return;
     try {
       const response = await fetch(
-        `http://140.84.170.68/api/skills/${skillId}`,
+        `${config.apiBaseUrl}/api/skills/${skillId}`,
         {
           method: "DELETE",
         },
@@ -314,7 +315,7 @@ function UsersList() {
       description: newDesc,
     };
     try {
-      const response = await fetch(`http://140.84.170.68/api/skills`, {
+      const response = await fetch(`${config.apiBaseUrl}/api/skills`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

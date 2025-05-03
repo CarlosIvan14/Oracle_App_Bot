@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import config from '../../config'
 
 export default function AllTasksCalendar() {
   const { sprintId } = useParams();
@@ -16,9 +17,9 @@ export default function AllTasksCalendar() {
 
         const [assignedResponse, unassignedResponse] = await Promise.all([
           fetch(
-            `http://140.84.170.68/api/task-assignees/by-sprint/${sprintId}`,
+            `${config.apiBaseUrl}/api/task-assignees/by-sprint/${sprintId}`,
           ),
-          fetch(`http://140.84.170.68/api/tasks/unassigned/${sprintId}`),
+          fetch(`${config.apiBaseUrl}/api/tasks/unassigned/${sprintId}`),
         ]);
 
         if (!assignedResponse.ok || !unassignedResponse.ok) {

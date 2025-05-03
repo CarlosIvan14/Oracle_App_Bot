@@ -1,6 +1,7 @@
 // src/routes/ProjectSprints.js
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import config from '../../config'
 
 const IconPlus = () => <span className="text-lg">＋</span>;
 const IconCancel = () => <span className="text-lg">✕</span>;
@@ -22,11 +23,11 @@ export default function ProjectSprints() {
   // 1) Carga sprints + rol
   useEffect(() => {
     Promise.all([
-      fetch(`http://140.84.170.68/api/sprints/project/${projectId}`).then(
+      fetch(`${config.apiBaseUrl}/api/sprints/project/${projectId}`).then(
         (r) => (r.ok ? r.json() : Promise.reject("Error sprints")),
       ),
       fetch(
-        `http://140.84.170.68/api/project-users/role-user/project-id/${projectId}/user-id/${
+        `${config.apiBaseUrl}/api/project-users/role-user/project-id/${projectId}/user-id/${
           JSON.parse(localStorage.getItem("user")).idUser
         }`,
       ).then((r) => (r.ok ? r.text() : Promise.reject("Error rol"))),
@@ -49,7 +50,7 @@ export default function ProjectSprints() {
   // 3) Toggle estado
   const toggle = (sprint) => {
     const d = sprint.description === "Active" ? "idle" : "Active";
-    fetch(`http://140.84.170.68/api/sprints/${sprint.id_sprint}`, {
+    fetch(`${config.apiBaseUrl}/api/sprints/${sprint.id_sprint}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ description: d }),
@@ -74,7 +75,7 @@ export default function ProjectSprints() {
       name: newName,
       project: { id_project: +projectId },
     };
-    fetch("http://140.84.170.68/api/sprints", {
+    fetch(`${config.apiBaseUrl}/api/sprints`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

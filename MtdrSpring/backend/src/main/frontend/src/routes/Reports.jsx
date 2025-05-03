@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import config from '../../config'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams } from "react-router-dom";
@@ -27,7 +28,7 @@ function Reports() {
   const [reportData, setReportData] = useState(null);
 
   useEffect(() => {
-    fetch(`http://140.84.170.68/api/sprints/project/${projectId}`)
+    fetch(`${config.apiBaseUrl}/api/sprints/project/${projectId}`)
       .then((res) => res.json())
       .then((data) => {
         const simplified = data.map((s) => ({
@@ -41,7 +42,7 @@ function Reports() {
   }, []);
 
   useEffect(() => {
-    fetch(`http://140.84.170.68/api/projects/${projectId}`)
+    fetch(`${config.apiBaseUrl}/api/projects/${projectId}`)
       .then((res) => res.json())
       .then((data) => {
         const users = data.projectUsers.map((pu) => ({
@@ -74,60 +75,60 @@ function Reports() {
         return;
       }
       doneTasksCountEndpoint = isTeam
-        ? `http://140.84.170.68/api/task-assignees/team-sprint/${selectedSprint}/done/count`
-        : `http://140.84.170.68/api/task-assignees/user/${selectedMember}/sprint/${selectedSprint}/done/count`;
+        ? `${config.apiBaseUrl}/api/task-assignees/team-sprint/${selectedSprint}/done/count`
+        : `${config.apiBaseUrl}/api/task-assignees/user/${selectedMember}/sprint/${selectedSprint}/done/count`;
 
       doneTasksDataEndpoint = isTeam
-        ? `http://140.84.170.68/api/task-assignees/team-sprint/${selectedSprint}/done`
-        : `http://140.84.170.68/api/task-assignees/user/${selectedMember}/sprint/${selectedSprint}/done`;
+        ? `${config.apiBaseUrl}/api/task-assignees/team-sprint/${selectedSprint}/done`
+        : `${config.apiBaseUrl}/api/task-assignees/user/${selectedMember}/sprint/${selectedSprint}/done`;
 
       // realHoursEndpoint = isTeam
-      //   ? `http://140.84.170.68/api/timelogs/team-sprint/${selectedSprint}/real-hours`
-      //   : `http://140.84.170.68/api/timelogs/individual-sprint/${selectedSprint}/${selectedMember}/real-hours`;
+      //   ? `${config.apiBaseUrl}/api/timelogs/team-sprint/${selectedSprint}/real-hours`
+      //   : `${config.apiBaseUrl}/api/timelogs/individual-sprint/${selectedSprint}/${selectedMember}/real-hours`;
 
       // timeLogsEndpoint = isTeam
-      //    ? `http://140.84.170.68/api/timelogs/team-sprint/${selectedSprint}/time-logs`
-      //    : `http://140.84.170.68/api/timelogs/individual-sprint/${selectedSprint}/${selectedMember}/time-logs`;
+      //    ? `${config.apiBaseUrl}/api/timelogs/team-sprint/${selectedSprint}/time-logs`
+      //    : `${config.apiBaseUrl}/api/timelogs/individual-sprint/${selectedSprint}/${selectedMember}/time-logs`;
     } else if (filterType === "week") {
       if (!selectedDate) {
         alert("Selecciona una semana.");
         return;
       }
       doneTasksCountEndpoint = isTeam
-        ? `http://140.84.170.68/api/task-assignees/team-week/${selectedDate}/project/${projectId}/done/count`
-        : `http://140.84.170.68/api/task-assignees/user/${selectedMember}/week/${selectedDate}/done/count`;
+        ? `${config.apiBaseUrl}/api/task-assignees/team-week/${selectedDate}/project/${projectId}/done/count`
+        : `${config.apiBaseUrl}/api/task-assignees/user/${selectedMember}/week/${selectedDate}/done/count`;
 
       doneTasksDataEndpoint = isTeam
-        ? `http://140.84.170.68/api/task-assignees/team-week/${selectedDate}/project/${projectId}/done`
-        : `http://140.84.170.68/api/task-assignees/user/${selectedMember}/week/${selectedDate}/done`;
+        ? `${config.apiBaseUrl}/api/task-assignees/team-week/${selectedDate}/project/${projectId}/done`
+        : `${config.apiBaseUrl}/api/task-assignees/user/${selectedMember}/week/${selectedDate}/done`;
 
       // realHoursEndpoint = isTeam
-      //   ? `http://140.84.170.68/api/timelogs/team-week/${selectedDate}/${projectId}/real-hours`
-      //   : `http://140.84.170.68/api/timelogs/individual-week/${selectedDate}/${selectedMember}/real-hours`;
+      //   ? `${config.apiBaseUrl}/api/timelogs/team-week/${selectedDate}/${projectId}/real-hours`
+      //   : `${config.apiBaseUrl}/api/timelogs/individual-week/${selectedDate}/${selectedMember}/real-hours`;
 
       // timeLogsEndpoint = isTeam
-      //   ? `http://140.84.170.68/api/timelogs/team-week/${selectedDate}/${projectId}/time-logs`
-      //   : `http://140.84.170.68/api/timelogs/individual-week/${selectedDate}/${selectedMember}/time-logs`;
+      //   ? `${config.apiBaseUrl}/api/timelogs/team-week/${selectedDate}/${projectId}/time-logs`
+      //   : `${config.apiBaseUrl}/api/timelogs/individual-week/${selectedDate}/${selectedMember}/time-logs`;
     } else if (filterType === "month") {
       if (!selectedDate) {
         alert("Selecciona un mes.");
         return;
       }
       doneTasksCountEndpoint = isTeam
-        ? `http://140.84.170.68/api/task-assignees/team-month/${selectedDate}/project/${projectId}/done/count`
-        : `http://140.84.170.68/api/task-assignees/user/${selectedMember}/month/${selectedDate}/done/count`;
+        ? `${config.apiBaseUrl}/api/task-assignees/team-month/${selectedDate}/project/${projectId}/done/count`
+        : `${config.apiBaseUrl}/api/task-assignees/user/${selectedMember}/month/${selectedDate}/done/count`;
 
       doneTasksDataEndpoint = isTeam
-        ? `http://140.84.170.68/api/task-assignees/team-month/${selectedDate}/project/${projectId}/done`
-        : `http://140.84.170.68/api/task-assignees/user/${selectedMember}/month/${selectedDate}/done`;
+        ? `${config.apiBaseUrl}/api/task-assignees/team-month/${selectedDate}/project/${projectId}/done`
+        : `${config.apiBaseUrl}/api/task-assignees/user/${selectedMember}/month/${selectedDate}/done`;
 
       // realHoursEndpoint = isTeam
-      //   ? `http://140.84.170.68/api/timelogs/team-month/${selectedDate}/${projectId}/real-hours`
-      //   : `http://140.84.170.68/api/timelogs/individual-month/${selectedDate}/${selectedMember}/real-hours`;
+      //   ? `${config.apiBaseUrl}/api/timelogs/team-month/${selectedDate}/${projectId}/real-hours`
+      //   : `${config.apiBaseUrl}/api/timelogs/individual-month/${selectedDate}/${selectedMember}/real-hours`;
 
       // timeLogsEndpoint = isTeam
-      //   ? `http://140.84.170.68/api/timelogs/team-month/${selectedDate}/${projectId}/time-logs`
-      //   : `http://140.84.170.68/api/timelogs/individual-month/${selectedDate}/${selectedMember}/time-logs`;
+      //   ? `${config.apiBaseUrl}/api/timelogs/team-month/${selectedDate}/${projectId}/time-logs`
+      //   : `${config.apiBaseUrl}/api/timelogs/individual-month/${selectedDate}/${selectedMember}/time-logs`;
     }
 
     try {
