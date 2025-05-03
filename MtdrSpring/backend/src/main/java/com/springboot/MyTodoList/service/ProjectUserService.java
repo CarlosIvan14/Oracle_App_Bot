@@ -35,9 +35,8 @@ public class ProjectUserService {
 		// Verifica que la entidad Projects ya exista
 		Projects proj = projectUser.getProject();
 		if (proj != null && proj.getIdProject() != 0) {
-			Projects managedProject = projectsRepository.findById(proj.getIdProject())
-				.orElseThrow(
-						() -> new IllegalArgumentException("Proyecto con id " + proj.getIdProject() + " no existe"));
+			Projects managedProject = projectsRepository.findById(proj.getIdProject()).orElseThrow(
+					() -> new IllegalArgumentException("Proyecto con id " + proj.getIdProject() + " no existe"));
 			projectUser.setProject(managedProject);
 		}
 		else {
@@ -56,8 +55,8 @@ public class ProjectUserService {
 			}
 			if (projectUserDetails.getProject() != null && projectUserDetails.getProject().getIdProject() != 0) {
 				Projects managedProject = projectsRepository.findById(projectUserDetails.getProject().getIdProject())
-					.orElseThrow(() -> new IllegalArgumentException(
-							"Proyecto con id " + projectUserDetails.getProject().getIdProject() + " no existe"));
+						.orElseThrow(() -> new IllegalArgumentException(
+								"Proyecto con id " + projectUserDetails.getProject().getIdProject() + " no existe"));
 				projectUser.setProject(managedProject);
 			}
 			if (projectUserDetails.getRoleUser() != null) {
@@ -94,8 +93,8 @@ public class ProjectUserService {
 				Map<String, Object> projectMap = (Map<String, Object>) updates.get("project");
 				if (projectMap.containsKey("idProject")) {
 					int projectId = (Integer) projectMap.get("idProject");
-					Projects managedProject = projectsRepository.findById(projectId)
-						.orElseThrow(() -> new IllegalArgumentException("Proyecto con id " + projectId + " no existe"));
+					Projects managedProject = projectsRepository.findById(projectId).orElseThrow(
+							() -> new IllegalArgumentException("Proyecto con id " + projectId + " no existe"));
 					projectUser.setProject(managedProject);
 				}
 			}

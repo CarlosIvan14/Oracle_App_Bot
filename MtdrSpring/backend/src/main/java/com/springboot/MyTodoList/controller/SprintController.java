@@ -37,7 +37,7 @@ public class SprintController {
 	public ResponseEntity<Sprint> getSprintById(@PathVariable int id) {
 		Optional<Sprint> sprint = sprintService.getSprintById(id);
 		return sprint.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-			.orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+				.orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
 	// Actualizar Sprint (PUT: actualiza todos los campos)

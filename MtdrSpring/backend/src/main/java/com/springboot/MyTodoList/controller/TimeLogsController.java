@@ -50,7 +50,7 @@ public class TimeLogsController {
 	public ResponseEntity<TimeLogs> getTimeLogById(@PathVariable int id) {
 		Optional<TimeLogs> timeLog = timeLogsService.getTimeLogById(id);
 		return timeLog.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-			.orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+				.orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
 	// Actualizar TimeLog (PUT: reemplazo completo)

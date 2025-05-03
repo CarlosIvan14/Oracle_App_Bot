@@ -40,7 +40,7 @@ public class TasksController {
 	public ResponseEntity<Tasks> getTaskById(@PathVariable int id) {
 		Optional<Tasks> task = tasksService.getTaskById(id);
 		return task.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-			.orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+				.orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
 	// Actualizar Task (PUT: reemplazo completo)
@@ -86,9 +86,9 @@ public class TasksController {
 		List<Tasks> tasks = tasksService.getUnassignedTasksBySprint(sprintId);
 
 		List<SimplifiedTaskDTO> result = tasks.stream()
-			.map(task -> new SimplifiedTaskDTO(task.getId(), task.getName(), task.getStatus(), task.getDescription(),
-					task.getStoryPoints(), task.getDeadline(), task.getEstimatedHours()))
-			.collect(Collectors.toList());
+				.map(task -> new SimplifiedTaskDTO(task.getId(), task.getName(), task.getStatus(),
+						task.getDescription(), task.getStoryPoints(), task.getDeadline(), task.getEstimatedHours()))
+				.collect(Collectors.toList());
 
 		return ResponseEntity.ok(result);
 	}

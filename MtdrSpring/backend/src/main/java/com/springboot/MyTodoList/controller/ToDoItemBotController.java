@@ -291,33 +291,33 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
 		switch (st.flow) {
 
-			case LOGIN:
-				loginFlow(chatId, txt, st);
-				break;
+		case LOGIN:
+			loginFlow(chatId, txt, st);
+			break;
 
-			case ADD_SPRINT:
-				sprintFlow(chatId, txt, st);
-				break;
+		case ADD_SPRINT:
+			sprintFlow(chatId, txt, st);
+			break;
 
-			case ADD_TASK:
-				addTaskFlow(chatId, txt, st);
-				break;
+		case ADD_TASK:
+			addTaskFlow(chatId, txt, st);
+			break;
 
-			case ADD_USER:
-				addUserFlow(chatId, txt, st);
-				break;
+		case ADD_USER:
+			addUserFlow(chatId, txt, st);
+			break;
 
-			case TASK_COMPLETE:
-				completeFlow(chatId, txt, st);
-				break;
+		case TASK_COMPLETE:
+			completeFlow(chatId, txt, st);
+			break;
 
-			case REPORTS:
-				reportsFlow(chatId, txt, st);
-				break;
+		case REPORTS:
+			reportsFlow(chatId, txt, st);
+			break;
 
-			default:
-				// nada
-				break;
+		default:
+			// nada
+			break;
 		}
 	}
 
@@ -418,142 +418,142 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
 		switch (st.step) {
 
-			case 1:
-				st.tName = txt;
-				st.step = 2;
-				send(chatId, "2) Descripción:", false);
-				break;
+		case 1:
+			st.tName = txt;
+			st.step = 2;
+			send(chatId, "2) Descripción:", false);
+			break;
 
-			case 2:
-				st.tDesc = txt;
-				st.step = 3;
-				send(chatId, "3) Deadline (YYYY-MM-DD):", false);
-				break;
+		case 2:
+			st.tDesc = txt;
+			st.step = 3;
+			send(chatId, "3) Deadline (YYYY-MM-DD):", false);
+			break;
 
-			case 3:
-				try {
-					st.tDeadline = LocalDate.parse(txt);
-				}
-				catch (DateTimeParseException e) {
-					send(chatId, "Fecha inválida. Formato: YYYY-MM-DD", false);
-					return; // sigue en step 3
-				}
-				st.step = 4;
-				send(chatId, "4) Story Points (1–7):", false);
-				break;
+		case 3:
+			try {
+				st.tDeadline = LocalDate.parse(txt);
+			}
+			catch (DateTimeParseException e) {
+				send(chatId, "Fecha inválida. Formato: YYYY-MM-DD", false);
+				return; // sigue en step 3
+			}
+			st.step = 4;
+			send(chatId, "4) Story Points (1–7):", false);
+			break;
 
-			case 4:
-				int sp;
-				try {
-					sp = Integer.parseInt(txt);
-				}
-				catch (NumberFormatException e) {
-					send(chatId, "Número inválido. Ingresa un entero entre 1 y 7:", false);
-					return; // sigue en step 4
-				}
-				if (sp < 1 || sp > 7) {
-					send(chatId, "Story Points fuera de rango. Ingresa un valor entre 1 y 7:", false);
-					return; // sigue en step 4
-				}
-				st.tSP = sp;
-				st.step = 5;
-				send(chatId, "5) Horas estimadas (0–4):", false);
-				break;
+		case 4:
+			int sp;
+			try {
+				sp = Integer.parseInt(txt);
+			}
+			catch (NumberFormatException e) {
+				send(chatId, "Número inválido. Ingresa un entero entre 1 y 7:", false);
+				return; // sigue en step 4
+			}
+			if (sp < 1 || sp > 7) {
+				send(chatId, "Story Points fuera de rango. Ingresa un valor entre 1 y 7:", false);
+				return; // sigue en step 4
+			}
+			st.tSP = sp;
+			st.step = 5;
+			send(chatId, "5) Horas estimadas (0–4):", false);
+			break;
 
-			case 5:
-				double est;
-				try {
-					est = Double.parseDouble(txt);
-				}
-				catch (NumberFormatException e) {
-					send(chatId, "Número inválido. Ingresa un decimal entre 0 y 4:", false);
-					return; // sigue en step 5
-				}
-				if (est < 0 || est > 4) {
-					send(chatId, "Horas estimadas fuera de rango. Ingresa un valor entre 0 y 4:", false);
-					return; // sigue en step 5
-				}
-				st.tEst = est;
+		case 5:
+			double est;
+			try {
+				est = Double.parseDouble(txt);
+			}
+			catch (NumberFormatException e) {
+				send(chatId, "Número inválido. Ingresa un decimal entre 0 y 4:", false);
+				return; // sigue en step 5
+			}
+			if (est < 0 || est > 4) {
+				send(chatId, "Horas estimadas fuera de rango. Ingresa un valor entre 0 y 4:", false);
+				return; // sigue en step 5
+			}
+			st.tEst = est;
 
-				boolean mgr = roleSvc.isManagerInProject(st.currentProjectId, st.loggedUser.getIdUser());
-				if (!mgr) {
-					createTask(chatId, st);
-					return;
-				}
-				st.step = 6;
-				send(chatId, "6) Tipo:\n1) Free\n2) Asignar usuario\n3) IA", false);
-				break;
+			boolean mgr = roleSvc.isManagerInProject(st.currentProjectId, st.loggedUser.getIdUser());
+			if (!mgr) {
+				createTask(chatId, st);
+				return;
+			}
+			st.step = 6;
+			send(chatId, "6) Tipo:\n1) Free\n2) Asignar usuario\n3) IA", false);
+			break;
 
-			case 6:
-				if ("1".equals(txt)) {
+		case 6:
+			if ("1".equals(txt)) {
+				st.mode = "FREE";
+				createTask(chatId, st);
+				return;
+			}
+			if ("2".equals(txt)) {
+				st.mode = "ASSIGN";
+				st.oracleUsers = getProjectUsers(st.currentProjectId);
+				StringBuilder sb = new StringBuilder("Usuario:\n");
+				for (int i = 0; i < st.oracleUsers.size(); i++)
+					sb.append(i + 1).append(") ").append(st.oracleUsers.get(i).getName()).append("\n");
+				st.step = 7;
+				send(chatId, sb.toString(), false);
+				return;
+			}
+			if ("3".equals(txt)) {
+				st.mode = "AI";
+				HashMap<String, Object> payload = new HashMap<String, Object>();
+				payload.put("projectId", st.currentProjectId);
+				payload.put("name", st.tName);
+				payload.put("description", st.tDesc);
+				OracleUser[] rec = rest.postForEntity(baseUrl + "/assignment/by-ai", payload, OracleUser[].class)
+						.getBody();
+				if (rec != null && rec.length > 0) {
+					st.assigneeUserId = rec[0].getIdUser();
+					st.step = 8;
+					send(chatId, "IA sugiere *" + rec[0].getName() + "*\nEscribe OK para aceptar u otro ID:", true);
+				}
+				else {
 					st.mode = "FREE";
 					createTask(chatId, st);
-					return;
 				}
-				if ("2".equals(txt)) {
-					st.mode = "ASSIGN";
-					st.oracleUsers = getProjectUsers(st.currentProjectId);
-					StringBuilder sb = new StringBuilder("Usuario:\n");
-					for (int i = 0; i < st.oracleUsers.size(); i++)
-						sb.append(i + 1).append(") ").append(st.oracleUsers.get(i).getName()).append("\n");
-					st.step = 7;
-					send(chatId, sb.toString(), false);
-					return;
-				}
-				if ("3".equals(txt)) {
-					st.mode = "AI";
-					HashMap<String, Object> payload = new HashMap<String, Object>();
-					payload.put("projectId", st.currentProjectId);
-					payload.put("name", st.tName);
-					payload.put("description", st.tDesc);
-					OracleUser[] rec = rest.postForEntity(baseUrl + "/assignment/by-ai", payload, OracleUser[].class)
-						.getBody();
-					if (rec != null && rec.length > 0) {
-						st.assigneeUserId = rec[0].getIdUser();
-						st.step = 8;
-						send(chatId, "IA sugiere *" + rec[0].getName() + "*\nEscribe OK para aceptar u otro ID:", true);
-					}
-					else {
-						st.mode = "FREE";
-						createTask(chatId, st);
-					}
-					return;
-				}
-				send(chatId, "Solo 1/2/3", false);
-				break;
+				return;
+			}
+			send(chatId, "Solo 1/2/3", false);
+			break;
 
-			case 7:
-				int idx;
+		case 7:
+			int idx;
+			try {
+				idx = Integer.parseInt(txt);
+			}
+			catch (Exception e) {
+				send(chatId, "Número", false);
+				return;
+			}
+			if (idx < 1 || idx > st.oracleUsers.size()) {
+				send(chatId, "Fuera de rango", false);
+				return;
+			}
+			st.assigneeUserId = st.oracleUsers.get(idx - 1).getIdUser();
+			createTask(chatId, st);
+			break;
+
+		case 8:
+			if (!"OK".equalsIgnoreCase(txt)) {
 				try {
-					idx = Integer.parseInt(txt);
+					st.assigneeUserId = Integer.parseInt(txt);
 				}
 				catch (Exception e) {
 					send(chatId, "Número", false);
 					return;
 				}
-				if (idx < 1 || idx > st.oracleUsers.size()) {
-					send(chatId, "Fuera de rango", false);
-					return;
-				}
-				st.assigneeUserId = st.oracleUsers.get(idx - 1).getIdUser();
-				createTask(chatId, st);
-				break;
+			}
+			createTask(chatId, st);
+			break;
 
-			case 8:
-				if (!"OK".equalsIgnoreCase(txt)) {
-					try {
-						st.assigneeUserId = Integer.parseInt(txt);
-					}
-					catch (Exception e) {
-						send(chatId, "Número", false);
-						return;
-					}
-				}
-				createTask(chatId, st);
-				break;
-
-			default:
-				break;
+		default:
+			break;
 		}
 	}
 
@@ -620,84 +620,81 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	private void reportsFlow(long chatId, String txt, ChatState st) {
 		switch (st.step) {
 
-			case 1:
-				if ("1".equals(txt))
-					st.rFilter = "sprint";
-				else if ("2".equals(txt))
-					st.rFilter = "week";
-				else if ("3".equals(txt))
-					st.rFilter = "month";
-				else {
-					send(chatId, "1/2/3", false);
-					return;
-				}
-				st.step = 2;
-				if (st.rFilter.equals("sprint")) {
-					// Show all sprints.
-					List<Sprint> sprints = sprintsSvc.getSprintsByProjectId(st.currentProjectId);
-					StringBuilder sprintListMsg = new StringBuilder("Sprints del proyecto:\n");
-					for (Sprint sprint : sprints) {
-						sprintListMsg.append("ID: ")
-							.append(sprint.getId())
-							.append(" - ")
-							.append(sprint.getName())
+		case 1:
+			if ("1".equals(txt))
+				st.rFilter = "sprint";
+			else if ("2".equals(txt))
+				st.rFilter = "week";
+			else if ("3".equals(txt))
+				st.rFilter = "month";
+			else {
+				send(chatId, "1/2/3", false);
+				return;
+			}
+			st.step = 2;
+			if (st.rFilter.equals("sprint")) {
+				// Show all sprints.
+				List<Sprint> sprints = sprintsSvc.getSprintsByProjectId(st.currentProjectId);
+				StringBuilder sprintListMsg = new StringBuilder("Sprints del proyecto:\n");
+				for (Sprint sprint : sprints) {
+					sprintListMsg.append("ID: ").append(sprint.getId()).append(" - ").append(sprint.getName())
 							.append("\n");
-					}
-					send(chatId, sprintListMsg.toString(), false);
-					send(chatId, "ID del sprint:", false);
 				}
-				else {
-					send(chatId, "Fecha (yyyy-MM-dd):", false);
-				}
-				break;
+				send(chatId, sprintListMsg.toString(), false);
+				send(chatId, "ID del sprint:", false);
+			}
+			else {
+				send(chatId, "Fecha (yyyy-MM-dd):", false);
+			}
+			break;
 
-			case 2:
-				st.rDateOrSprint = txt.trim();
-				st.step = 3;
-				List<OracleUser> us = getProjectUsers(st.currentProjectId);
-				st.oracleUsers = us;
-				StringBuilder sb = new StringBuilder("0) Todo el equipo\n");
-				for (int i = 0; i < us.size(); i++)
-					sb.append(i + 1).append(") ").append(us.get(i).getName()).append("\n");
-				send(chatId, sb.toString(), false);
-				break;
+		case 2:
+			st.rDateOrSprint = txt.trim();
+			st.step = 3;
+			List<OracleUser> us = getProjectUsers(st.currentProjectId);
+			st.oracleUsers = us;
+			StringBuilder sb = new StringBuilder("0) Todo el equipo\n");
+			for (int i = 0; i < us.size(); i++)
+				sb.append(i + 1).append(") ").append(us.get(i).getName()).append("\n");
+			send(chatId, sb.toString(), false);
+			break;
 
-			case 3:
-				int idx;
-				try {
-					idx = Integer.parseInt(txt);
-				}
-				catch (Exception e) {
-					send(chatId, "Número", false);
-					return;
-				}
-				if (idx == 0)
-					st.rMemberId = "all";
-				else if (idx > 0 && idx <= st.oracleUsers.size()) {
-					OracleUser selectedUser = st.oracleUsers.get(idx - 1);
+		case 3:
+			int idx;
+			try {
+				idx = Integer.parseInt(txt);
+			}
+			catch (Exception e) {
+				send(chatId, "Número", false);
+				return;
+			}
+			if (idx == 0)
+				st.rMemberId = "all";
+			else if (idx > 0 && idx <= st.oracleUsers.size()) {
+				OracleUser selectedUser = st.oracleUsers.get(idx - 1);
 
-					Integer userId = selectedUser.getIdUser(); // Synchronous call
-					System.out.println("Selected user index: " + idx + ", User ID: " + userId);
+				Integer userId = selectedUser.getIdUser(); // Synchronous call
+				System.out.println("Selected user index: " + idx + ", User ID: " + userId);
 
-					String puIdEpt = baseUrl + "/api/project-users/project-id/" + st.currentProjectId + "/user-id/"
-							+ userId;
-					Integer projectUserId = Optional.ofNullable(rest.getForObject(puIdEpt, Integer.class)).orElse(0);
-					System.out.println("Project ID: " + st.currentProjectId + ", Project User ID: " + projectUserId);
+				String puIdEpt = baseUrl + "/api/project-users/project-id/" + st.currentProjectId + "/user-id/"
+						+ userId;
+				Integer projectUserId = Optional.ofNullable(rest.getForObject(puIdEpt, Integer.class)).orElse(0);
+				System.out.println("Project ID: " + st.currentProjectId + ", Project User ID: " + projectUserId);
 
-					st.rUserId = String.valueOf(userId);
-					st.rMemberId = String.valueOf(projectUserId);
-					System.out.println("st.rMemberId set to: " + st.rMemberId);
-				}
-				else {
-					send(chatId, "Fuera de rango", false);
-					return;
-				}
-				sendReport(chatId, st);
-				reset(st);
-				break;
+				st.rUserId = String.valueOf(userId);
+				st.rMemberId = String.valueOf(projectUserId);
+				System.out.println("st.rMemberId set to: " + st.rMemberId);
+			}
+			else {
+				send(chatId, "Fuera de rango", false);
+				return;
+			}
+			sendReport(chatId, st);
+			reset(st);
+			break;
 
-			default:
-				break;
+		default:
+			break;
 		}
 	}
 
@@ -740,36 +737,18 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				sp += ta.getTask().getStoryPoints();
 			}
 		String who = team ? "Todo el equipo"
-				: st.oracleUsers.stream()
-					.filter(u -> u.getIdUser() == Integer.parseInt(st.rUserId))
-					.findFirst()
-					.map(OracleUser::getName)
-					.orElse("—");
+				: st.oracleUsers.stream().filter(u -> u.getIdUser() == Integer.parseInt(st.rUserId)).findFirst()
+						.map(OracleUser::getName).orElse("—");
 
 		StringBuilder sb = new StringBuilder("*Reporte*\n");
 		double kpi1 = (real != 0) ? (est / real) * 100 : 0;
 		kpi1 = Math.round(kpi1 * 100.0) / 100.0;
 		double kpi2 = (done != 0) ? (sp / done) : 0;
 		kpi2 = Math.round(kpi2 * 100.0) / 100.0;
-		sb.append("Miembro: ")
-			.append(who)
-			.append("\n")
-			.append("Completadas: ")
-			.append(done)
-			.append("\n")
-			.append("Horas est.: ")
-			.append(est)
-			.append("\n")
-			.append("Horas reales: ")
-			.append(real)
-			.append("\n")
-			.append("kpi 1 time-efficiency: ")
-			.append(kpi1)
-			.append("%")
-			.append("\n")
-			.append("kpi 2 tryhard: ")
-			.append(kpi2)
-			.append("/7.0");
+		sb.append("Miembro: ").append(who).append("\n").append("Completadas: ").append(done).append("\n")
+				.append("Horas est.: ").append(est).append("\n").append("Horas reales: ").append(real).append("\n")
+				.append("kpi 1 time-efficiency: ").append(kpi1).append("%").append("\n").append("kpi 2 tryhard: ")
+				.append(kpi2).append("/7.0");
 
 		send(chatId, sb.toString(), true);
 	}
@@ -1012,19 +991,10 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			for (TaskAssignees ta : assigned) {
 				Tasks t = ta.getTask();
 				String dev = ta.getProjectUser().getUser().getName();
-				sbAssigned.append("_Nombre Task:_ ")
-					.append(t.getName())
-					.append("\n")
-					.append("_Desarrollador:_ ")
-					.append(dev)
-					.append("\n")
-					.append("_HR:_ ")
-					.append(t.getRealHours() != null ? t.getRealHours() : 0)
-					.append(" ")
-					.append("_HE:_ ")
-					.append(t.getEstimatedHours())
-					.append("h\n")
-					.append("-----------------\n");
+				sbAssigned.append("_Nombre Task:_ ").append(t.getName()).append("\n").append("_Desarrollador:_ ")
+						.append(dev).append("\n").append("_HR:_ ")
+						.append(t.getRealHours() != null ? t.getRealHours() : 0).append(" ").append("_HE:_ ")
+						.append(t.getEstimatedHours()).append("h\n").append("-----------------\n");
 			}
 		}
 		send(chatId, sbAssigned.toString(), true);
@@ -1037,16 +1007,9 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		}
 		else {
 			for (SimplifiedTaskDTO t : free) {
-				sbFree.append("_Nombre Task:_ ")
-					.append(t.getName())
-					.append("\n")
-					.append("_Horas Estimadas:_ ")
-					.append(t.getEstimatedHours())
-					.append("h\n")
-					.append("_Story Points:_ ")
-					.append(t.getStoryPoints())
-					.append("\n")
-					.append("-----------------\n");
+				sbFree.append("_Nombre Task:_ ").append(t.getName()).append("\n").append("_Horas Estimadas:_ ")
+						.append(t.getEstimatedHours()).append("h\n").append("_Story Points:_ ")
+						.append(t.getStoryPoints()).append("\n").append("-----------------\n");
 			}
 		}
 		send(chatId, sbFree.toString(), true);

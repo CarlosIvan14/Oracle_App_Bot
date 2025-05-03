@@ -27,7 +27,7 @@ public class SprintService {
 			int projectId = sprint.getProject().getIdProject();
 			// Carga el project existente desde la base de datos
 			Projects project = projectsRepository.findById(projectId)
-				.orElseThrow(() -> new RuntimeException("Project with id " + projectId + " not found."));
+					.orElseThrow(() -> new RuntimeException("Project with id " + projectId + " not found."));
 			sprint.setProject(project);
 		}
 		return sprintRepository.save(sprint);
@@ -51,7 +51,7 @@ public class SprintService {
 			if (sprintDetails.getProject() != null && sprintDetails.getProject().getIdProject() != 0) {
 				int projectId = sprintDetails.getProject().getIdProject();
 				Projects project = projectsRepository.findById(projectId)
-					.orElseThrow(() -> new RuntimeException("Project with id " + projectId + " not found."));
+						.orElseThrow(() -> new RuntimeException("Project with id " + projectId + " not found."));
 				sprint.setProject(project);
 			}
 			sprint.setTasks(sprintDetails.getTasks());
@@ -76,7 +76,7 @@ public class SprintService {
 			if (updates.containsKey("projectId")) {
 				int projectId = Integer.parseInt(updates.get("projectId").toString());
 				Projects project = projectsRepository.findById(projectId)
-					.orElseThrow(() -> new RuntimeException("Project with id " + projectId + " not found."));
+						.orElseThrow(() -> new RuntimeException("Project with id " + projectId + " not found."));
 				sprint.setProject(project);
 			}
 			// Se pueden agregar más campos si es necesario
