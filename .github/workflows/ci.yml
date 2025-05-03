@@ -27,8 +27,13 @@ jobs:
         working-directory: MtdrSpring/backend
         run: mvn spring-javaformat:apply
 
-      # Run backend tests
+      # Dependency Installation
       - name: Install backend dependencies
+        working-directory: MtdrSpring/backend
+        run: mvn clean install
+      
+      # Run backend tests
+      - name: Run backend tests
         working-directory: MtdrSpring/backend
         run: mvn clean test
 
