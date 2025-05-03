@@ -1,6 +1,5 @@
 package com.springboot.MyTodoList.repository;
 
-
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -10,10 +9,13 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.springboot.MyTodoList.model.ToDoItem;
+
 @Repository
 @Transactional
 @EnableTransactionManagement
-public interface ToDoItemRepository extends JpaRepository<ToDoItem,Integer> {
- // ToDoItemRepository.java
-    List<ToDoItem> findByAssignedUserIdUser(int userId);
+public interface ToDoItemRepository extends JpaRepository<ToDoItem, Integer> {
+
+	// ToDoItemRepository.java
+	List<ToDoItem> findByAssignedUserIdUser(int userId);
+
 }

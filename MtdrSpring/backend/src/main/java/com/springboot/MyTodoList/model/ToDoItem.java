@@ -11,121 +11,116 @@ import java.time.OffsetDateTime;
 @Table(name = "TODOITEM")
 public class ToDoItem {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int ID;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int ID;
 
-    @Column(name = "DESCRIPTION")
-    private String description;
+	@Column(name = "DESCRIPTION")
+	private String description;
 
-    @Column(name = "CREATION_TS")
-    private OffsetDateTime creationTs;
+	@Column(name = "CREATION_TS")
+	private OffsetDateTime creationTs;
 
-    @Column(name = "DONE")
-    private boolean done;
+	@Column(name = "DONE")
+	private boolean done;
 
-    // Nuevo campo: deadline
-    @Column(name = "DEADLINE")
-    private LocalDate deadline;
+	// Nuevo campo: deadline
+	@Column(name = "DEADLINE")
+	private LocalDate deadline;
 
-    // Nuevo campo: priority
-    @Column(name = "PRIORITY")
-    private Integer priority;
+	// Nuevo campo: priority
+	@Column(name = "PRIORITY")
+	private Integer priority;
 
-     // Nuevo campo para el estado de la tarea (por ejemplo, "ASSIGNED", "IN_PROGRESS", "COMPLETED")
-     @Column(name = "STATE")
-     private String state;
+	// Nuevo campo para el estado de la tarea (por ejemplo, "ASSIGNED", "IN_PROGRESS",
+	// "COMPLETED")
+	@Column(name = "STATE")
+	private String state;
 
-    // Relación con ORACLE_USERS
-    @ManyToOne
-    @JoinColumn(name = "ASSIGNED_USER") // Nombre de la columna en la tabla TODOITEM
-    private OracleUser assignedUser;
+	// Relación con ORACLE_USERS
+	@ManyToOne
+	@JoinColumn(name = "ASSIGNED_USER") // Nombre de la columna en la tabla TODOITEM
+	private OracleUser assignedUser;
 
-    public ToDoItem() {
-    }
+	public ToDoItem() {
+	}
 
-    public ToDoItem(int ID, String description, OffsetDateTime creationTs, boolean done) {
-        this.ID = ID;
-        this.description = description;
-        this.creationTs = creationTs;
-        this.done = done;
-    }
+	public ToDoItem(int ID, String description, OffsetDateTime creationTs, boolean done) {
+		this.ID = ID;
+		this.description = description;
+		this.creationTs = creationTs;
+		this.done = done;
+	}
 
-    public int getID() {
-        return ID;
-    }
+	public int getID() {
+		return ID;
+	}
 
-    public void setID(int ID) {
-        this.ID = ID;
-    }
+	public void setID(int ID) {
+		this.ID = ID;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public OffsetDateTime getCreationTs() {
-        return creationTs;
-    }
+	public OffsetDateTime getCreationTs() {
+		return creationTs;
+	}
 
-    public void setCreationTs(OffsetDateTime creationTs) {
-        this.creationTs = creationTs;
-    }
+	public void setCreationTs(OffsetDateTime creationTs) {
+		this.creationTs = creationTs;
+	}
 
-    public boolean isDone() {
-        return done;
-    }
+	public boolean isDone() {
+		return done;
+	}
 
-    public void setDone(boolean done) {
-        this.done = done;
-    }
+	public void setDone(boolean done) {
+		this.done = done;
+	}
 
-    public LocalDate getDeadline() {
-        return deadline;
-    }
+	public LocalDate getDeadline() {
+		return deadline;
+	}
 
-    public void setDeadline(LocalDate deadline) {
-        this.deadline = deadline;
-    }
+	public void setDeadline(LocalDate deadline) {
+		this.deadline = deadline;
+	}
 
-    public Integer getPriority() {
-        return priority;
-    }
+	public Integer getPriority() {
+		return priority;
+	}
 
-    public void setPriority(Integer priority) {
-        this.priority = priority;
-    }
+	public void setPriority(Integer priority) {
+		this.priority = priority;
+	}
 
-    public OracleUser getAssignedUser() {
-        return assignedUser;
-    }
+	public OracleUser getAssignedUser() {
+		return assignedUser;
+	}
 
-    public void setAssignedUser(OracleUser assignedUser) {
-        this.assignedUser = assignedUser;
-    }
+	public void setAssignedUser(OracleUser assignedUser) {
+		this.assignedUser = assignedUser;
+	}
 
-    public String getState() {
-        return state;
-    }
+	public String getState() {
+		return state;
+	}
 
-    public void setState(String state) {
-        this.state = state;
-    }
+	public void setState(String state) {
+		this.state = state;
+	}
 
-    @Override
-    public String toString() {
-        return "ToDoItem{" +
-                "ID=" + ID +
-                ", description='" + description + '\'' +
-                ", creation_ts=" + creationTs +
-                ", done=" + done +
-                ", deadline=" + deadline +
-                ", priority=" + priority +
-                ", state=" + state +
-                ", assignedUser=" + (assignedUser != null ? assignedUser.getIdUser() : null) +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "ToDoItem{" + "ID=" + ID + ", description='" + description + '\'' + ", creation_ts=" + creationTs
+				+ ", done=" + done + ", deadline=" + deadline + ", priority=" + priority + ", state=" + state
+				+ ", assignedUser=" + (assignedUser != null ? assignedUser.getIdUser() : null) + '}';
+	}
+
 }

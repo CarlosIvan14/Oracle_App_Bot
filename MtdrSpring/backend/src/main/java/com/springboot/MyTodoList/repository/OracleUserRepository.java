@@ -8,6 +8,8 @@ import java.util.Optional;
 
 @Repository
 public interface OracleUserRepository extends JpaRepository<OracleUser, Integer> {
-    // Custom query to find a user by name and password
-    Optional<OracleUser> findByName(String name);
+
+	// Custom query to find a user by name and password
+	Optional<OracleUser> findByName(String name);
+
 }

@@ -11,44 +11,45 @@ import java.util.Optional;
 @Service
 public class ProjectService {
 
-    @Autowired
-    private ProjectsRepository projectsRepository;
+	@Autowired
+	private ProjectsRepository projectsRepository;
 
-    // Create
-    public Projects addProject(Projects project) {
-        return projectsRepository.save(project);
-    }
+	// Create
+	public Projects addProject(Projects project) {
+		return projectsRepository.save(project);
+	}
 
-    // Read All
-    public List<Projects> findAllProjects() {
-        return projectsRepository.findAll();
-    }
+	// Read All
+	public List<Projects> findAllProjects() {
+		return projectsRepository.findAll();
+	}
 
-    // Read by ID
-    public Optional<Projects> getProjectById(int id) {
-        return projectsRepository.findById(id);
-    }
+	// Read by ID
+	public Optional<Projects> getProjectById(int id) {
+		return projectsRepository.findById(id);
+	}
 
-    // Update
-    public Projects updateProject(int id, Projects projectDetails) {
-        Optional<Projects> projectOptional = projectsRepository.findById(id);
-        if (projectOptional.isPresent()) {
-            Projects project = projectOptional.get();
-            project.setName(projectDetails.getName());
-            project.setDescription(projectDetails.getDescription());
-            project.setCreationTs(projectDetails.getCreationTs());
-            project.setDeletedTs(projectDetails.getDeletedTs());
-            return projectsRepository.save(project);
-        }
-        return null; // or throw an exception
-    }
+	// Update
+	public Projects updateProject(int id, Projects projectDetails) {
+		Optional<Projects> projectOptional = projectsRepository.findById(id);
+		if (projectOptional.isPresent()) {
+			Projects project = projectOptional.get();
+			project.setName(projectDetails.getName());
+			project.setDescription(projectDetails.getDescription());
+			project.setCreationTs(projectDetails.getCreationTs());
+			project.setDeletedTs(projectDetails.getDeletedTs());
+			return projectsRepository.save(project);
+		}
+		return null; // or throw an exception
+	}
 
-    // Delete
-    public boolean deleteProject(int id) {
-        if (projectsRepository.existsById(id)) {
-            projectsRepository.deleteById(id);
-            return true;
-        }
-        return false;
-    }
+	// Delete
+	public boolean deleteProject(int id) {
+		if (projectsRepository.existsById(id)) {
+			projectsRepository.deleteById(id);
+			return true;
+		}
+		return false;
+	}
+
 }

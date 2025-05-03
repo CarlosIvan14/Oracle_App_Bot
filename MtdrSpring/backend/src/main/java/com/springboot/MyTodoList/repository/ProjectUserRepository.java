@@ -12,16 +12,18 @@ import java.util.List;
 
 @Repository
 public interface ProjectUserRepository extends JpaRepository<ProjectUser, Integer> {
-    // Fetch users by project ID (directly from ProjectUsers table)
-    @Query("SELECT pu.user FROM ProjectUser pu WHERE pu.project.id = :projectId")
-    List<OracleUser> findUsersByProjectId(int projectId);
 
-    @Query("SELECT pu.project FROM ProjectUser pu WHERE pu.user.id = :userId")
-    List<Projects> findProjectsByUserId(int userId);
+	// Fetch users by project ID (directly from ProjectUsers table)
+	@Query("SELECT pu.user FROM ProjectUser pu WHERE pu.project.id = :projectId")
+	List<OracleUser> findUsersByProjectId(int projectId);
 
-    @Query("SELECT pu.idProjectUser FROM ProjectUser pu WHERE pu.user.id = :userId AND pu.project.id = :projectId")
-    Integer findProjectUserIdByUserIdAndProjectId(int userId, int projectId);
+	@Query("SELECT pu.project FROM ProjectUser pu WHERE pu.user.id = :userId")
+	List<Projects> findProjectsByUserId(int userId);
 
-    @Query("SELECT pu.roleUser FROM ProjectUser pu WHERE pu.user.id = :userId AND pu.project.id = :projectId")
-    String findRoleUserByUserIdAndProjectId(int userId, int projectId);
+	@Query("SELECT pu.idProjectUser FROM ProjectUser pu WHERE pu.user.id = :userId AND pu.project.id = :projectId")
+	Integer findProjectUserIdByUserIdAndProjectId(int userId, int projectId);
+
+	@Query("SELECT pu.roleUser FROM ProjectUser pu WHERE pu.user.id = :userId AND pu.project.id = :projectId")
+	String findRoleUserByUserIdAndProjectId(int userId, int projectId);
+
 }

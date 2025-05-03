@@ -13,24 +13,22 @@ import java.util.List;
 
 @Service
 public class SprintsServiceBot {
-    private final RestTemplate restTemplate;
-    private final String apiBaseUrl = "http://localhost:8081/api";
 
-    @Autowired
-    public SprintsServiceBot(RestTemplateBuilder restTemplateBuilder) {
-        this.restTemplate = restTemplateBuilder.build();
-    }
+	private final RestTemplate restTemplate;
 
-    public List<Sprint> getSprintsByProjectId(int projectId) {
-        String url = apiBaseUrl + "/sprints/project/" + projectId;
-        ResponseEntity<List<Sprint>> response = restTemplate.exchange(
-            url,
-            HttpMethod.GET,
-            null,
-            new ParameterizedTypeReference<List<Sprint>>() {}
-        );
-        return response.getBody();
-    }
+	private final String apiBaseUrl = "http://localhost:8081/api";
 
-    
+	@Autowired
+	public SprintsServiceBot(RestTemplateBuilder restTemplateBuilder) {
+		this.restTemplate = restTemplateBuilder.build();
+	}
+
+	public List<Sprint> getSprintsByProjectId(int projectId) {
+		String url = apiBaseUrl + "/sprints/project/" + projectId;
+		ResponseEntity<List<Sprint>> response = restTemplate.exchange(url, HttpMethod.GET, null,
+				new ParameterizedTypeReference<List<Sprint>>() {
+				});
+		return response.getBody();
+	}
+
 }

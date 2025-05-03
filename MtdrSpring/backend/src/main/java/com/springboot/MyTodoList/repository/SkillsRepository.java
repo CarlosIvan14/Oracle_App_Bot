@@ -11,7 +11,9 @@ import com.springboot.MyTodoList.model.Skills;
 
 @Repository
 public interface SkillsRepository extends JpaRepository<Skills, Integer> {
-    // Fetch skills by oracleUser ID.
-    @Query("SELECT s FROM Skills s WHERE s.oracleUser.id = :oracleUserId")
-    List<Skills> findByOracleUserID(@Param("oracleUserId") int oracleUserId);
+
+	// Fetch skills by oracleUser ID.
+	@Query("SELECT s FROM Skills s WHERE s.oracleUser.id = :oracleUserId")
+	List<Skills> findByOracleUserID(@Param("oracleUserId") int oracleUserId);
+
 }
