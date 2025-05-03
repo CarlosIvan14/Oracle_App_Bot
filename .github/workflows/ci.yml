@@ -27,6 +27,11 @@ jobs:
         working-directory: MtdrSpring/backend
         run: mvn spring-javaformat:apply
 
+      # CheckStyle check
+      - name: Lint backend with checkstyle
+        working-directory: MtdrSpring/backend
+        run: mvn checkstyle:check
+
       # Dependency Installation
       - name: Install backend dependencies
         working-directory: MtdrSpring/backend
