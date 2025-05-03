@@ -194,7 +194,27 @@
 				<groupId>io.spring.javaformat</groupId>
 				<artifactId>spring-javaformat-maven-plugin</artifactId>
 				<version>0.0.32</version> <!-- Downgraded version compatible with Java 11 -->
-			</plugin>			  
+			</plugin>
+			<!-- Maven Checkstyle Plugin -->	
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.1.2</version>
+				<configuration>
+				  <configLocation>google_checks.xml</configLocation> <!-- or your own config -->
+				  <encoding>UTF-8</encoding>
+				  <consoleOutput>true</consoleOutput>
+				  <failsOnError>true</failsOnError>
+				</configuration>
+				<dependencies>
+				  <dependency>
+					<groupId>com.puppycrawl.tools</groupId>
+					<artifactId>checkstyle</artifactId>
+					<version>10.23.1</version>
+				  </dependency>
+				</dependencies>
+			  </plugin>
+						
 		</plugins>
 	</build>
 </project>
