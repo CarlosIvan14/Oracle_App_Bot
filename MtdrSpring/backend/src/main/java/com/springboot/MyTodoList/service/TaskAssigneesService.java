@@ -50,7 +50,7 @@ public class TaskAssigneesService {
 		// Validar ProjectUser
 		if (taskAssignee.getProjectUser() != null && taskAssignee.getProjectUser().getIdProjectUser() != 0) {
 			Optional<ProjectUser> existingProjectUser = projectUserRepository
-				.findById(taskAssignee.getProjectUser().getIdProjectUser());
+					.findById(taskAssignee.getProjectUser().getIdProjectUser());
 			if (existingProjectUser.isPresent()) {
 				taskAssignee.setProjectUser(existingProjectUser.get());
 			}
@@ -80,7 +80,7 @@ public class TaskAssigneesService {
 			if (taskAssigneeDetails.getProjectUser() != null
 					&& taskAssigneeDetails.getProjectUser().getIdProjectUser() != 0) {
 				Optional<ProjectUser> existingProjectUser = projectUserRepository
-					.findById(taskAssigneeDetails.getProjectUser().getIdProjectUser());
+						.findById(taskAssigneeDetails.getProjectUser().getIdProjectUser());
 				existingProjectUser.ifPresent(taskAssignee::setProjectUser);
 			}
 			// Actualizar Task si se envía uno nuevo

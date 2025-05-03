@@ -46,7 +46,7 @@ public class SkillsController {
 	public ResponseEntity<Skills> getSkillById(@PathVariable int id) {
 		Optional<Skills> skill = skillsService.getSkillsById(id);
 		return skill.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-			.orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+				.orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
 	// Actualizar Skill (PUT: reemplazo completo)

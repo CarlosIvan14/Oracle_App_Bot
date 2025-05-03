@@ -38,7 +38,7 @@ public class ProjectUserController {
 	public ResponseEntity<ProjectUser> getProjectUserById(@PathVariable int id) {
 		Optional<ProjectUser> projectUserOpt = projectUserService.getProjectUserById(id);
 		return projectUserOpt.map(projectUser -> new ResponseEntity<>(projectUser, HttpStatus.OK))
-			.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+				.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
 	// Actualizar un ProjectUser

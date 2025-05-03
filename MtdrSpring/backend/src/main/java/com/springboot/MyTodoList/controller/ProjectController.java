@@ -36,7 +36,7 @@ public class ProjectController {
 	public ResponseEntity<Projects> getProjectById(@PathVariable int id) {
 		Optional<Projects> project = projectService.getProjectById(id);
 		return project.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-			.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+				.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
 	// Update

@@ -62,14 +62,10 @@ public class OpenAIService {
 
 		/* 3) Construir prompt */
 		StringBuilder prompt = new StringBuilder();
-		prompt.append("Tienes que asignar una tarea en un proyecto de software.\n")
-			.append("Nombre de la tarea: ")
-			.append(taskName)
-			.append('\n')
-			.append("Descripción de la tarea: ")
-			.append(taskDescription)
-			.append("\n\n")
-			.append("A continuación la lista de usuarios disponibles en el proyecto y sus skills:\n");
+		prompt.append("Tienes que asignar una tarea en un proyecto de software.\n").append("Nombre de la tarea: ")
+				.append(taskName).append('\n').append("Descripción de la tarea: ").append(taskDescription)
+				.append("\n\n")
+				.append("A continuación la lista de usuarios disponibles en el proyecto y sus skills:\n");
 
 		for (OracleUser u : projectUsers) {
 			prompt.append("ID=").append(u.getIdUser()).append(", Nombre=").append(u.getName()).append('\n');
@@ -86,7 +82,7 @@ public class OpenAIService {
 		}
 
 		prompt.append("\nOrdena **todos** los IDs anteriores de mejor a peor match.\n")
-			.append("Devuelve **solo** la lista separada por comas, sin texto extra.");
+				.append("Devuelve **solo** la lista separada por comas, sin texto extra.");
 
 		/* 4) Llamada a OpenAI */
 		HttpHeaders headers = new HttpHeaders();
@@ -104,13 +100,9 @@ public class OpenAIService {
 		if (!respOA.getStatusCode().is2xxSuccessful())
 			throw new RuntimeException("OpenAI error " + respOA.getStatusCode());
 
-		String content = Optional.ofNullable(respOA.getBody())
-			.map(m -> (List<?>) m.get("choices"))
-			.filter(l -> !l.isEmpty())
-			.map(l -> (Map<?, ?>) l.get(0))
-			.map(c -> (Map<?, ?>) c.get("message"))
-			.map(m -> (String) m.get("content"))
-			.orElseThrow(() -> new RuntimeException("Respuesta vacía OpenAI"));
+		String content = Optional.ofNullable(respOA.getBody()).map(m -> (List<?>) m.get("choices"))
+				.filter(l -> !l.isEmpty()).map(l -> (Map<?, ?>) l.get(0)).map(c -> (Map<?, ?>) c.get("message"))
+				.map(m -> (String) m.get("content")).orElseThrow(() -> new RuntimeException("Respuesta vacía OpenAI"));
 
 		/* 5) Parsear IDs */
 		List<Integer> orderedIds = new ArrayList<>();
