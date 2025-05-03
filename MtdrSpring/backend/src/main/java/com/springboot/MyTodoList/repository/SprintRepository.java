@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface SprintRepository extends JpaRepository<Sprint, Integer> {
-    // Utilizamos "_" para indicar que se accede a la propiedad idProject del objeto project.
-    List<Sprint> findByProject_IdProject(int projectId);
+
+	// Utilizamos "_" para indicar que se accede a la propiedad idProject del objeto
+	// project.
+	List<Sprint> findByProject_IdProject(int projectId);
+
 }

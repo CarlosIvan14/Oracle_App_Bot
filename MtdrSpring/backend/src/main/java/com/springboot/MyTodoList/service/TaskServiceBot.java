@@ -12,7 +12,7 @@ import org.springframework.http.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
-import java.util.Arrays; 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -25,71 +25,70 @@ import com.springboot.MyTodoList.model.TaskAssignees; // Import the correct mode
 
 @Service
 public class TaskServiceBot {
+<<<<<<< HEAD
     private static final Logger logger = LoggerFactory.getLogger(TaskServiceBot.class);
     
     private final RestTemplate restTemplate;
     private final String apiBaseUrl = "http://140.84.170.68/api";
+=======
+>>>>>>> 57a64cb (backend format checking w springjavaformat && testNG)
 
-    @Autowired
-    public TaskServiceBot(RestTemplateBuilder restTemplateBuilder) {
-        this.restTemplate = restTemplateBuilder.build();
-    }
+	private static final Logger logger = LoggerFactory.getLogger(TaskServiceBot.class);
 
-    // Llama al endpoint que obtiene las asignaciones de tareas para un sprint y usuario.
-    public List<TaskAssignees> getUserTaskAssignments(int sprintId, int projectUserId) {
-        String url = apiBaseUrl + "/task-assignees/user/" + projectUserId + "/sprint/" + sprintId;
-        ResponseEntity<TaskAssignees[]> response =
-                restTemplate.getForEntity(url, TaskAssignees[].class);
+	private final RestTemplate restTemplate;
 
-        TaskAssignees[] assignments = response.getBody();
-        return (assignments != null) ? Arrays.asList(assignments) : Collections.emptyList();
-    }
+	private final String apiBaseUrl = "http://localhost:8081/api";
 
+	@Autowired
+	public TaskServiceBot(RestTemplateBuilder restTemplateBuilder) {
+		this.restTemplate = restTemplateBuilder.build();
+	}
 
-    public void updateTask(int taskId, Map<String, Object> updates) {
-        String url = apiBaseUrl + "/tasks/" + taskId;
-    
-        // Log the request details
-        logger.info("Updating Task ID {} with data: {}", taskId, updates);
-    
-        // Create the request entity with headers
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(updates, headers);
-    
-        // Send PATCH request
-        ResponseEntity<Void> response = restTemplate.exchange(
-            url,
-            HttpMethod.PATCH,
-            requestEntity,
-            Void.class
-        );
-    
-        logger.info("Task update response status: {}", response.getStatusCode());
-    }
+	// Llama al endpoint que obtiene las asignaciones de tareas para un sprint y usuario.
+	public List<TaskAssignees> getUserTaskAssignments(int sprintId, int projectUserId) {
+		String url = apiBaseUrl + "/task-assignees/user/" + projectUserId + "/sprint/" + sprintId;
+		ResponseEntity<TaskAssignees[]> response = restTemplate.getForEntity(url, TaskAssignees[].class);
 
-    public List<SimplifiedTaskDTO> getUnassignedTasksBySprint(int sprintId) {
-        String url = apiBaseUrl + "/tasks/unassigned/" + sprintId;
-        
-        logger.info("Fetching simplified unassigned tasks for sprint {} from: {}", sprintId, url);
+		TaskAssignees[] assignments = response.getBody();
+		return (assignments != null) ? Arrays.asList(assignments) : Collections.emptyList();
+	}
 
-        ResponseEntity<List<SimplifiedTaskDTO>> response = restTemplate.exchange(
-            url,
-            HttpMethod.GET,
-            null,
-            new ParameterizedTypeReference<List<SimplifiedTaskDTO>>() {}
-        );
+	public void updateTask(int taskId, Map<String, Object> updates) {
+		String url = apiBaseUrl + "/tasks/" + taskId;
 
-        return response.getBody();
-    }
-     public List<TaskAssignees> getTaskAssigneesBySprint(int sprintId) {
-        String url = apiBaseUrl + "/task-assignees/by-sprint/" + sprintId;
+		// Log the request details
+		logger.info("Updating Task ID {} with data: {}", taskId, updates);
 
-        ResponseEntity<TaskAssignees[]> resp =
-            restTemplate.getForEntity(url, TaskAssignees[].class);
+		// Create the request entity with headers
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(updates, headers);
 
-        TaskAssignees[] arr = resp.getBody();
-        return (arr != null) ? Arrays.asList(arr)
-                             : new ArrayList<TaskAssignees>();
-    }
+		// Send PATCH request
+		ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.PATCH, requestEntity, Void.class);
+
+		logger.info("Task update response status: {}", response.getStatusCode());
+	}
+
+	public List<SimplifiedTaskDTO> getUnassignedTasksBySprint(int sprintId) {
+		String url = apiBaseUrl + "/tasks/unassigned/" + sprintId;
+
+		logger.info("Fetching simplified unassigned tasks for sprint {} from: {}", sprintId, url);
+
+		ResponseEntity<List<SimplifiedTaskDTO>> response = restTemplate.exchange(url, HttpMethod.GET, null,
+				new ParameterizedTypeReference<List<SimplifiedTaskDTO>>() {
+				});
+
+		return response.getBody();
+	}
+
+	public List<TaskAssignees> getTaskAssigneesBySprint(int sprintId) {
+		String url = apiBaseUrl + "/task-assignees/by-sprint/" + sprintId;
+
+		ResponseEntity<TaskAssignees[]> resp = restTemplate.getForEntity(url, TaskAssignees[].class);
+
+		TaskAssignees[] arr = resp.getBody();
+		return (arr != null) ? Arrays.asList(arr) : new ArrayList<TaskAssignees>();
+	}
+
 }

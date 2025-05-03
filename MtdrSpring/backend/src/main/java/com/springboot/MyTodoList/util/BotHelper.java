@@ -25,7 +25,8 @@ public class BotHelper {
 			// send message
 			bot.execute(messageToTelegram);
 
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			logger.error(e.getLocalizedMessage(), e);
 		}
 	}

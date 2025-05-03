@@ -5,31 +5,34 @@ import com.springboot.MyTodoList.model.ProjectUser;
 import com.springboot.MyTodoList.model.OracleUser;
 
 public class AssigneeDTO {
-    private int idTaskAssignees;
-    private ProjectUserDTO projectUser;
 
-    public AssigneeDTO(TaskAssignees taskAssignee) {
-        this.idTaskAssignees = taskAssignee.getIdTaskAssignees();
-        this.projectUser = new ProjectUserDTO(taskAssignee.getProjectUser());
-    }
+	private int idTaskAssignees;
 
-    public AssigneeDTO() {
-    }
+	private ProjectUserDTO projectUser;
 
-    // Getters and Setters
-    public int getIdTaskAssignees() {
-        return idTaskAssignees;
-    }
+	public AssigneeDTO(TaskAssignees taskAssignee) {
+		this.idTaskAssignees = taskAssignee.getIdTaskAssignees();
+		this.projectUser = new ProjectUserDTO(taskAssignee.getProjectUser());
+	}
 
-    public void setIdTaskAssignees(int idTaskAssignees) {
-        this.idTaskAssignees = idTaskAssignees;
-    }
+	public AssigneeDTO() {
+	}
 
-    public ProjectUserDTO getProjectUser() {
-        return projectUser;
-    }
+	// Getters and Setters
+	public int getIdTaskAssignees() {
+		return idTaskAssignees;
+	}
 
-    public void setProjectUser(ProjectUserDTO projectUser) {
-        this.projectUser = projectUser;
-    }
+	public void setIdTaskAssignees(int idTaskAssignees) {
+		this.idTaskAssignees = idTaskAssignees;
+	}
+
+	public ProjectUserDTO getProjectUser() {
+		return projectUser;
+	}
+
+	public void setProjectUser(ProjectUserDTO projectUser) {
+		this.projectUser = projectUser;
+	}
+
 }

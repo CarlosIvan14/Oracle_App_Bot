@@ -13,22 +13,27 @@ import java.util.List;
 
 @Service
 public class ProjectsServiceBot {
+<<<<<<< HEAD
     private final RestTemplate restTemplate;
     private final String apiBaseUrl = "http://140.84.170.68/api";
+=======
+>>>>>>> 57a64cb (backend format checking w springjavaformat && testNG)
 
-    @Autowired
-    public ProjectsServiceBot(RestTemplateBuilder restTemplateBuilder) {
-        this.restTemplate = restTemplateBuilder.build();
-    }
+	private final RestTemplate restTemplate;
 
-    public List<Projects> getProjectsByUserId(int userId) {
-        String url = apiBaseUrl + "/project-users/user/" + userId + "/projects";
-        ResponseEntity<List<Projects>> response = restTemplate.exchange(
-            url,
-            HttpMethod.GET,
-            null,
-            new ParameterizedTypeReference<List<Projects>>() {}
-        );
-        return response.getBody();
-    }
+	private final String apiBaseUrl = "http://localhost:8081/api";
+
+	@Autowired
+	public ProjectsServiceBot(RestTemplateBuilder restTemplateBuilder) {
+		this.restTemplate = restTemplateBuilder.build();
+	}
+
+	public List<Projects> getProjectsByUserId(int userId) {
+		String url = apiBaseUrl + "/project-users/user/" + userId + "/projects";
+		ResponseEntity<List<Projects>> response = restTemplate.exchange(url, HttpMethod.GET, null,
+				new ParameterizedTypeReference<List<Projects>>() {
+				});
+		return response.getBody();
+	}
+
 }

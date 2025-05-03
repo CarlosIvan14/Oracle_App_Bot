@@ -4,42 +4,46 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 
 public class TaskAssigneeResponseDTO {
-    private int idTaskAssignees;
-    private ProjectUserDTO projectUser;
-    private TaskDTO task; // Simplified version of TaskDTO
 
-    // Constructors, Getters and Setters
-    public TaskAssigneeResponseDTO() {
-    }
+	private int idTaskAssignees;
 
-    public TaskAssigneeResponseDTO(int idTaskAssignees, ProjectUserDTO projectUser, TaskDTO task) {
-        this.idTaskAssignees = idTaskAssignees;
-        this.projectUser = projectUser;
-        this.task = task;
-    }
+	private ProjectUserDTO projectUser;
 
-    // Getters and Setters
-    public int getIdTaskAssignees() {
-        return idTaskAssignees;
-    }
+	private TaskDTO task; // Simplified version of TaskDTO
 
-    public void setIdTaskAssignees(int idTaskAssignees) {
-        this.idTaskAssignees = idTaskAssignees;
-    }
+	// Constructors, Getters and Setters
+	public TaskAssigneeResponseDTO() {
+	}
 
-    public ProjectUserDTO getProjectUser() {
-        return projectUser;
-    }
+	public TaskAssigneeResponseDTO(int idTaskAssignees, ProjectUserDTO projectUser, TaskDTO task) {
+		this.idTaskAssignees = idTaskAssignees;
+		this.projectUser = projectUser;
+		this.task = task;
+	}
 
-    public void setProjectUser(ProjectUserDTO projectUser) {
-        this.projectUser = projectUser;
-    }
+	// Getters and Setters
+	public int getIdTaskAssignees() {
+		return idTaskAssignees;
+	}
 
-    public TaskDTO getTask() {
-        return task;
-    }
+	public void setIdTaskAssignees(int idTaskAssignees) {
+		this.idTaskAssignees = idTaskAssignees;
+	}
 
-    public void setTask(TaskDTO task) {
-        this.task = task;
-    }
+	public ProjectUserDTO getProjectUser() {
+		return projectUser;
+	}
+
+	public void setProjectUser(ProjectUserDTO projectUser) {
+		this.projectUser = projectUser;
+	}
+
+	public TaskDTO getTask() {
+		return task;
+	}
+
+	public void setTask(TaskDTO task) {
+		this.task = task;
+	}
+
 }

@@ -25,68 +25,79 @@ import io.github.cdimascio.dotenv.Dotenv;
 @SpringBootApplication
 public class MyTodoListApplication implements CommandLineRunner {
 
-    private static final Logger logger =
-            LoggerFactory.getLogger(MyTodoListApplication.class);
+	private static final Logger logger = LoggerFactory.getLogger(MyTodoListApplication.class);
 
-    /* ======== SERVICES ======== */
-    @Autowired private ProjectsServiceBot     projectsServiceBot;
-    @Autowired private SprintsServiceBot      sprintsServiceBot;
-    @Autowired private TaskServiceBot         taskServiceBot;
-    @Autowired private TaskCreationServiceBot taskCreationServiceBot;
-    @Autowired private UserRoleServiceBot     userRoleServiceBot;
+	/* ======== SERVICES ======== */
+	@Autowired
+	private ProjectsServiceBot projectsServiceBot;
 
-    /* ======== CONFIG ======== */
-    @Value("${telegram.bot.token}") private String telegramBotToken;
-    @Value("${telegram.bot.name}")  private String botName;
+	@Autowired
+	private SprintsServiceBot sprintsServiceBot;
 
+<<<<<<< HEAD
     /* -> NUEVO: URL del backend que usará el bot                */
     /*    (se lee de application.properties o variable de entorno) */
     @Value("${backend.base-url:http://140.84.170.68}")
     private String backendBaseUrl;
+=======
+	@Autowired
+	private TaskServiceBot taskServiceBot;
+>>>>>>> 57a64cb (backend format checking w springjavaformat && testNG)
 
-    public static void main(String[] args) {
+	@Autowired
+	private TaskCreationServiceBot taskCreationServiceBot;
 
-        /* 1) Cargar variables del archivo .env si existe */
-        Dotenv dotenv = Dotenv.configure()
-                              .directory("./")
-                              .ignoreIfMalformed()
-                              .ignoreIfMissing()
-                              .load();
+	@Autowired
+	private UserRoleServiceBot userRoleServiceBot;
 
-        /* 2) Pasar la API‑key de OpenAI como propiedad de sistema
-              para que Spring la recoja con @Value               */
-        String openAIKey = dotenv.get("OPENAI_API_KEY");
-        if (openAIKey != null) {
-            System.setProperty("openai.api.key", openAIKey);
-        }
+	/* ======== CONFIG ======== */
+	@Value("${telegram.bot.token}")
+	private String telegramBotToken;
 
-        SpringApplication.run(MyTodoListApplication.class, args);
-    }
+	@Value("${telegram.bot.name}")
+	private String botName;
 
-    @Override
-    public void run(String... args) {
+	/* -> NUEVO: URL del backend que usará el bot */
+	/* (se lee de application.properties o variable de entorno) */
+	@Value("${backend.base-url:http://localhost:8081}")
+	private String backendBaseUrl;
 
-        try {
-            /* Instanciar la API de Telegram */
-            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
+	public static void main(String[] args) {
 
-            /* Registrar nuestro bot:  <<——  SE AÑADE backendBaseUrl  */
-            botsApi.registerBot(
-                new ToDoItemBotController(
-                        telegramBotToken,
-                        botName,
-                        backendBaseUrl,          // <-- nuevo parámetro
-                        projectsServiceBot,
-                        sprintsServiceBot,
-                        taskServiceBot,
-                        taskCreationServiceBot,
-                        userRoleServiceBot)
-            );
+		/* 1) Cargar variables del archivo .env si existe */
+		Dotenv dotenv = Dotenv.configure().directory("./").ignoreIfMalformed().ignoreIfMissing().load();
 
-            logger.info(BotMessages.BOT_REGISTERED_STARTED.getMessage());
+		/*
+		 * 2) Pasar la API‑key de OpenAI como propiedad de sistema para que Spring la
+		 * recoja con @Value
+		 */
+		String openAIKey = dotenv.get("OPENAI_API_KEY");
+		if (openAIKey != null) {
+			System.setProperty("openai.api.key", openAIKey);
+		}
 
-        } catch (TelegramApiException e) {
-            logger.error("Error registrando el bot:", e);
-        }
-    }
+		SpringApplication.run(MyTodoListApplication.class, args);
+	}
+
+	@Override
+	public void run(String... args) {
+
+		try {
+			/* Instanciar la API de Telegram */
+			TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
+
+			/* Registrar nuestro bot: <<—— SE AÑADE backendBaseUrl */
+			botsApi.registerBot(new ToDoItemBotController(telegramBotToken, botName, backendBaseUrl, // <--
+																										// nuevo
+																										// parámetro
+					projectsServiceBot, sprintsServiceBot, taskServiceBot, taskCreationServiceBot, userRoleServiceBot));
+
+			logger.info(BotMessages.BOT_REGISTERED_STARTED.getMessage());
+
+		}
+		catch (TelegramApiException e) {
+			logger.error("Error registrando el bot:", e);
+		}
+	}
+
 }

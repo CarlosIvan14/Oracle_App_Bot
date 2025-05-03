@@ -3,138 +3,138 @@ package com.springboot.MyTodoList.dto;
 import java.time.LocalDateTime;
 
 public class SimplifiedTaskDTO {
-    private int id;
-    private String name;
-    private String status;
-    private String description;
-    private Integer storyPoints;
-    private LocalDateTime deadline;
-    private Double estimatedHours;
-    private Double realHours;
-    private LocalDateTime creationTs;
 
-    // Default constructor
-    public SimplifiedTaskDTO() {
-    }
+	private int id;
 
-    // Full constructor
-    public SimplifiedTaskDTO(int id, String name, String status, String description, 
-                           Integer storyPoints, LocalDateTime deadline, 
-                           Double estimatedHours, Double realHours, 
-                           LocalDateTime creationTs) {
-        this.id = id;
-        this.name = name;
-        this.status = status;
-        this.description = description;
-        this.storyPoints = storyPoints;
-        this.deadline = deadline;
-        this.estimatedHours = estimatedHours;
-        this.realHours = realHours;
-        this.creationTs = creationTs;
-    }
+	private String name;
 
-        // Constructor with 7 parameters
-    public SimplifiedTaskDTO(int id, String name, String status, String description, 
-    Integer storyPoints, LocalDateTime deadline, 
-    Double estimatedHours) {
-    this.id = id;
-    this.name = name;
-    this.status = status;
-    this.description = description;
-    this.storyPoints = storyPoints;
-    this.deadline = deadline;
-    this.estimatedHours = estimatedHours;
-    // Set default values for missing fields
-    this.realHours = 0.0;
-    this.creationTs = LocalDateTime.now();
-    }
+	private String status;
 
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
+	private String description;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	private Integer storyPoints;
 
-    public String getName() {
-        return name;
-    }
+	private LocalDateTime deadline;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	private Double estimatedHours;
 
-    public String getStatus() {
-        return status;
-    }
+	private Double realHours;
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	private LocalDateTime creationTs;
 
-    public String getDescription() {
-        return description;
-    }
+	// Default constructor
+	public SimplifiedTaskDTO() {
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	// Full constructor
+	public SimplifiedTaskDTO(int id, String name, String status, String description, Integer storyPoints,
+			LocalDateTime deadline, Double estimatedHours, Double realHours, LocalDateTime creationTs) {
+		this.id = id;
+		this.name = name;
+		this.status = status;
+		this.description = description;
+		this.storyPoints = storyPoints;
+		this.deadline = deadline;
+		this.estimatedHours = estimatedHours;
+		this.realHours = realHours;
+		this.creationTs = creationTs;
+	}
 
-    public Integer getStoryPoints() {
-        return storyPoints;
-    }
+	// Constructor with 7 parameters
+	public SimplifiedTaskDTO(int id, String name, String status, String description, Integer storyPoints,
+			LocalDateTime deadline, Double estimatedHours) {
+		this.id = id;
+		this.name = name;
+		this.status = status;
+		this.description = description;
+		this.storyPoints = storyPoints;
+		this.deadline = deadline;
+		this.estimatedHours = estimatedHours;
+		// Set default values for missing fields
+		this.realHours = 0.0;
+		this.creationTs = LocalDateTime.now();
+	}
 
-    public void setStoryPoints(Integer storyPoints) {
-        this.storyPoints = storyPoints;
-    }
+	// Getters and Setters
+	public int getId() {
+		return id;
+	}
 
-    public LocalDateTime getDeadline() {
-        return deadline;
-    }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    public void setDeadline(LocalDateTime deadline) {
-        this.deadline = deadline;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public Double getEstimatedHours() {
-        return estimatedHours;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setEstimatedHours(Double estimatedHours) {
-        this.estimatedHours = estimatedHours;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public Double getRealHours() {
-        return realHours;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public void setRealHours(Double realHours) {
-        this.realHours = realHours;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public LocalDateTime getCreationTs() {
-        return creationTs;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public void setCreationTs(LocalDateTime creationTs) {
-        this.creationTs = creationTs;
-    }
+	public Integer getStoryPoints() {
+		return storyPoints;
+	}
 
-    // toString() method for debugging/logging
-    @Override
-    public String toString() {
-        return "SimplifiedTaskDTO{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", status='" + status + '\'' +
-                ", description='" + description + '\'' +
-                ", storyPoints=" + storyPoints +
-                ", deadline=" + deadline +
-                ", estimatedHours=" + estimatedHours +
-                ", realHours=" + realHours +
-                ", creationTs=" + creationTs +
-                '}';
-    }
+	public void setStoryPoints(Integer storyPoints) {
+		this.storyPoints = storyPoints;
+	}
+
+	public LocalDateTime getDeadline() {
+		return deadline;
+	}
+
+	public void setDeadline(LocalDateTime deadline) {
+		this.deadline = deadline;
+	}
+
+	public Double getEstimatedHours() {
+		return estimatedHours;
+	}
+
+	public void setEstimatedHours(Double estimatedHours) {
+		this.estimatedHours = estimatedHours;
+	}
+
+	public Double getRealHours() {
+		return realHours;
+	}
+
+	public void setRealHours(Double realHours) {
+		this.realHours = realHours;
+	}
+
+	public LocalDateTime getCreationTs() {
+		return creationTs;
+	}
+
+	public void setCreationTs(LocalDateTime creationTs) {
+		this.creationTs = creationTs;
+	}
+
+	// toString() method for debugging/logging
+	@Override
+	public String toString() {
+		return "SimplifiedTaskDTO{" + "id=" + id + ", name='" + name + '\'' + ", status='" + status + '\''
+				+ ", description='" + description + '\'' + ", storyPoints=" + storyPoints + ", deadline=" + deadline
+				+ ", estimatedHours=" + estimatedHours + ", realHours=" + realHours + ", creationTs=" + creationTs
+				+ '}';
+	}
+
 }

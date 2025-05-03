@@ -11,30 +11,39 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 public class AuthService {
+<<<<<<< HEAD
     private final RestTemplate restTemplate;
     private final String apiBaseUrl = "http://140.84.170.68/api";
+=======
+>>>>>>> 57a64cb (backend format checking w springjavaformat && testNG)
 
-    @Autowired
-    public AuthService(RestTemplateBuilder restTemplateBuilder) {
-        this.restTemplate = restTemplateBuilder.build();
-    }
+	private final RestTemplate restTemplate;
 
-    public OracleUser doLogin(String name, String password) {
-        try {
-            String url = apiBaseUrl + "/users/login";
-            LoginRequest req = new LoginRequest();
-            req.setName(name);
-            req.setPassword(password);
+	private final String apiBaseUrl = "http://localhost:8081/api";
 
-            ResponseEntity<OracleUser> resp = restTemplate.postForEntity(url, req, OracleUser.class);
+	@Autowired
+	public AuthService(RestTemplateBuilder restTemplateBuilder) {
+		this.restTemplate = restTemplateBuilder.build();
+	}
 
-            if (resp.getStatusCode() == HttpStatus.OK && resp.getBody() != null) {
-                return resp.getBody();
-            }
-        } catch (Exception e) {
-            System.err.println("Error logging in: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return null;
-    }
+	public OracleUser doLogin(String name, String password) {
+		try {
+			String url = apiBaseUrl + "/users/login";
+			LoginRequest req = new LoginRequest();
+			req.setName(name);
+			req.setPassword(password);
+
+			ResponseEntity<OracleUser> resp = restTemplate.postForEntity(url, req, OracleUser.class);
+
+			if (resp.getStatusCode() == HttpStatus.OK && resp.getBody() != null) {
+				return resp.getBody();
+			}
+		}
+		catch (Exception e) {
+			System.err.println("Error logging in: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 }

@@ -4,110 +4,117 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 
 public class TaskDTO {
-    private int id;
-    
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime creationTs;
-    
-    private String name;
-    private String status;
-    private String description;
-    private Integer storyPoints;
-    
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime deadline;
-    
-    private Double realHours;
-    private Double estimatedHours;
-    //private List<AssigneeDTO> assignees;
 
-    // Constructors
-    public TaskDTO() {
-    }
+	private int id;
 
-    public TaskDTO(int id, LocalDateTime creationTs, String name, String status, String description, 
-                  Integer storyPoints, LocalDateTime deadline, Double realHours, Double estimatedHours) {
-        this.id = id;
-        this.creationTs = creationTs;
-        this.name = name;
-        this.status = status;
-        this.description = description;
-        this.storyPoints = storyPoints;
-        this.deadline = deadline;
-        this.realHours = realHours;
-        this.estimatedHours = estimatedHours;
-    }
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	private LocalDateTime creationTs;
 
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
+	private String name;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	private String status;
 
-    public LocalDateTime getCreationTs() {
-        return creationTs;
-    }
+	private String description;
 
-    public void setCreationTs(LocalDateTime creationTs) {
-        this.creationTs = creationTs;
-    }
+	private Integer storyPoints;
 
-    public String getName() {
-        return name;
-    }
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	private LocalDateTime deadline;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	private Double realHours;
 
-    public String getStatus() {
-        return status;
-    }
+	private Double estimatedHours;
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	// private List<AssigneeDTO> assignees;
 
-    public String getDescription() {
-        return description;
-    }
+	// Constructors
+	public TaskDTO() {
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public TaskDTO(int id, LocalDateTime creationTs, String name, String status, String description,
+			Integer storyPoints, LocalDateTime deadline, Double realHours, Double estimatedHours) {
+		this.id = id;
+		this.creationTs = creationTs;
+		this.name = name;
+		this.status = status;
+		this.description = description;
+		this.storyPoints = storyPoints;
+		this.deadline = deadline;
+		this.realHours = realHours;
+		this.estimatedHours = estimatedHours;
+	}
 
-    public Integer getStoryPoints() {
-        return storyPoints;
-    }
+	// Getters and Setters
+	public int getId() {
+		return id;
+	}
 
-    public void setStoryPoints(Integer storyPoints) {
-        this.storyPoints = storyPoints;
-    }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    public LocalDateTime getDeadline() {
-        return deadline;
-    }
+	public LocalDateTime getCreationTs() {
+		return creationTs;
+	}
 
-    public void setDeadline(LocalDateTime deadline) {
-        this.deadline = deadline;
-    }
+	public void setCreationTs(LocalDateTime creationTs) {
+		this.creationTs = creationTs;
+	}
 
-    public Double getRealHours() {
-        return realHours;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setRealHours(Double realHours) {
-        this.realHours = realHours;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public Double getEstimatedHours() {
-        return estimatedHours;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public void setEstimatedHours(Double estimatedHours) {
-        this.estimatedHours = estimatedHours;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Integer getStoryPoints() {
+		return storyPoints;
+	}
+
+	public void setStoryPoints(Integer storyPoints) {
+		this.storyPoints = storyPoints;
+	}
+
+	public LocalDateTime getDeadline() {
+		return deadline;
+	}
+
+	public void setDeadline(LocalDateTime deadline) {
+		this.deadline = deadline;
+	}
+
+	public Double getRealHours() {
+		return realHours;
+	}
+
+	public void setRealHours(Double realHours) {
+		this.realHours = realHours;
+	}
+
+	public Double getEstimatedHours() {
+		return estimatedHours;
+	}
+
+	public void setEstimatedHours(Double estimatedHours) {
+		this.estimatedHours = estimatedHours;
+	}
+
 }

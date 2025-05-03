@@ -6,5 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProjectsRepository extends JpaRepository<Projects, Integer> {
-    // Métodos personalizados, si se requieren
+
+	// Métodos personalizados, si se requieren
+
 }
