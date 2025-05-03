@@ -25,13 +25,15 @@ import com.springboot.MyTodoList.model.TaskAssignees; // Import the correct mode
 
 @Service
 public class TaskServiceBot {
-<<<<<<< HEAD
-    private static final Logger logger = LoggerFactory.getLogger(TaskServiceBot.class);
-    
-    private final RestTemplate restTemplate;
-    private final String apiBaseUrl = "http://140.84.170.68/api";
-=======
->>>>>>> 57a64cb (backend format checking w springjavaformat && testNG)
+
+	<<<<<<<HEAD
+	private static final Logger logger = LoggerFactory.getLogger(TaskServiceBot.class);
+
+	private final RestTemplate restTemplate;
+
+	private final String apiBaseUrl = "http://140.84.170.68/api";
+
+	=======>>>>>>>57a64cb (backend format checking w springjavaformat && testNG)
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskServiceBot.class);
 

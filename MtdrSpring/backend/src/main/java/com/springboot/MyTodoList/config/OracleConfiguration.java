@@ -21,34 +21,37 @@ import java.sql.SQLException;
 //
 @Configuration
 public class OracleConfiguration {
-<<<<<<< HEAD
-    Logger logger = LoggerFactory.getLogger(DbSettings.class);
-    @Autowired
-    private DbSettings dbSettings;
-    @Autowired
-    private Environment env;
-    @Bean
-    public DataSource dataSource() throws SQLException{
-        OracleDataSource ds = new OracleDataSource();
-        ds.setDriverType(env.getProperty("driver_class_name"));
-        logger.info("Using Driver " + env.getProperty("driver_class_name"));
-        ds.setURL(env.getProperty("db_url"));
-        logger.info("Using URL: " + env.getProperty("db_url"));
-        ds.setUser(env.getProperty("db_user"));
-        logger.info("Using Username " + env.getProperty("db_user"));
-        ds.setPassword(env.getProperty("dbpassword"));
 
-//      For local testing
-/*         ds.setDriverType(dbSettings.getDriver_class_name());
-        logger.info("Using Driver " + dbSettings.getDriver_class_name());
-        ds.setURL(dbSettings.getUrl());
-        logger.info("Using URL: " + dbSettings.getUrl());
-        ds.setUser(dbSettings.getUsername());
-        logger.info("Using Username: " + dbSettings.getUsername());
-        ds.setPassword(dbSettings.getPassword()); */
-        return ds;
-    }
-=======
+	<<<<<<<
+	HEAD Logger logger=LoggerFactory.getLogger(DbSettings.class);
+	@Autowired
+	private DbSettings dbSettings;
+
+	@Autowired
+	private Environment env;
+
+	@Bean
+	public DataSource dataSource() throws SQLException {
+		OracleDataSource ds = new OracleDataSource();
+		ds.setDriverType(env.getProperty("driver_class_name"));
+		logger.info("Using Driver " + env.getProperty("driver_class_name"));
+		ds.setURL(env.getProperty("db_url"));
+		logger.info("Using URL: " + env.getProperty("db_url"));
+		ds.setUser(env.getProperty("db_user"));
+		logger.info("Using Username " + env.getProperty("db_user"));
+		ds.setPassword(env.getProperty("dbpassword"));
+
+		// For local testing
+		/*
+		 * ds.setDriverType(dbSettings.getDriver_class_name());
+		 * logger.info("Using Driver " + dbSettings.getDriver_class_name());
+		 * ds.setURL(dbSettings.getUrl()); logger.info("Using URL: " +
+		 * dbSettings.getUrl()); ds.setUser(dbSettings.getUsername());
+		 * logger.info("Using Username: " + dbSettings.getUsername());
+		 * ds.setPassword(dbSettings.getPassword());
+		 */
+		return ds;
+	}=======
 
 	Logger logger = LoggerFactory.getLogger(DbSettings.class);
 
@@ -79,5 +82,5 @@ public class OracleConfiguration {
 		return ds;
 	}
 
->>>>>>> 57a64cb (backend format checking w springjavaformat && testNG)
+	>>>>>>>57a64cb (backend format checking w springjavaformat && testNG)
 }

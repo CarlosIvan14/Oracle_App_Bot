@@ -10,12 +10,15 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class UserRoleServiceBot {
 
-<<<<<<< HEAD
-    private final RestTemplate rest;
-    private final String apiBase = "http://140.84.170.68/api";
-=======
+	<<<<<<<HEAD
 	private final RestTemplate rest;
->>>>>>> 57a64cb (backend format checking w springjavaformat && testNG)
+
+	private final String apiBase = "http://140.84.170.68/api";
+
+	=======
+	private final RestTemplate rest;
+
+	>>>>>>>57a64cb (backend format checking w springjavaformat && testNG)
 
 	private final String apiBase = "http://localhost:8081/api";
 
