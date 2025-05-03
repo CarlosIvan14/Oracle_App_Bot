@@ -37,6 +37,7 @@ function Reports() {
         setSprints(simplified);
       })
       .catch((err) => console.error("Error fetching sprints:", err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -51,6 +52,7 @@ function Reports() {
         setMembers([{ id: "all", name: "Todo el equipo" }, ...users]);
       })
       .catch((err) => console.error("Error fetching members:", err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleGenerateReport = async () => {
