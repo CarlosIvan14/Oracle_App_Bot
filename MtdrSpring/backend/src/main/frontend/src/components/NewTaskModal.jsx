@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import config from '../../config';
 
 /**
  * Props
@@ -42,7 +43,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
 
     /* 1. Rol */
     fetch(
-      `http://localhost:8081/api/project-users/role-user/project-id/${projectId}/user-id/${user.idUser}`,
+      `${config.apiBaseUrl}/api/project-users/role-user/project-id/${projectId}/user-id/${user.idUser}`,
     )
       .then((r) => (r.ok ? r.text() : Promise.reject()))
       .then((txt) => setRole(txt.trim()))
@@ -50,14 +51,14 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
 
     /* 2. mi idProjectUser (dev) */
     fetch(
-      `http://localhost:8081/api/project-users/project-id/${projectId}/user-id/${user.idUser}`,
+      `${config.apiBaseUrl}/api/project-users/project-id/${projectId}/user-id/${user.idUser}`,
     )
       .then((r) => (r.ok ? r.text() : null))
       .then((txt) => setMyProjectUserId(txt ? Number(txt) : null))
       .catch(() => setMyProjectUserId(null));
 
     /* 3. lista de usuarios del proyecto */
-    fetch(`http://localhost:8081/api/project-users/project/${projectId}/users`)
+    fetch(`${config.apiBaseUrl}/api/project-users/project/${projectId}/users`)
       .then((r) => (r.ok ? r.json() : []))
       .then(setAllUsers)
       .catch(() => setAllUsers([]));
@@ -77,7 +78,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
     }
     setAiLoading(true);
     try {
-      const res = await fetch("http://localhost:8081/assignment/by-ai", {
+      const res = await fetch("${config.apiBaseUrl}/assignment/by-ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectId, name, description }),
@@ -132,7 +133,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
     let createdTask;
     try {
       console.log(taskPayload.creation_ts);
-      const res = await fetch("http://localhost:8081/api/tasks", {
+      const res = await fetch("${config.apiBaseUrl}/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(taskPayload),
@@ -158,7 +159,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
         // manager
         try {
           const resPU = await fetch(
-            `http://localhost:8081/api/project-users/project-id/${projectId}/user-id/${selectedUserId}`,
+            `${config.apiBaseUrl}/api/project-users/project-id/${projectId}/user-id/${selectedUserId}`,
           );
           if (resPU.ok) {
             const txt = await resPU.text();
@@ -171,7 +172,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
 
       if (idProjectUser) {
         try {
-          await fetch("http://localhost:8081/api/task-assignees", {
+          await fetch("${config.apiBaseUrl}/api/task-assignees", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

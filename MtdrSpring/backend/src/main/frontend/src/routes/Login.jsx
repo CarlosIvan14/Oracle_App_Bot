@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../components/LoadingSpinner";
+import config from '../../config'
 
 function Login({ onLogin }) {
   const [name, setName] = useState("");
@@ -16,7 +17,7 @@ function Login({ onLogin }) {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8081/users/login", {
+      const response = await fetch(`${config.apiBaseUrl}/users/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
