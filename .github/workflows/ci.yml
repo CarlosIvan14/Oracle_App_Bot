@@ -36,7 +36,7 @@ jobs:
       - name: Run backend tests
         working-directory: MtdrSpring/backend
         run: mvn clean test
-
+      
       # FRONTEND
 
       # Node.js setup
@@ -56,6 +56,11 @@ jobs:
       - name: Check frontend formatting with Prettier
         working-directory: MtdrSpring/backend/src/main/frontend  
         run: npm run format-check
+
+      # Eslint check
+      - name: Lint frontend with eslint
+        working-directory: MtdrSpring/backend/src/main/frontend  
+        run: npm run lint
 
       # Run frontend tests
       - name: Run frontend tests

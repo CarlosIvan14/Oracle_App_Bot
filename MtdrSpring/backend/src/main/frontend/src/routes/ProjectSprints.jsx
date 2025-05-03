@@ -55,7 +55,7 @@ export default function ProjectSprints() {
       body: JSON.stringify({ description: d }),
     })
       .then((r) => {
-        if (!r.ok) throw "Error patch";
+        if (!r.ok) throw new Error("Error patch");
         setSprints((s) =>
           s.map((x) =>
             x.id_sprint === sprint.id_sprint ? { ...x, description: d } : x,

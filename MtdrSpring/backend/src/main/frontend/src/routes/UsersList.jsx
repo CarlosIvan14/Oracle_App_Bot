@@ -1,13 +1,12 @@
 // src/routes/UsersList.js
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 /** Íconos de ejemplo. Reemplaza estos componentes con los íconos de tu elección */
 const IconEdit = () => <span>✎</span>;
 const IconTrash = () => <span>🗑</span>;
 const IconCheck = () => <span>✓</span>;
 const IconCancel = () => <span>✕</span>;
-const IconBack = () => <span>←</span>;
 
 /**
  * Componente que representa una fila de una skill existente.
@@ -150,7 +149,6 @@ function NewSkillRow({ onSave, onCancel }) {
  */
 function UsersList() {
   const { projectId } = useParams() || { projectId: "41" };
-  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
