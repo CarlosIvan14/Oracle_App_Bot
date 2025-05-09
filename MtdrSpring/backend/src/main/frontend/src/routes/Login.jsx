@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../components/LoadingSpinner";
-import config from '../../config'
+import config from '../config'
 
 function Login({ onLogin }) {
   const [name, setName] = useState("");

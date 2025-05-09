@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import config from '../../config';
+import config from '../config';
 
 /**
  * Props
@@ -78,7 +78,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
     }
     setAiLoading(true);
     try {
-      const res = await fetch("${config.apiBaseUrl}/assignment/by-ai", {
+      const res = await fetch(`${config.apiBaseUrl}/assignment/by-ai`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectId, name, description }),
@@ -133,7 +133,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
     let createdTask;
     try {
       console.log(taskPayload.creation_ts);
-      const res = await fetch("${config.apiBaseUrl}/api/tasks", {
+      const res = await fetch(`${config.apiBaseUrl}/api/tasks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(taskPayload),
@@ -172,7 +172,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
 
       if (idProjectUser) {
         try {
-          await fetch("${config.apiBaseUrl}/api/task-assignees", {
+          await fetch(`${config.apiBaseUrl}/api/task-assignees`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

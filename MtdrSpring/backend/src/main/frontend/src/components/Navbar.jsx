@@ -1,7 +1,7 @@
 // src/components/Navbar.jsx
 import React, { useState, useEffect } from "react";
 import { NavLink, useMatch, useNavigate, useParams } from "react-router-dom";
-import config from '../../config'
+import config from '../config'
 
 const IconProfile = () => (
   <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-red-600">
