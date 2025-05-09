@@ -1,7 +1,7 @@
 // src/routes/ProjectSprints.js
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import config from '../config'
+import config from "../config";
 
 const IconPlus = () => <span className="text-lg">＋</span>;
 const IconCancel = () => <span className="text-lg">✕</span>;
