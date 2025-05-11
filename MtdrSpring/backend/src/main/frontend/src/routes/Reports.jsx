@@ -286,7 +286,10 @@ function Reports() {
       <div className="flex flex-wrap gap-4 items-end">
         {/* filtro */}
         <div>
-          <label htmlFor="filterTypeSelect" className="block text-sm text-gray-200 font-bold mb-1">
+          <label
+            htmlFor="filterTypeSelect"
+            className="block text-sm text-gray-200 font-bold mb-1"
+          >
             Filtrar por
           </label>
           <select
@@ -303,7 +306,10 @@ function Reports() {
 
         {filterType === "sprint" && (
           <div>
-            <label id="sprintSelect" className="block text-sm text-gray-200 font-bold mb-1">
+            <label
+              id="sprintSelect"
+              className="block text-sm text-gray-200 font-bold mb-1"
+            >
               Sprint
             </label>
             <select
@@ -343,7 +349,10 @@ function Reports() {
 
         {/* miembro */}
         <div>
-          <label htmlFor="memberSelect" className="block text-sm text-gray-200 font-bold mb-1">
+          <label
+            htmlFor="memberSelect"
+            className="block text-sm text-gray-200 font-bold mb-1"
+          >
             Miembro
           </label>
           <select

@@ -60,7 +60,7 @@ jobs:
       # Prettier check
       - name: Check frontend formatting with Prettier
         working-directory: MtdrSpring/backend/src/main/frontend  
-        run: npm run format-check
+        run: npm run format && npm run format-check
 
       # Eslint check
       - name: Lint frontend with eslint
