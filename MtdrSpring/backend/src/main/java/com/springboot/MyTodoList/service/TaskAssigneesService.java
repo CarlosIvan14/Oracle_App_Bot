@@ -138,6 +138,13 @@ public class TaskAssigneesService {
 		return taskAssigneesRepository.findByProjectUserIdAndSprintId(projectUserId, sprintId);
 	}
 
+	private Double getRealHoursFromTaskAssignees(List<TaskAssignees> taskAssignees) {
+		return taskAssignees.stream()
+        .map(TaskAssignees::getTask)
+        .mapToDouble(Tasks::getRealHours)
+        .sum();
+	}
+
 	// Nuevos métodos: obtener la cantidad de tareas con status "Done" para un ProjectUser
 	// en un Sprint
 	// tasks-user-sprint methods (R01)
@@ -148,6 +155,12 @@ public class TaskAssigneesService {
 	public List<TaskAssignees> getCompletedTasksByUserAndSprint(int projectUserId, int sprintId) {
 		return taskAssigneesRepository.findCompletedTasksByProjectUserAndSprint(projectUserId, sprintId);
 	}
+
+	public Double getStaticRealHoursByUserAndSprint(int projectUserId, int sprintId) {
+		List<TaskAssignees> taskAssignees = getCompletedTasksByUserAndSprint(projectUserId, sprintId);
+		return getRealHoursFromTaskAssignees(taskAssignees);
+	}
+	
 
 	// tasks-user-daterange methods (R02 y R03)
 	public long getCountDoneTasksByUserByDateRange(int projectUserId, LocalDate from, LocalDate to) {
@@ -160,6 +173,11 @@ public class TaskAssigneesService {
 				to.plusDays(1).atStartOfDay());
 	}
 
+	public Double getStaticRealHoursByUserByDateRange(int projectUserId, LocalDate from, LocalDate to) {
+		List<TaskAssignees> taskAssignees = getCompletedTasksByUserByDateRange(projectUserId, from, to);
+		return getRealHoursFromTaskAssignees(taskAssignees);
+	}
+
 	// tasks-team-sprint methods (R04)
 	public long getCountDoneTasksByTeamAndSprint(int sprintId) {
 		return taskAssigneesRepository.countDoneTasksByTeamAndSprint(sprintId);
@@ -167,6 +185,11 @@ public class TaskAssigneesService {
 
 	public List<TaskAssignees> getCompletedTasksByTeamAndSprint(int sprintId) {
 		return taskAssigneesRepository.findCompletedTasksByTeamAndSprint(sprintId);
+	}
+
+	public Double getStaticRealHoursByTeamAndSprint(int sprintId) {
+		List<TaskAssignees> taskAssignees = getCompletedTasksByTeamAndSprint(sprintId);
+		return getRealHoursFromTaskAssignees(taskAssignees);
 	}
 
 	// tasks-team-daterange methods (R05 y R06)
@@ -178,6 +201,11 @@ public class TaskAssigneesService {
 	public List<TaskAssignees> getCompletedTasksByTeamByDateRange(int projectId, LocalDate from, LocalDate to) {
 		return taskAssigneesRepository.findCompletedTasksByTeamAndDateRange(projectId, from.atStartOfDay(),
 				to.plusDays(1).atStartOfDay());
+	}
+
+	public Double getStaticRealHoursByTeamByDateRange(int projectId, LocalDate from, LocalDate to) {
+		List<TaskAssignees> taskAssignees = getCompletedTasksByTeamByDateRange(projectId, from, to);
+		return getRealHoursFromTaskAssignees(taskAssignees);
 	}
 
 }

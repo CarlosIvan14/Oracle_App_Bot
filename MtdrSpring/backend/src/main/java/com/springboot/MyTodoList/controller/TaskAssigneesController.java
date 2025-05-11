@@ -114,6 +114,13 @@ public class TaskAssigneesController {
 		return new ResponseEntity<>(taskAssignees, HttpStatus.OK);
 	}
 
+	@GetMapping("/user/{projectUserId}/sprint/{sprintId}/real-hours")
+	public ResponseEntity<Double> getCompletedTasksStaticRealHoursByUserAndSprint(@PathVariable int projectUserId,
+			@PathVariable int sprintId) {
+		Double realHours = taskAssigneesService.getStaticRealHoursByUserAndSprint(projectUserId,sprintId);
+		return new ResponseEntity<>(realHours, HttpStatus.OK);
+	}
+
 	// R02: tareas completadas por usuario en semana
 	@GetMapping("/user/{projectUserId}/week/{date}/done/count")
 	public ResponseEntity<Long> getDoneTasksCountByUserAndWeek(@PathVariable int projectUserId,
@@ -131,6 +138,15 @@ public class TaskAssigneesController {
 		LocalDate to = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 		List<TaskAssignees> tasks = taskAssigneesService.getCompletedTasksByUserByDateRange(projectUserId, from, to);
 		return new ResponseEntity<>(tasks, HttpStatus.OK);
+	}
+
+	@GetMapping("/user/{projectUserId}/week/{date}/real-hours")
+	public ResponseEntity<Double> getCompletedTasksStaticRealHoursByUserAndWeek(@PathVariable int projectUserId,
+			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+		LocalDate from = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		LocalDate to = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+		Double realHours = taskAssigneesService.getStaticRealHoursByUserByDateRange(projectUserId, from, to);
+		return new ResponseEntity<>(realHours, HttpStatus.OK);
 	}
 
 	// R03: tareas completadas por usuario en mes
@@ -152,6 +168,15 @@ public class TaskAssigneesController {
 		return new ResponseEntity<>(tasks, HttpStatus.OK);
 	}
 
+	@GetMapping("/user/{projectUserId}/month/{date}/real-hours")
+	public ResponseEntity<Double> getCompletedTasksStaticRealHoursByUserAndMonth(@PathVariable int projectUserId,
+			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+		LocalDate from = date.with(TemporalAdjusters.firstDayOfMonth());
+		LocalDate to = date.with(TemporalAdjusters.lastDayOfMonth());
+		Double realHours = taskAssigneesService.getStaticRealHoursByUserByDateRange(projectUserId, from, to);
+		return new ResponseEntity<>(realHours, HttpStatus.OK);
+	}
+
 	// R04: tareas completadas por equipo en sprint
 	@GetMapping("/team-sprint/{sprintId}/done/count")
 	public ResponseEntity<Long> getDoneTasksCountByTeamAndSprint(@PathVariable int sprintId) {
@@ -163,6 +188,12 @@ public class TaskAssigneesController {
 	public ResponseEntity<List<TaskAssignees>> getCompletedTasksByTeamAndSprint(@PathVariable int sprintId) {
 		List<TaskAssignees> tasks = taskAssigneesService.getCompletedTasksByTeamAndSprint(sprintId);
 		return new ResponseEntity<>(tasks, HttpStatus.OK);
+	}
+
+	@GetMapping("/team-sprint/{sprintId}/real-hours")
+	public ResponseEntity<Double> getCompletedTasksStaticRealHoursByTeamAndSprint(@PathVariable int sprintId) {
+		Double realHours = taskAssigneesService.getStaticRealHoursByTeamAndSprint(sprintId);
+		return new ResponseEntity<>(realHours, HttpStatus.OK);
 	}
 
 	// R05: tareas completadas por equipo en semana
@@ -184,6 +215,15 @@ public class TaskAssigneesController {
 		return new ResponseEntity<>(tasks, HttpStatus.OK);
 	}
 
+	@GetMapping("/team-week/{date}/project/{projectId}/real-hours")
+	public ResponseEntity<Double> getCompletedTasksStaticRealHoursByTeamAndWeek(@PathVariable int projectId,
+			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+		LocalDate from = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		LocalDate to = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+		Double realHours = taskAssigneesService.getStaticRealHoursByTeamByDateRange(projectId, from, to);
+		return new ResponseEntity<>(realHours, HttpStatus.OK);
+	}
+
 	// R06: tareas completadas por equipo en mes
 	@GetMapping("/team-month/{date}/project/{projectId}/done/count")
 	public ResponseEntity<Long> getDoneTasksCountByTeamAndMonth(@PathVariable int projectId,
@@ -201,6 +241,15 @@ public class TaskAssigneesController {
 		LocalDate to = date.with(TemporalAdjusters.lastDayOfMonth());
 		List<TaskAssignees> tasks = taskAssigneesService.getCompletedTasksByTeamByDateRange(projectId, from, to);
 		return new ResponseEntity<>(tasks, HttpStatus.OK);
+	}
+
+	@GetMapping("/team-month/{date}/project/{projectId}/real-hours")
+	public ResponseEntity<Double> getCompletedTasksStaticRealHoursByTeamAndMonth(@PathVariable int projectId,
+			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+		LocalDate from = date.with(TemporalAdjusters.firstDayOfMonth());
+		LocalDate to = date.with(TemporalAdjusters.lastDayOfMonth());
+		Double realHours = taskAssigneesService.getStaticRealHoursByTeamByDateRange(projectId, from, to);
+		return new ResponseEntity<>(realHours, HttpStatus.OK);
 	}
 
 }

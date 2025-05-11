@@ -133,7 +133,7 @@ export default function AllTasksCalendar() {
         >
           <div
             className="max-w-md w-full p-6 bg-white dark:bg-customDark dark:text-white rounded-2xl"
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-2xl font-bold mb-4">{selectedTask.name}</h2>
             <p className="mb-2">
