@@ -20,15 +20,16 @@ import {
 
 /* ---------- colores fijos para cada developer ---------- */
 const PALETTE = [
-  "#82ca9d",
-  "#ffc658",
-  "#ff7300",
-  "#0088fe",
-  "#00c49f",
-  "#ffbb28",
-  "#ff8042",
-  "#8884d8",
+  "#30afaf", 
+  "#100f0d", 
+  "#6aa492",
+  "#524034", 
+  "#22772f", 
+  "#5c1487", 
+  "#41372e", 
+  "#565c90", 
 ];
+
 
 function Reports() {
   const { projectId } = useParams();
@@ -78,7 +79,65 @@ function Reports() {
       })
       .catch(console.error);
   }, [projectId]);
-
+  useEffect(() => {
+    if (sprints.length === 0 || members.length === 0) return;
+  
+    const devs = members.filter((m) => m.id !== "all");
+    const makeBlank = () => {
+      const row = {};
+      devs.forEach((d) => { row[d.id] = 0; });
+      return row;
+    };
+  
+    (async () => {
+      // 1) Gráfica 1: total hours por sprint
+      const g1 = await Promise.all(
+        sprints.map(async (sp) => {
+          const raw = await fetch(
+            `${config.apiBaseUrl}/api/task-assignees/team-sprint/${sp.id}/real-hours`
+          ).then((r) => r.json()).catch(() => 0);
+          return { sprintName: sp.name, hours: Number(raw) || 0 };
+        })
+      );
+      setTotalHoursBySprint(g1);
+  
+      // 2) Gráfica 2: horas por dev por sprint
+      const g2 = await Promise.all(
+        sprints.map(async (sp) => {
+          const row = { sprintName: sp.name, ...makeBlank() };
+          await Promise.all(
+            devs.map(async (d) => {
+              const raw = await fetch(
+                `${config.apiBaseUrl}/api/task-assignees/user/${d.id}/sprint/${sp.id}/real-hours`
+              ).then((r) => r.json()).catch(() => 0);
+              row[d.id] = Number(raw) || 0;
+            })
+          );
+          return row;
+        })
+      );
+      setHoursByDevPerSprint(g2);
+  
+      // 3) Gráfica 3: tareas completadas por dev por sprint
+      const g3 = await Promise.all(
+        sprints.map(async (sp) => {
+          const row = { sprintName: sp.name, ...makeBlank() };
+          await Promise.all(
+            devs.map(async (d) => {
+              const c = await fetch(
+                `${config.apiBaseUrl}/api/task-assignees/user/${d.id}/sprint/${sp.id}/done/count`
+              ).then((r) => r.json()).catch(() => 0);
+              row[d.id] = Number(c) || 0;
+            })
+          );
+          return row;
+        })
+      );
+      setTasksByDevPerSprint(g3);
+    })();
+  
+  }, [sprints, members]);
+  
   /* ============================================================= *
    *                BOTÓN  «Generar Reporte»                       *
    * ============================================================= */
@@ -165,68 +224,7 @@ function Reports() {
          ===========================================================*/
 
       /* ---- Gráfica 1  (team hours por sprint) ----------------- */
-      const g1 = await Promise.all(
-        sprints.map(async (sp) => {
-          const h = await fetch(
-            `${config.apiBaseUrl}/api/task-assignees/team-sprint/${sp.id}/real-hours`,
-          )
-            .then((r) => r.json())
-            .catch(() => ({ hours: 0 }));
-          console.log("hinsideof:", h);
-          return { sprintName: sp.name, hours: h?.hours ?? 0 };
-        }),
-      );
-      console.log("team-sprint-realhours:", g1);
-      setTotalHoursBySprint(g1);
-
-      /* ---- Prepara estructura vacía por sprint ---------------- */
-      const devs = members.filter((m) => m.id !== "all");
-      const makeBlank = () => {
-        const row = {};
-        devs.forEach((d) => {
-          row[d.id] = 0;
-        });
-        return row;
-      };
-
-      /* ---- Horas y tareas por dev para CADA sprint ------------- */
-      const g2Promises = sprints.map(async (sp) => {
-        const row = { sprintName: sp.name, ...makeBlank() };
-        await Promise.all(
-          devs.map(async (d) => {
-            const h = await fetch(
-              `${config.apiBaseUrl}/api/task-assignees/user/${d.id}/sprint/${sp.id}/real-hours`,
-            )
-              .then((r) => r.json())
-              .catch(() => ({ hours: 0 }));
-            row[d.id] = h?.hours ?? 0;
-          }),
-        );
-        return row;
-      });
-      console.log("user-sprint-realhours:", g2Promises);
-
-      const g3Promises = sprints.map(async (sp) => {
-        const row = { sprintName: sp.name, ...makeBlank() };
-        await Promise.all(
-          devs.map(async (d) => {
-            const c = await fetch(
-              `${config.apiBaseUrl}/api/task-assignees/user/${d.id}/sprint/${sp.id}/done/count`,
-            )
-              .then((r) => r.json())
-              .catch(() => 0);
-            row[d.id] = c ?? 0;
-          }),
-        );
-        return row;
-      });
-
-      const [g2, g3] = await Promise.all([
-        Promise.all(g2Promises),
-        Promise.all(g3Promises),
-      ]);
-      setHoursByDevPerSprint(g2);
-      setTasksByDevPerSprint(g3);
+     
 
       /* --------------- guardar KPI / tabla --------------------- */
       setReportData({
@@ -392,7 +390,7 @@ function Reports() {
               <XAxis dataKey="sprintName" stroke="#ccc" />
               <YAxis stroke="#ccc" />
               <Tooltip />
-              <Bar dataKey="hours" fill="#c084fc" name="Horas" />
+              <Bar dataKey="hours" fill="#10677a" name="Horas" />
             </BarChart>
           </ResponsiveContainer>
         </div>
