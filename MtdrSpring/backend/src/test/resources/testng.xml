@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="DummySuite">
+<suite name="UnitTests">
+    <test name="AllServiceTests">
+        <packages>
+            <!-- Include all tests in the service package -->
+            <package name="com.springboot.MyTodoList.service"/>
+        </packages>
+    </test>
+</suite>
+<!-- <suite name="DummySuite">
     <test name="DummyTestOnly">
         <classes>
             <class name="com.springboot.MyTodoList.DummyTest" />
         </classes>
     </test>
-</suite>
+    <test name="Service">
+        <classes>
+            <class name="com.springboot.MyTodoList.service.AuthServiceTest" />
+        </classes>
+    </test>
+</suite> -->
