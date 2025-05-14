@@ -1,13 +1,22 @@
-FROM openjdk:22
+FROM maven:3.9.6-eclipse-temurin-21 AS base
+WORKDIR /app
+COPY pom.xml .
 
-WORKDIR /tmp/
+FROM base AS development
+RUN mkdir -p /wallet
+COPY wallet/ /wallet
+EXPOSE 8081
+ENTRYPOINT ["mvn", "spring-boot:run"]
 
-# Expose port 8080
-EXPOSE 8080
-
-# Copy the application JAR and the .env file
-COPY target/MyTodoList-0.0.1-SNAPSHOT.jar MyTodoList.jar
+# Build image, creates the production JAR
+FROM base AS build
+COPY src ./src
 COPY .env ./
+RUN mvn clean package -DskipTests
 
-# Start the application
-ENTRYPOINT ["java","-jar","MyTodoList.jar"]
+# Production image
+FROM openjdk:22 AS production
+WORKDIR /app
+COPY --from=build /app/target/MyTodoList-0.0.1-SNAPSHOT.jar MyTodoList.jar
+EXPOSE 8081
+ENTRYPOINT ["java", "-jar", "MyTodoList.jar"]
