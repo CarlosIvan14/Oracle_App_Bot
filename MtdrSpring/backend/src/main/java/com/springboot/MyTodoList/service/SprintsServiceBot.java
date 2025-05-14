@@ -14,16 +14,9 @@ import java.util.List;
 @Service
 public class SprintsServiceBot {
 
-	<<<<<<<HEAD
 	private final RestTemplate restTemplate;
 
 	private final String apiBaseUrl = "http://140.84.170.68/api";
-
-	=======>>>>>>>57a64cb (backend format checking w springjavaformat && testNG)
-
-	private final RestTemplate restTemplate;
-
-	private final String apiBaseUrl = "http://localhost:8081/api";
 
 	@Autowired
 	public SprintsServiceBot(RestTemplateBuilder restTemplateBuilder) {

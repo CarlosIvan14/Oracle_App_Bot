@@ -34,17 +34,13 @@ public class MyTodoListApplication implements CommandLineRunner {
 	@Autowired
 	private SprintsServiceBot sprintsServiceBot;
 
-	<<<<<<<HEAD
 	/* -> NUEVO: URL del backend que usará el bot */
 	/* (se lee de application.properties o variable de entorno) */
 	@Value("${backend.base-url:http://140.84.170.68}")
 	private String backendBaseUrl;
 
-	=======
-	@Autowired
 	private TaskServiceBot taskServiceBot;
 
-	>>>>>>>57a64cb (backend format checking w springjavaformat && testNG)
 
 	@Autowired
 	private TaskCreationServiceBot taskCreationServiceBot;
@@ -58,11 +54,6 @@ public class MyTodoListApplication implements CommandLineRunner {
 
 	@Value("${telegram.bot.name}")
 	private String botName;
-
-	/* -> NUEVO: URL del backend que usará el bot */
-	/* (se lee de application.properties o variable de entorno) */
-	@Value("${backend.base-url:http://localhost:8081}")
-	private String backendBaseUrl;
 
 	public static void main(String[] args) {
 
