@@ -76,7 +76,7 @@ public class MyTodoListApplication implements CommandLineRunner {
 	public void run(String... args) {
 
 		try {
-			/* Instanciar la API de Telegram */
+			/* Instanciar la API de Telegram*/
 			TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
 
 			/* Registrar nuestro bot: <<—— SE AÑADE backendBaseUrl */
@@ -89,7 +89,7 @@ public class MyTodoListApplication implements CommandLineRunner {
 
 		}
 		catch (TelegramApiException e) {
-			logger.error("Error registrando el bot:", e);
+			logger.error("Error registrando el botdfsdf:", e);
 		}
 	}
 
