@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import config from '../../../config';
+import config from '../../config';
 
 function NewItemModal({ addItem, isInserting }) {
   // Estados para el modal

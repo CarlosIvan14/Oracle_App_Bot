@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import config from '../../config'
+import config from '../config'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams } from "react-router-dom";
