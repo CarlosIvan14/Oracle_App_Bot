@@ -12,6 +12,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -22,12 +25,21 @@ public class ToDoItemController {
 	private ToDoItemService toDoItemService;
 
 	// @CrossOrigin
+	@Operation(summary = "Obtener todas las tareas", description = "Devuelve una lista con todas las tareas registradas")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Tareas obtenidas correctamente")
+	})
 	@GetMapping(value = "/todolist")
 	public List<ToDoItem> getAllToDoItems() {
 		return toDoItemService.findAll();
 	}
 
 	// @CrossOrigin
+	@Operation(summary = "Obtener tarea por ID", description = "Devuelve la tarea correspondiente al ID especificado")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Tarea encontrada"),
+		@ApiResponse(responseCode = "404", description = "Tarea no encontrada")
+	})
 	@GetMapping(value = "/todolist/{id}")
 	public ResponseEntity<ToDoItem> getToDoItemById(@PathVariable int id) {
 		try {
@@ -40,6 +52,11 @@ public class ToDoItemController {
 	}
 
 	// @CrossOrigin
+	@Operation(summary = "Crear nueva tarea", description = "Agrega una nueva tarea a la lista")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Tarea creada exitosamente"),
+		@ApiResponse(responseCode = "500", description = "Error interno al crear la tarea")
+	})
 	@PostMapping(value = "/todolist")
 	public ResponseEntity addToDoItem(@RequestBody ToDoItem todoItem) throws Exception {
 		ToDoItem td = toDoItemService.addToDoItem(todoItem);
@@ -52,6 +69,11 @@ public class ToDoItemController {
 	}
 
 	// @CrossOrigin
+	@Operation(summary = "Actualizar tarea por ID", description = "Actualiza completamente los datos de una tarea existente")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Tarea actualizada correctamente"),
+		@ApiResponse(responseCode = "404", description = "Tarea no encontrada")
+	})
 	@PutMapping(value = "todolist/{id}")
 	public ResponseEntity updateToDoItem(@RequestBody ToDoItem toDoItem, @PathVariable int id) {
 		try {
@@ -65,6 +87,11 @@ public class ToDoItemController {
 	}
 
 	// @CrossOrigin
+	@Operation(summary = "Eliminar tarea por ID", description = "Elimina una tarea específica de la lista")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Tarea eliminada correctamente"),
+		@ApiResponse(responseCode = "404", description = "Tarea no encontrada")
+	})
 	@DeleteMapping(value = "todolist/{id}")
 	public ResponseEntity<Boolean> deleteToDoItem(@PathVariable("id") int id) {
 		Boolean flag = false;
@@ -77,6 +104,10 @@ public class ToDoItemController {
 		}
 	}
 
+	@Operation(summary = "Obtener tareas por usuario", description = "Devuelve todas las tareas asociadas a un usuario específico")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Tareas del usuario obtenidas correctamente")
+	})
 	@GetMapping(value = "/todolist/user/{userId}")
 	public List<ToDoItem> getToDoItemsByUser(@PathVariable int userId) {
 		return toDoItemService.getItemsByUserId(userId);

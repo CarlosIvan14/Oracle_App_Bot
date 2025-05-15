@@ -4,6 +4,10 @@ import com.springboot.MyTodoList.model.OracleUser;
 import com.springboot.MyTodoList.service.OpenAIService;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.*;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import java.util.List;
 import java.util.Map;
@@ -18,10 +22,16 @@ public class AssignmentController {
 		this.openAIService = openAIService;
 	}
 
-	/**
-	 * Body esperado: { "projectId" : 41, "name" : "Implementar pasarela de pagos",
-	 * "description" : "Crear micro‑servicio ..." }
-	 */
+	@Operation(
+		summary = "Asignar usuarios automaticamente con IA",
+		description = "Recibe ID del proyecto, nombre y descripcion de la tarea para recomendar a los usuarios"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Usuarios recomendados exitosamente",
+			content = @Content(array = @ArraySchema(schema = @Schema(implementation = OracleUser.class)))),
+		@ApiResponse(responseCode = "400", description = "Parametros invalidos"),
+		@ApiResponse(responseCode = "500", description = "Error del servidor")
+	})
 	@PostMapping("/by-ai")
 	public ResponseEntity<List<OracleUser>> assignByAi(@RequestBody Map<String, Object> payload) {
 

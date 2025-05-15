@@ -8,6 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +26,11 @@ public class OracleUserController {
 	private OracleUserService oracleUserService;
 
 	// Endpoint para registrar un nuevo usuario
+	@Operation(summary = "Registrar usuario", description = "Crea un nuevo usuario con los datos proporcionados")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "201", description = "Usuario registrado exitosamente"),
+		@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@PostMapping("/register")
 	public ResponseEntity<OracleUser> registerUser(@RequestBody OracleUser oracleUser) {
 		try {
@@ -32,6 +43,11 @@ public class OracleUserController {
 	}
 
 	// Endpoint para obtener todos los usuarios
+	@Operation(summary = "Obtener todos los usuarios", description = "Devuelve una lista de todos los usuarios registrados en el sistema")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Usuarios obtenidos correctamente"),
+		@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@GetMapping
 	public ResponseEntity<List<OracleUser>> getAllUsers() {
 		try {
@@ -44,6 +60,12 @@ public class OracleUserController {
 	}
 
 	// Endpoint para obtener un usuario por ID
+	@Operation(summary = "Obtener usuario por ID", description = "Devuelve los datos de un usuario específico según su ID")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Usuario encontrado"),
+		@ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+		@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@GetMapping("/{id}")
 	public ResponseEntity<OracleUser> getUserById(@PathVariable int id) {
 		try {
@@ -61,6 +83,12 @@ public class OracleUserController {
 	}
 
 	// Endpoint para login de usuario
+	@Operation(summary = "Login de usuario", description = "Autentica un usuario con nombre y contraseña")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Usuario autenticado correctamente"),
+		@ApiResponse(responseCode = "404", description = "Credenciales inválidas o usuario no encontrado"),
+		@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@PostMapping("/login")
 	public ResponseEntity<OracleUser> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
 		try {
@@ -79,6 +107,12 @@ public class OracleUserController {
 
 	// Endpoint para actualizar un usuario
 	// Se pueden actualizar campos como email, status, telegramId, phoneNumber o password
+	@Operation(summary = "Actualizar usuario parcialmente", description = "Actualiza campos específicos de un usuario como email, status, telegramId, phoneNumber o password")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Usuario actualizado correctamente"),
+		@ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+		@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@PatchMapping("/{id}")
 	public ResponseEntity<OracleUser> updateUser(@PathVariable int id, @RequestBody OracleUser userUpdates) {
 		try {

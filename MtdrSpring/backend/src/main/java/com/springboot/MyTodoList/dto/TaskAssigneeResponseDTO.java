@@ -1,15 +1,20 @@
 package com.springboot.MyTodoList.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 
+@Schema(description = "Asignación de una tarea a un usuario dentro de un sprint")
 public class TaskAssigneeResponseDTO {
 
-	private int idTaskAssignees;
+	@Schema(description = "ID de la asignación de tarea", example = "123")
+    private int idTaskAssignees;
 
-	private ProjectUserDTO projectUser;
+    @Schema(description = "Usuario asignado al proyecto")
+    private ProjectUserDTO projectUser;
 
-	private TaskDTO task; // Simplified version of TaskDTO
+    @Schema(description = "Tarea asignada al usuario")
+    private TaskDTO task; // Simplified version of TaskDTO
 
 	// Constructors, Getters and Setters
 	public TaskAssigneeResponseDTO() {

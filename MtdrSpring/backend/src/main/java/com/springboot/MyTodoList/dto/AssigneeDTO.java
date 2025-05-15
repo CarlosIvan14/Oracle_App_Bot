@@ -4,11 +4,16 @@ import com.springboot.MyTodoList.model.TaskAssignees;
 import com.springboot.MyTodoList.model.ProjectUser;
 import com.springboot.MyTodoList.model.OracleUser;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Información de un usuario asignado a una tarea")
 public class AssigneeDTO {
 
-	private int idTaskAssignees;
+    @Schema(description = "ID del registro de asignación de tarea", example = "101")
+    private int idTaskAssignees;
 
-	private ProjectUserDTO projectUser;
+    @Schema(description = "Usuario asignado al proyecto")
+    private ProjectUserDTO projectUser;
 
 	public AssigneeDTO(TaskAssignees taskAssignee) {
 		this.idTaskAssignees = taskAssignee.getIdTaskAssignees();

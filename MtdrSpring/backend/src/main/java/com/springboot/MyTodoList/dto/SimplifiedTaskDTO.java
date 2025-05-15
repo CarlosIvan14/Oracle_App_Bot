@@ -1,26 +1,38 @@
 package com.springboot.MyTodoList.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
+@Schema(description = "Tarea simplificada sin asignación")
 public class SimplifiedTaskDTO {
 
-	private int id;
+ 	@Schema(description = "ID único de la tarea", example = "101")
+    private int id;
 
-	private String name;
+    @Schema(description = "Nombre de la tarea", example = "Implementar login")
+    private String name;
 
-	private String status;
+    @Schema(description = "Estado de la tarea", example = "IN_PROGRESS")
+    private String status;
 
-	private String description;
+    @Schema(description = "Descripción de la tarea", example = "Crear login con JWT")
+    private String description;
 
-	private Integer storyPoints;
+    @Schema(description = "Puntos de historia asignados", example = "5")
+    private Integer storyPoints;
 
-	private LocalDateTime deadline;
+    @Schema(description = "Fecha límite de la tarea", example = "2024-05-20T23:59:00")
+    private LocalDateTime deadline;
 
-	private Double estimatedHours;
+    @Schema(description = "Horas estimadas para completar la tarea", example = "10.0")
+    private Double estimatedHours;
 
-	private Double realHours;
+    @Schema(description = "Horas reales utilizadas (por defecto 0)", example = "0.0")
+    private Double realHours;
 
-	private LocalDateTime creationTs;
+    @Schema(description = "Fecha de creación de la tarea", example = "2024-05-10T08:30:00")
+    private LocalDateTime creationTs;
+
 
 	// Default constructor
 	public SimplifiedTaskDTO() {

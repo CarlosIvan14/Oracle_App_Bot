@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +26,11 @@ public class TasksController {
 	private TasksService tasksService;
 
 	// Crear Task
+	@Operation(summary = "Crear nueva tarea", description = "Crea una nueva tarea en el sistema")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "201", description = "Tarea creada exitosamente"),
+		@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@PostMapping
 	public ResponseEntity<Tasks> createTask(@RequestBody Tasks task) {
 		Tasks createdTask = tasksService.addTask(task);
@@ -29,6 +38,11 @@ public class TasksController {
 	}
 
 	// Obtener todas las Tasks
+	@Operation(summary = "Obtener todas las tareas", description = "Devuelve una lista de todas las tareas registradas")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Tareas obtenidas correctamente"),
+		@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@GetMapping
 	public ResponseEntity<List<Tasks>> getAllTasks() {
 		List<Tasks> tasks = tasksService.findAllTasks();
@@ -36,6 +50,12 @@ public class TasksController {
 	}
 
 	// Obtener Task por ID
+	@Operation(summary = "Obtener tarea por ID", description = "Devuelve los detalles de una tarea específica según su ID")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Tarea encontrada correctamente"),
+		@ApiResponse(responseCode = "404", description = "Tarea no encontrada"),
+		@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@GetMapping("/{id}")
 	public ResponseEntity<Tasks> getTaskById(@PathVariable int id) {
 		Optional<Tasks> task = tasksService.getTaskById(id);
@@ -44,6 +64,12 @@ public class TasksController {
 	}
 
 	// Actualizar Task (PUT: reemplazo completo)
+	@Operation(summary = "Actualizar tarea (reemplazo total)", description = "Reemplaza por completo los datos de una tarea existente")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Tarea actualizada correctamente"),
+		@ApiResponse(responseCode = "404", description = "Tarea no encontrada"),
+		@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@PutMapping("/{id}")
 	public ResponseEntity<Tasks> updateTask(@PathVariable int id, @RequestBody Tasks taskDetails) {
 		Tasks updatedTask = tasksService.updateTask(id, taskDetails);
@@ -54,6 +80,12 @@ public class TasksController {
 	}
 
 	// Actualizar parcialmente Task (PATCH)
+	@Operation(summary = "Actualizar tarea parcialmente", description = "Modifica uno o más campos de una tarea existente")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Tarea actualizada parcialmente"),
+		@ApiResponse(responseCode = "404", description = "Tarea no encontrada"),
+		@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@PatchMapping("/{id}")
 	public ResponseEntity<Tasks> patchTask(@PathVariable int id, @RequestBody JsonNode taskUpdates) {
 		Tasks patchedTask = tasksService.patchTask(id, taskUpdates);
@@ -64,6 +96,12 @@ public class TasksController {
 	}
 
 	// Eliminar Task
+	@Operation(summary = "Eliminar tarea", description = "Elimina una tarea existente por su ID")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "204", description = "Tarea eliminada correctamente"),
+		@ApiResponse(responseCode = "404", description = "Tarea no encontrada"),
+		@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteTask(@PathVariable int id) {
 		boolean deleted = tasksService.deleteTask(id);
@@ -74,6 +112,11 @@ public class TasksController {
 	}
 
 	// Obtener todas las tareas de un Sprint por id_sprint
+	@Operation(summary = "Obtener tareas por sprint", description = "Devuelve una lista de tareas asociadas a un sprint específico")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Tareas obtenidas correctamente"),
+		@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@GetMapping("/sprint/{sprintId}")
 	public ResponseEntity<List<Tasks>> getTasksBySprint(@PathVariable int sprintId) {
 		List<Tasks> tasks = tasksService.getTasksBySprint(sprintId);
@@ -81,6 +124,14 @@ public class TasksController {
 	}
 
 	// Get unassigned tasks by sprint ID
+	@Operation(
+		summary = "Obtener tareas no asignadas por Sprint",
+		description = "Retorna una lista de tareas que no han sido asignadas dentro del sprint especificado")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Tareas no asignadas obtenidas correctamente",
+			content = @Content(array = @ArraySchema(schema = @Schema(implementation = SimplifiedTaskDTO.class)))),
+		@ApiResponse(responseCode = "404", description = "Sprint no encontrado"),
+		@ApiResponse(responseCode = "500", description = "Error del servidor")})
 	@GetMapping("/unassigned/{sprintId}")
 	public ResponseEntity<List<SimplifiedTaskDTO>> getSimpleUnassignedTasksBySprint(@PathVariable int sprintId) {
 		List<Tasks> tasks = tasksService.getUnassignedTasksBySprint(sprintId);
