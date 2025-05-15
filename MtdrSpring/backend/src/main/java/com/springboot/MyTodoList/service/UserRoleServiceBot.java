@@ -12,7 +12,7 @@ public class UserRoleServiceBot {
 
 	private final RestTemplate rest;
 
-	private final String apiBase = "http://140.84.170.68/api";
+	private final String apiBase = "http://159.54.139.252/api";
 
 	@Autowired
 	public UserRoleServiceBot(RestTemplateBuilder builder) {

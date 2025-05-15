@@ -4,7 +4,7 @@
 //  };
    
 const config = {
-  apiBaseUrl: "http://140.84.170.68"
+  apiBaseUrl: "http://159.54.139.252"
 };
   
   export default config;

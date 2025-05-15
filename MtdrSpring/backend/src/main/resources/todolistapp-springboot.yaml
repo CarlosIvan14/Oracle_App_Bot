@@ -6,13 +6,13 @@ metadata:
     oci.oraclecloud.com/loadbalancer-policy: "IP_HASH"
 spec:
   type: LoadBalancer
-  loadBalancerIP: 140.84.170.68
+  loadBalancerIP: 159.54.139.252
   externalTrafficPolicy: Local
 
   ports:
     - port: 80
       protocol: TCP
-      targetPort: 8080
+      targetPort: 8081
   selector:
     app: todolistapp-springboot
 ---
@@ -91,7 +91,7 @@ spec:
             - name: creds
               mountPath: /mtdrworkshop/creds
           ports:
-            - containerPort: 8080
+            - containerPort: 8081
       restartPolicy: Always
       volumes:
         - name: creds
