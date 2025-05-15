@@ -1,6 +1,7 @@
 FROM openjdk:22
 
 WORKDIR /tmp/
+COPY .env ./
 
 EXPOSE 8080
 
