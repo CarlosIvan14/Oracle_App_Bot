@@ -19467,7 +19467,7 @@ org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error exe
 
 2025-04-22 19:16:30.658 ERROR 39092 --- [Xavio2_bot Telegram Executor] c.s.M.controller.ToDoItemBotController   : 
 
-org.springframework.web.client.ResourceAccessException: I/O error on POST request for "http://localhost:8081/users/login": Connect to localhost:8081 [localhost/127.0.0.1] failed: Connection refused; nested exception is org.apache.http.conn.HttpHostConnectException: Connect to localhost:8081 [localhost/127.0.0.1] failed: Connection refused
+org.springframework.web.client.ResourceAccessException: I/O error on POST request for "http://localhost:8080/users/login": Connect to localhost:8080 [localhost/127.0.0.1] failed: Connection refused; nested exception is org.apache.http.conn.HttpHostConnectException: Connect to localhost:8080 [localhost/127.0.0.1] failed: Connection refused
 	at org.springframework.web.client.RestTemplate.doExecute(RestTemplate.java:785) ~[spring-web-5.3.16.jar:5.3.16]
 	at org.springframework.web.client.RestTemplate.execute(RestTemplate.java:711) ~[spring-web-5.3.16.jar:5.3.16]
 	at org.springframework.web.client.RestTemplate.postForEntity(RestTemplate.java:468) ~[spring-web-5.3.16.jar:5.3.16]
@@ -19478,7 +19478,7 @@ org.springframework.web.client.ResourceAccessException: I/O error on POST reques
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
 	at org.telegram.telegrambots.meta.generics.LongPollingBot.onUpdatesReceived(LongPollingBot.java:27) ~[telegrambots-meta-6.5.0.jar:na]
 	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$HandlerThread.run(DefaultBotSession.java:312) ~[telegrambots-6.5.0.jar:na]
-Caused by: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8081 [localhost/127.0.0.1] failed: Connection refused
+Caused by: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8080 [localhost/127.0.0.1] failed: Connection refused
 	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:156) ~[httpclient-4.5.13.jar:4.5.13]
 	at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376) ~[httpclient-4.5.13.jar:4.5.13]
 	at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393) ~[httpclient-4.5.13.jar:4.5.13]
@@ -20201,7 +20201,7 @@ org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error exe
 
 2025-04-22 19:17:27.598 ERROR 39092 --- [Xavio2_bot Telegram Executor] c.s.M.controller.ToDoItemBotController   : 
 
-org.springframework.web.client.ResourceAccessException: I/O error on POST request for "http://localhost:8081/users/login": Connect to localhost:8081 [localhost/127.0.0.1] failed: Connection refused; nested exception is org.apache.http.conn.HttpHostConnectException: Connect to localhost:8081 [localhost/127.0.0.1] failed: Connection refused
+org.springframework.web.client.ResourceAccessException: I/O error on POST request for "http://localhost:8080/users/login": Connect to localhost:8080 [localhost/127.0.0.1] failed: Connection refused; nested exception is org.apache.http.conn.HttpHostConnectException: Connect to localhost:8080 [localhost/127.0.0.1] failed: Connection refused
 	at org.springframework.web.client.RestTemplate.doExecute(RestTemplate.java:785) ~[spring-web-5.3.16.jar:5.3.16]
 	at org.springframework.web.client.RestTemplate.execute(RestTemplate.java:711) ~[spring-web-5.3.16.jar:5.3.16]
 	at org.springframework.web.client.RestTemplate.postForEntity(RestTemplate.java:468) ~[spring-web-5.3.16.jar:5.3.16]
@@ -20212,7 +20212,7 @@ org.springframework.web.client.ResourceAccessException: I/O error on POST reques
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
 	at org.telegram.telegrambots.meta.generics.LongPollingBot.onUpdatesReceived(LongPollingBot.java:27) ~[telegrambots-meta-6.5.0.jar:na]
 	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$HandlerThread.run(DefaultBotSession.java:312) ~[telegrambots-6.5.0.jar:na]
-Caused by: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8081 [localhost/127.0.0.1] failed: Connection refused
+Caused by: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8080 [localhost/127.0.0.1] failed: Connection refused
 	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:156) ~[httpclient-4.5.13.jar:4.5.13]
 	at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376) ~[httpclient-4.5.13.jar:4.5.13]
 	at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393) ~[httpclient-4.5.13.jar:4.5.13]
@@ -22436,7 +22436,7 @@ org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error exe
 
 2025-04-22 19:20:27.183 ERROR 39092 --- [Xavio2_bot Telegram Executor] c.s.M.controller.ToDoItemBotController   : 
 
-org.springframework.web.client.ResourceAccessException: I/O error on POST request for "http://localhost:8081/users/login": Connect to localhost:8081 [localhost/127.0.0.1] failed: Connection refused; nested exception is org.apache.http.conn.HttpHostConnectException: Connect to localhost:8081 [localhost/127.0.0.1] failed: Connection refused
+org.springframework.web.client.ResourceAccessException: I/O error on POST request for "http://localhost:8080/users/login": Connect to localhost:8080 [localhost/127.0.0.1] failed: Connection refused; nested exception is org.apache.http.conn.HttpHostConnectException: Connect to localhost:8080 [localhost/127.0.0.1] failed: Connection refused
 	at org.springframework.web.client.RestTemplate.doExecute(RestTemplate.java:785) ~[spring-web-5.3.16.jar:5.3.16]
 	at org.springframework.web.client.RestTemplate.execute(RestTemplate.java:711) ~[spring-web-5.3.16.jar:5.3.16]
 	at org.springframework.web.client.RestTemplate.postForEntity(RestTemplate.java:468) ~[spring-web-5.3.16.jar:5.3.16]
@@ -22447,7 +22447,7 @@ org.springframework.web.client.ResourceAccessException: I/O error on POST reques
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
 	at org.telegram.telegrambots.meta.generics.LongPollingBot.onUpdatesReceived(LongPollingBot.java:27) ~[telegrambots-meta-6.5.0.jar:na]
 	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$HandlerThread.run(DefaultBotSession.java:312) ~[telegrambots-6.5.0.jar:na]
-Caused by: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8081 [localhost/127.0.0.1] failed: Connection refused
+Caused by: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8080 [localhost/127.0.0.1] failed: Connection refused
 	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:156) ~[httpclient-4.5.13.jar:4.5.13]
 	at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376) ~[httpclient-4.5.13.jar:4.5.13]
 	at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393) ~[httpclient-4.5.13.jar:4.5.13]

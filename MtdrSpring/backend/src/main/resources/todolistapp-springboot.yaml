@@ -12,7 +12,7 @@ spec:
   ports:
     - port: 80
       protocol: TCP
-      targetPort: 8081
+      targetPort: 8080
   selector:
     app: todolistapp-springboot
 ---
@@ -91,7 +91,7 @@ spec:
             - name: creds
               mountPath: /mtdrworkshop/creds
           ports:
-            - containerPort: 8081
+            - containerPort: 8080
       restartPolicy: Always
       volumes:
         - name: creds

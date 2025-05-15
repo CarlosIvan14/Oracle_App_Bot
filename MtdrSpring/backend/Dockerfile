@@ -4,12 +4,12 @@ WORKDIR /app
 COPY pom.xml .
 RUN mkdir -p /wallet
 COPY wallet/ /wallet
-EXPOSE 8081
+EXPOSE 8080
 
 # Production image - simplified approach
 FROM openjdk:22 AS production
 WORKDIR /app
 COPY target/MyTodoList-0.0.1-SNAPSHOT.jar MyTodoList.jar
 COPY .env ./
-EXPOSE 8081
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "MyTodoList.jar"]
