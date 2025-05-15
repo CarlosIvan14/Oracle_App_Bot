@@ -18,7 +18,7 @@ public class TaskCreationServiceBot {
 
 	private final RestTemplate restTemplate;
 
-	private final String apiBaseUrl = "http://159.54.139.252/api";
+	private final String apiBaseUrl = "http://140.84.179.223/api";
 
 	private final UserRoleServiceBot userRoleService;
 
