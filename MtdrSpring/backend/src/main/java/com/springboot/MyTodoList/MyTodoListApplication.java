@@ -76,7 +76,7 @@ public class MyTodoListApplication implements CommandLineRunner {
 	public void run(String... args) {
 
 		try {
-			/* Instanciar la API de Telegram*/
+			/* Instanciar la API de Telegram */
 			TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
 
 			/* Registrar nuestro bot: <<—— SE AÑADE backendBaseUrl */

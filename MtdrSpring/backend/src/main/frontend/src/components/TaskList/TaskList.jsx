@@ -5,10 +5,7 @@ import TaskListItem from "./TaskListItem";
 // <div id="maincontent" className="bg-gray-800 bg-opacity-50 p-4 rounded-lg"></div>
 function TaskList({ items, toggleDone, deleteItem }) {
   return (
-    <div
-      id="maincontent"
-      className="bg-[#212233] bg-opacity-50 p-4 rounded-lg"
-    >
+    <div id="maincontent" className="bg-[#212233] bg-opacity-50 p-4 rounded-lg">
       {/* Tareas pendientes */}
       <h2 className="text-2xl font-semibold mb-2 text-white">Pending Items</h2>
       <table
