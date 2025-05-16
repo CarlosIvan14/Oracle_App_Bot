@@ -6,7 +6,7 @@ function TaskModal({ task, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-customDark text-white p-8 rounded-3xl relative max-w-md w-full">
+      <div className="bg-[#212233] text-white p-8 rounded-3xl relative max-w-md w-full">
         <button
           className="absolute top-4 right-8 text-gray-400 hover:text-white"
           onClick={onClose}
