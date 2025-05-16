@@ -1,7 +1,7 @@
 // src/routes/Home.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import config from '../config'
+import config from "../config";
 
 function Home({ user }) {
   const [projects, setProjects] = useState([]);

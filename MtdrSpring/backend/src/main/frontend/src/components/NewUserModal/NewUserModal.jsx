@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import config from "../../config";
 
 function NewUserModal({ isOpen, onClose, isRegistering }) {
   const [name, setName] = useState("");

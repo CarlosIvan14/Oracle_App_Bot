@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import config from '../config';
+import config from "../config";
 
 /**
  * Props
@@ -78,7 +78,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
     }
     setAiLoading(true);
     try {
-      const res = await fetch("${config.apiBaseUrl}/assignment/by-ai", {
+      const res = await fetch(`${config.apiBaseUrl}/assignment/by-ai`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectId, name, description }),
@@ -133,7 +133,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
     let createdTask;
     try {
       console.log(taskPayload.creation_ts);
-      const res = await fetch("${config.apiBaseUrl}/api/tasks", {
+      const res = await fetch(`${config.apiBaseUrl}/api/tasks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(taskPayload),
@@ -172,7 +172,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
 
       if (idProjectUser) {
         try {
-          await fetch("${config.apiBaseUrl}/api/task-assignees", {
+          await fetch(`${config.apiBaseUrl}/api/task-assignees`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -251,7 +251,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
           onClick={() => !sending && setOpen(false)}
         >
           <div
-            className="max-w-lg w-full bg-customDark  text-white p-6 rounded-2xl relative"
+            className="max-w-lg w-full bg-[#212233]  text-white p-6 rounded-2xl relative"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -274,14 +274,14 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
             <div className="space-y-3">
               <input
                 placeholder="Nombre / título"
-                className="w-full bg-customDarkligth bg-opac rounded-lg p-2"
+                className="w-full bg-[#3f4052] bg-opac rounded-lg p-2"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
               <textarea
                 rows={3}
                 placeholder="Descripción"
-                className="w-full bg-customDarkligth bg-opac rounded-lg p-2 resize-none"
+                className="w-full bg-[#3f4052] bg-opac rounded-lg p-2 resize-none"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -293,7 +293,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                     type="number"
                     min={1}
                     max={7}
-                    className="bg-customDarkligth bg-opac rounded-lg p-2 mt-1"
+                    className="bg-[#3f4052] bg-opac rounded-lg p-2 mt-1"
                     value={storyPoints}
                     onChange={(e) => {
                       const val = Number(e.target.value);
@@ -307,7 +307,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                     type="number"
                     min={1}
                     max={4} // límite superior
-                    className="bg-customDarkligth bg-opac rounded-lg p-2 mt-1"
+                    className="bg-[#3f4052] bg-opac rounded-lg p-2 mt-1"
                     value={estimated}
                     onChange={(e) => {
                       const val = Number(e.target.value);
@@ -324,7 +324,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                 onChange={setDeadline}
                 placeholderText="Deadline"
                 dateFormat="yyyy-MM-dd"
-                className="w-full bg-customDarkligth bg-opac rounded-lg p-2 text-center"
+                className="w-full bg-[#3f4052] bg-opac rounded-lg p-2 text-center"
                 wrapperClassName="w-full"
               />
 
@@ -333,7 +333,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                 <select
                   value={selectedUserId}
                   onChange={(e) => setSelectedUserId(e.target.value)}
-                  className="w-full bg-customDarkligth bg-opac rounded-lg p-2"
+                  className="w-full bg-[#3f4052] bg-opac rounded-lg p-2"
                 >
                   <option value="">— Selecciona usuario —</option>
                   {allUsers.map((u) => (
@@ -366,7 +366,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                     <select
                       value={selectedUserId}
                       onChange={(e) => setSelectedUserId(e.target.value)}
-                      className="w-full bg-customDarkligth bg-opac rounded-lg p-2"
+                      className="w-full bg-[#212233] bg-opac rounded-lg p-2"
                     >
                       <option value="">
                         — Selecciona usuario recomendado —

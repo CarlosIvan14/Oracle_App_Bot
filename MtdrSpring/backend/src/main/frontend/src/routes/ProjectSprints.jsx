@@ -1,7 +1,7 @@
 // src/routes/ProjectSprints.js
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import config from '../config'
+import config from "../config";
 
 const IconPlus = () => <span className="text-lg">＋</span>;
 const IconCancel = () => <span className="text-lg">✕</span>;
@@ -149,7 +149,7 @@ export default function ProjectSprints() {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="max-w-md w-full p-6 bg-customDark bg-opacity-50 text-white rounded-xl shadow-lg"
+            className="max-w-md w-full p-6 bg-[#212233] bg-opacity-50 text-white rounded-xl shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold mb-4">Crear Sprint</h2>
@@ -159,7 +159,7 @@ export default function ProjectSprints() {
                 <input
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="w-full rounded-full p-2 border bg-customDarkligth"
+                  className="w-full rounded-full p-2 border bg-[#212233]"
                 />
               </div>
               <div>
@@ -168,7 +168,7 @@ export default function ProjectSprints() {
                   type="date"
                   value={newDate}
                   onChange={(e) => setNewDate(e.target.value)}
-                  className="w-full rounded-full p-2 border bg-customDarkligth"
+                  className="w-full rounded-full p-2 border bg-[#212233]"
                 />
               </div>
               <div>
@@ -176,7 +176,7 @@ export default function ProjectSprints() {
                   type="hidden"
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
-                  className="w-full rounded-full p-2 border bg-customDarkligth"
+                  className="w-full rounded-full p-2 border bg-[#212233]"
                 />
               </div>
             </div>

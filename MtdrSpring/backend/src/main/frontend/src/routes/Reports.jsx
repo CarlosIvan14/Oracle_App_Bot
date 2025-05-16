@@ -6,30 +6,32 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useParams } from "react-router-dom";
 import {
   BarChart,
+  ComposedChart,
+  Area,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer, // KPI-1
+  ResponsiveContainer,
   PieChart,
   Pie,
-  Cell, // KPI-2
+  Cell,
 } from "recharts";
 
 /* ---------- colores fijos para cada developer ---------- */
+/* ---------- colores fijos para cada developer (azul) ---------- */
 const PALETTE = [
-  "#30afaf", 
-  "#100f0d", 
-  "#6aa492",
-  "#524034", 
-  "#22772f", 
-  "#5c1487", 
-  "#41372e", 
-  "#565c90", 
+  "#60a5fa", // blue-400
+  "#3b82f6", // blue-500
+  "#2563eb", // blue-600
+  "#1d4ed8", // blue-700
+  "#1e40af", // blue-800
+  "#1e3a8a", // blue-900
+  "#172554", // blue-950
+  "#0f172a", // custom ultra-dark blue
 ];
-
 
 function Reports() {
   const { projectId } = useParams();
@@ -263,15 +265,16 @@ function Reports() {
   );
 
   const PIE_COLORS = [
-    "#ffffff",
-    "#d3d3d3",
-    "#a9a9a9",
-    "#808080",
-    "#585858",
-    "#2f2f2f",
-    "#1a1a1a",
-    "#000000",
-  ];
+  "#eff6ff", // blue-50
+  "#dbeafe", // blue-100
+  "#bfdbfe", // blue-200
+  "#93c5fd", // blue-300
+  "#60a5fa", // blue-400
+  "#3b82f6", // blue-500
+  "#2563eb", // blue-600
+  "#1d4ed8", // blue-700
+];
+
 
   /* ============================================================= */
   /* =========================== UI ============================== */
@@ -294,7 +297,7 @@ function Reports() {
             id="filterTypeSelect"
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="bg-customDark bg-opacity-30 text-white px-3 py-2 rounded-xl"
+            className="bg-[#212233] bg-opacity-30 text-white px-3 py-2 rounded-xl"
           >
             <option value="sprint">sprint</option>
             <option value="week">semana</option>
@@ -314,7 +317,7 @@ function Reports() {
               id="sprintSelect"
               value={selectedSprint ?? ""}
               onChange={(e) => setSelectedSprint(e.target.value)}
-              className="bg-customDark bg-opacity-30 text-white px-3 py-2 rounded-xl"
+              className="bg-[#212233] bg-opacity-30 text-white px-3 py-2 rounded-xl"
             >
               <option value="" disabled>
                 Selecciona un sprint
@@ -338,7 +341,7 @@ function Reports() {
               onChange={(d) =>
                 setSelectedDate(d ? d.toISOString().slice(0, 10) : "")
               }
-              className="bg-customDark bg-opacity-30 text-white px-3 py-2 rounded-xl"
+              className="bg-[#212233] bg-opacity-30 text-white px-3 py-2 rounded-xl"
               placeholderText="Selecciona fecha"
               dateFormat="yyyy-MM-dd"
             />
@@ -357,7 +360,7 @@ function Reports() {
             id="memberSelect"
             value={selectedMember ?? ""}
             onChange={(e) => setSelectedMember(e.target.value)}
-            className="bg-customDark bg-opacity-30 text-white px-3 py-2 rounded-xl"
+            className="bg-[#212233] bg-opacity-30 text-white px-3 py-2 rounded-xl"
           >
             <option value="" disabled>
               Selecciona un miembro
@@ -378,47 +381,87 @@ function Reports() {
         </button>
       </div>
 
-      {/* ================= GRÁFICA 1 ================= */}
-      {totalHoursBySprint.length > 0 && (
-        <div>
-          <h2 className="text-white font-semibold mb-2">
-            Gráfica 1: Horas Totales trabajadas por Sprint
-          </h2>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={totalHoursBySprint}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-              <XAxis dataKey="sprintName" stroke="#ccc" />
-              <YAxis stroke="#ccc" />
-              <Tooltip />
-              <Bar dataKey="hours" fill="#10677a" name="Horas" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
+    {/* ================= GRÁFICA 1 ================= */}
+    {totalHoursBySprint.length > 0 && (
+      <div className="p-4 rounded bg-black bg-opacity-10">
+        <h2 className="text-white font-semibold mb-2">
+          Gráfica 1: Horas Totales trabajadas por Sprint
+        </h2>
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={totalHoursBySprint}>
+            {/* Fondo tenue dentro del SVG */}
+            <rect x="0" y="0" width="100%" height="100%" fill="rgba(0,0,0,0.1)" />
+            {/* Gradiente negro→azul */}
+            <defs>
+              <linearGradient id="blackToRed700" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stopColor="#312D2A" />
+                <stop offset="100%" stopColor="#60a5fa" /> 
+              </linearGradient>
+            </defs>
+
+            <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+            <XAxis dataKey="sprintName" stroke="#ccc" />
+            <YAxis stroke="#ccc" />
+            <Tooltip
+              contentStyle={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+              labelStyle={{ color: '#fff' }}
+              itemStyle={{ color: '#fff' }}
+            />
+
+            <Bar
+              dataKey="hours"
+              name="Horas"
+              fill="url(#blackToRed700)"
+              onMouseOver={e => e.target.setAttribute('fill','rgba(0,0,0,0.3)')}
+              onMouseOut={e => e.target.setAttribute('fill','url(#blackToRed700)')}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    )}
 
       {/* ================= GRÁFICA 2 ================= */}
       {hoursByDevPerSprint.length > 0 && (
-        <div>
+        <div className="p-4 rounded bg-black bg-opacity-10">
           <h2 className="text-white font-semibold mb-2">
             Gráfica 2: <b>Horas Trabajadas</b> por Developer por Sprint
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={hoursByDevPerSprint}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-              <XAxis dataKey="sprintName" stroke="#ccc" />
-              <YAxis stroke="#ccc" />
-              <Tooltip />
-              <Legend />
-              {members
-                .filter((m) => m.id !== "all")
-                .map((d) => (
-                  <Bar
-                    key={d.id}
-                    dataKey={String(d.id)}
-                    name={d.name}
-                    fill={memberColors[d.id]}
-                  />
+              {/* un gradiente por cada dev, oscuro abajo→su color arriba */}
+              <defs>
+                {members.filter(m => m.id !== "all").map(dev => (
+                  <linearGradient
+                    key={dev.id}
+                    id={`grad-g2-${dev.id}`}
+                    x1="0" y1="1" x2="0" y2="0"
+                  >
+                    <stop offset="0%" stopColor="#312D2A" />
+                    <stop offset="100%" stopColor={dev.color} />
+                  </linearGradient>
                 ))}
+              </defs>
+
+              <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+              <XAxis dataKey="sprintName" tick={{ fill: '#fff' }} />
+              <YAxis tick={{ fill: '#fff' }} />
+              <Tooltip
+                contentStyle={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+                labelStyle={{ color: '#fff' }}
+                itemStyle={{ color: '#fff' }}
+              />
+              <Legend wrapperStyle={{ color: '#fff' }} />
+
+              {members.filter(m => m.id !== "all").map(dev => (
+                <Bar
+                  key={dev.id}
+                  dataKey={String(dev.id)}
+                  name={dev.name}
+                  fill={`url(#grad-g2-${dev.id})`}
+                  onMouseOver={e => e.target.setAttribute('fill','rgba(0,0,0,0.3)')}
+                  onMouseOut={e => e.target.setAttribute('fill',`url(#grad-g2-${dev.id})`)}
+                />
+              ))}
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -426,27 +469,46 @@ function Reports() {
 
       {/* ================= GRÁFICA 3 ================= */}
       {tasksByDevPerSprint.length > 0 && (
-        <div>
+        <div className="p-4 rounded bg-black bg-opacity-10">
           <h2 className="text-white font-semibold mb-2">
             Gráfica 3: <b>Tareas Completadas</b> por Developer por Sprint
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={tasksByDevPerSprint}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-              <XAxis dataKey="sprintName" stroke="#ccc" />
-              <YAxis stroke="#ccc" />
-              <Tooltip />
-              <Legend />
-              {members
-                .filter((m) => m.id !== "all")
-                .map((d) => (
-                  <Bar
-                    key={d.id}
-                    dataKey={String(d.id)}
-                    name={d.name}
-                    fill={memberColors[d.id]}
-                  />
+              {/* mismo patrón de gradientes que en G2 */}
+              <defs>
+                {members.filter(m => m.id !== "all").map(dev => (
+                  <linearGradient
+                    key={dev.id}
+                    id={`grad-g3-${dev.id}`}
+                    x1="0" y1="1" x2="0" y2="0"
+                  >
+                    <stop offset="0%" stopColor="#312D2A" />
+                    <stop offset="100%" stopColor={dev.color} />
+                  </linearGradient>
                 ))}
+              </defs>
+
+              <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+              <XAxis dataKey="sprintName" tick={{ fill: '#fff' }} />
+              <YAxis tick={{ fill: '#fff' }} />
+              <Tooltip
+                contentStyle={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+                labelStyle={{ color: '#fff' }}
+                itemStyle={{ color: '#fff' }}
+              />
+              <Legend wrapperStyle={{ color: '#fff' }} />
+
+              {members.filter(m => m.id !== "all").map(dev => (
+                <Bar
+                  key={dev.id}
+                  dataKey={String(dev.id)}
+                  name={dev.name}
+                  fill={`url(#grad-g3-${dev.id})`}
+                  onMouseOver={e => e.target.setAttribute('fill','rgba(0,0,0,0.3)')}
+                  onMouseOut={e => e.target.setAttribute('fill',`url(#grad-g3-${dev.id})`)}
+                />
+              ))}
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -460,9 +522,9 @@ function Reports() {
             {
               l: "Tareas Completadas",
               v: reportData.tasksDone,
-              c: "green-400",
+              c: "blue-400",
             },
-            { l: "Story Points", v: reportData.storyPoints, c: "green-400" },
+            { l: "Story Points", v: reportData.storyPoints, c: "blue-400" },
             { l: "Horas Reales", v: reportData.realHours, c: "blue-400" },
             {
               l: "Horas Estimadas",
@@ -480,34 +542,100 @@ function Reports() {
         </div>
       )}
 
-      {/* ================= KPI-1 + BAR detalle ==================== */}
-      {barChartData.length > 0 && (
-        <div className="grid grid-cols-6 gap-6 mt-10">
-          <div className="col-span-1 bg-black/30 rounded-2xl p-6 shadow-lg">
-            <h4 className="text-sm text-gray-400">KPI 1 Time Efficiency</h4>
-            <p className="text-3xl font-bold text-blue-400">
-              {reportData?.kpi1}
-            </p>
-          </div>
-          <div className="col-span-5 bg-black/30 rounded-2xl p-4">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={barChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-                <XAxis dataKey="name" stroke="#ccc" />
-                <YAxis stroke="#ccc" />
-                <Tooltip />
-                <Legend />
-                <Bar
-                  dataKey="estimated"
-                  fill="#d3d3d3"
-                  name="Horas Estimadas"
-                />
-                <Bar dataKey="real" fill="#808080" name="Horas Reales" />
-              </BarChart>
-            </ResponsiveContainer>
+     {/* ================= KPI-1 + COMPOSED detalle con scroll y área ==================== */}
+    {barChartData.length > 0 && (
+      <div className="grid grid-cols-6 gap-6 mt-10">
+        {/* KPI 1 */}
+        <div className="col-span-1 bg-black/30 rounded-2xl p-6 shadow-lg">
+          <h4 className="text-sm text-gray-400">KPI 1 Time Efficiency</h4>
+          <p className="text-3xl font-bold text-blue-400">
+            {reportData?.kpi1}
+          </p>
+        </div>
+
+        {/* Chart con scroll */}
+        <div className="col-span-5 bg-black/30 rounded-2xl p-4 overflow-x-auto">
+          <div
+            style={{
+              width: `${Math.max(barChartData.length * 80, 600)}px`,
+              minWidth: '100%',
+              height: '300px',
+            }}
+          >
+            <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart
+              data={barChartData}
+              margin={{ top: 20, right: 20, bottom: 60, left: 0 }}
+            >
+              {/* degradados de área */}
+              <defs>
+                {/* área real */}
+                <linearGradient id="areaGradientReal" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.6}/>
+                  <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.1}/>
+                </linearGradient>
+                {/* área estimada */}
+                <linearGradient id="areaGradientEst" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#1d4ed8" stopOpacity={0.6}/>
+                  <stop offset="100%" stopColor="#1d4ed8" stopOpacity={0.1}/>
+                </linearGradient>
+              </defs>
+
+              <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+              <XAxis
+                dataKey="name"
+                  tick={false}
+                  axisLine={false}
+                  tickLine={false}
+              />
+              <YAxis tick={{ fill: '#fff' }} />
+              <Tooltip
+                contentStyle={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+                labelStyle={{ color: '#fff' }}
+                itemStyle={{ color: '#fff' }}
+              />
+              <Legend wrapperStyle={{ color: '#fff' }} />
+
+              {/* Área Horas Reales */}
+              <Area
+                type="monotone"
+                dataKey="real"
+                name="Horas Reales (área)"
+                stroke="#60a5fa"
+                fill="url(#areaGradientReal)"
+                activeDot={{ r: 6, strokeWidth: 2, stroke: '#60a5fa' }}
+              />
+
+              {/* Área Horas Estimadas */}
+              <Area
+                type="monotone"
+                dataKey="estimated"
+                name="Horas Estimadas (área)"
+                stroke="#1d4ed8"
+                fill="url(#areaGradientEst)"
+                activeDot={{ r: 6, strokeWidth: 2, stroke: '#1d4ed8' }}
+              />
+              {/* Barras: estimadas y reales */}
+              <Bar
+                dataKey="estimated"
+                name="Horas Estimadas"
+                barSize={20}
+                fill="#1d4ed8"
+              />
+              <Bar
+                dataKey="real"
+                name="Horas Reales"
+                barSize={20}
+                fill="#60a5fa"
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+
           </div>
         </div>
-      )}
+      </div>
+    )}
+
 
       {/* ================= KPI-2 PIE ============================== */}
       {reportData?.spFrequencyChartData?.length > 0 && (

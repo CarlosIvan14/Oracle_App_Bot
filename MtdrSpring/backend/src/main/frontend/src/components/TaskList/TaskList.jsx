@@ -7,7 +7,7 @@ function TaskList({ items, toggleDone, deleteItem }) {
   return (
     <div
       id="maincontent"
-      className="bg-customDark bg-opacity-50 p-4 rounded-lg"
+      className="bg-[#212233] bg-opacity-50 p-4 rounded-lg"
     >
       {/* Tareas pendientes */}
       <h2 className="text-2xl font-semibold mb-2 text-white">Pending Items</h2>
@@ -23,7 +23,7 @@ function TaskList({ items, toggleDone, deleteItem }) {
           mb-4
         "
       >
-        <tbody className="divide-y divide-customDarkligth">
+        <tbody className="divide-y divide-[#212233]">
           {items
             .filter((item) => !item.done)
             .map((item) => (
@@ -49,10 +49,10 @@ function TaskList({ items, toggleDone, deleteItem }) {
           w-full 
           break-words 
           divide-y 
-          divide-customDarkligth
+          divide-[#212233]
         "
       >
-        <tbody className="divide-y divide-customDarkligth">
+        <tbody className="divide-y divide-[#212233]">
           {items
             .filter((item) => item.done)
             .map((item) => (

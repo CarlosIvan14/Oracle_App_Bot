@@ -35,7 +35,7 @@ function Profile({ user }) {
         {/* Columna izquierda: Ícono + "Acerca de mí" */}
         <div className="flex-1 flex flex-col items-center bg-black bg-opacity-50 p-6 rounded-lg">
           {/* Ícono de usuario en círculo */}
-          <div className="bg-customDark p-4 rounded-full mb-4">
+          <div className="bg-[#212233] p-4 rounded-full mb-4">
             <FaUser className="text-6xl text-gray-400" />
           </div>
           <h2 className="text-xl font-semibold mb-2">About me</h2>
