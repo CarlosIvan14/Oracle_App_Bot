@@ -132,7 +132,7 @@ export default function AllTasksCalendar() {
           onClick={() => setSelectedTask(null)}
         >
           <div
-            className="max-w-md w-full p-6 bg-white dark:bg-customDark dark:text-white rounded-2xl"
+            className="max-w-md w-full p-6 bg-[#212233] dark:text-white rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-2xl font-bold mb-4">{selectedTask.name}</h2>
@@ -192,7 +192,7 @@ export default function AllTasksCalendar() {
             )}
             <button
               onClick={() => setSelectedTask(null)}
-              className="mt-4 rounded-full border border-gray-300 px-4 py-2 hover:bg-gray-200 dark:hover:bg-customDarkligth"
+              className="mt-4 rounded-full border border-gray-300 px-4 py-2 hover:bg-gray-200 dark:hover:bg-[#212233]"
             >
               Cerrar
             </button>

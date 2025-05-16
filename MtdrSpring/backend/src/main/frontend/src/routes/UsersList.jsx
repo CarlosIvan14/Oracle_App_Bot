@@ -38,14 +38,14 @@ function SkillRow({
         <td className="px-4 py-2 space-x-2">
           <button
             onClick={onStartEdit}
-            className="rounded-full bg-customDark bg-opacity-70 p-2 hover:bg-gray-500"
+            className="rounded-full bg-[#212233] bg-opacity-70 p-2 hover:bg-gray-500"
             title="Editar Skill"
           >
             <IconEdit />
           </button>
           <button
             onClick={() => onDelete(skill.idSkills)}
-            className="rounded-full bg-customDark bg-opacity-70 p-2 hover:bg-gray-500"
+            className="rounded-full bg-[#212233] bg-opacity-70 p-2 hover:bg-gray-500"
             title="Eliminar Skill"
           >
             <IconTrash />
@@ -58,14 +58,14 @@ function SkillRow({
       <tr className="border-b border-gray-700">
         <td className="px-4 py-2">
           <input
-            className="w-full rounded-md p-1 bg-customDark bg-opacity-70 text-white"
+            className="w-full rounded-md p-1 bg-[#212233] bg-opacity-70 text-white"
             value={localName}
             onChange={(e) => setLocalName(e.target.value)}
           />
         </td>
         <td className="px-4 py-2">
           <input
-            className="w-full rounded-md p-1 bg-customDark bg-opacity-70 text-white"
+            className="w-full rounded-md p-1 bg-[#212233] bg-opacity-70 text-white"
             value={localDesc}
             onChange={(e) => setLocalDesc(e.target.value)}
           />
@@ -385,7 +385,7 @@ function UsersList() {
           onClick={closeModal}
         >
           <div
-            className="max-w-2xl w-full p-4 bg-customDark bg-opacity-90 text-white rounded-2xl relative"
+            className="max-w-2xl w-full p-4 bg-[#212233] bg-opacity-90 text-white rounded-2xl relative"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold mb-4">
@@ -397,8 +397,8 @@ function UsersList() {
             >
               <IconCancel />
             </button>
-            <table className="w-full bg-customDark bg-opacity-70 rounded-2xl overflow-hidden">
-              <thead className="bg-customDark bg-opacity-60">
+            <table className="w-full bg-[#212233] bg-opacity-70 rounded-2xl overflow-hidden">
+              <thead className="bg-[#212233] bg-opacity-60">
                 <tr>
                   <th className="px-4 py-2 text-left">Nombre</th>
                   <th className="px-4 py-2 text-left">Descripción</th>
