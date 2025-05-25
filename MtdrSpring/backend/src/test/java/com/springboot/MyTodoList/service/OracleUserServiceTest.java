@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
@@ -17,6 +19,7 @@ import static org.testng.Assert.assertTrue;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.springboot.MyTodoList.dto.UserDTO;
 import com.springboot.MyTodoList.model.OracleUser;
 import com.springboot.MyTodoList.repository.OracleUserRepository;
 
@@ -113,8 +116,8 @@ public class OracleUserServiceTest {
 
 		when(oracleUserRepository.findByName("testuser")).thenReturn(Optional.of(user));
 
-		// Act
-		Optional<OracleUser> result = oracleUserService.loginUser("testuser", rawPassword);
+        // Act
+        Optional<UserDTO> result = oracleUserService.loginUser("testuser", rawPassword);
 
 		// Assert
 		assertTrue(result.isPresent());
@@ -131,8 +134,8 @@ public class OracleUserServiceTest {
 
 		when(oracleUserRepository.findByName("testuser")).thenReturn(Optional.of(user));
 
-		// Act
-		Optional<OracleUser> result = oracleUserService.loginUser("testuser", "wrong");
+        // Act
+        Optional<UserDTO> result = oracleUserService.loginUser("testuser", "wrong");
 
 		// Assert
 		assertFalse(result.isPresent());
@@ -151,39 +154,47 @@ public class OracleUserServiceTest {
 		existingUser.setTelegramId(123L);
 		existingUser.setPhoneNumber("555-1234");
 
-		OracleUser updates = new OracleUser();
-		updates.setName("newName");
-		updates.setEmail("new@example.com");
-		updates.setStatus("inactive");
-		updates.setTelegramId(456L);
-		updates.setPhoneNumber("555-5678");
-		updates.setPassword("newPassword");
+        // Create UserDTO with updates instead of OracleUser
+        UserDTO updates = new UserDTO();
+        updates.setName("newName");
+        updates.setEmail("new@example.com");
+        updates.setStatus("inactive");
+        updates.setTelegramId(456L);
+        updates.setPhoneNumber("555-5678");
+        updates.setPassword("newPassword"); // This will be hashed
 
 		when(oracleUserRepository.findById(1)).thenReturn(Optional.of(existingUser));
 		when(oracleUserRepository.save(any(OracleUser.class))).thenAnswer(inv -> inv.getArgument(0));
 
-		// Act
-		Optional<OracleUser> result = oracleUserService.updateUser(1, updates);
+        // Act
+        Optional<UserDTO> result = oracleUserService.updateUser(1, updates);
 
-		// Assert
-		assertTrue(result.isPresent());
-		OracleUser updatedUser = result.get();
-		assertEquals(updatedUser.getName(), "newName");
-		assertEquals(updatedUser.getEmail(), "new@example.com");
-		assertEquals(updatedUser.getStatus(), "inactive");
-		assertEquals(updatedUser.getTelegramId(), Long.valueOf(456L));
-		assertEquals(updatedUser.getPhoneNumber(), "555-5678");
-		assertTrue(BCrypt.checkpw("newPassword", updatedUser.getPassword()));
-		verify(oracleUserRepository).save(existingUser);
-	}
+        // Assert
+        assertTrue(result.isPresent());
+        UserDTO updatedUserDto = result.get();
+        
+        // Verify DTO fields
+        assertEquals("newName", updatedUserDto.getName());
+        assertEquals("new@example.com", updatedUserDto.getEmail());
+        assertEquals("inactive", updatedUserDto.getStatus());
+        assertEquals(Long.valueOf(456L), updatedUserDto.getTelegramId());
+        assertEquals("555-5678", updatedUserDto.getPhoneNumber());
+        
+        // Verify password was hashed by checking the saved entity
+        verify(oracleUserRepository).save(argThat(savedUser -> 
+            BCrypt.checkpw("newPassword", savedUser.getPassword()) &&
+            savedUser.getName().equals("newName") &&
+            savedUser.getEmail().equals("new@example.com")
+        ));
+    }
 
 	@Test
 	public void testUpdateUserNotFound() {
 		// Arrange
 		when(oracleUserRepository.findById(999)).thenReturn(Optional.empty());
 
-		// Act
-		Optional<OracleUser> result = oracleUserService.updateUser(999, new OracleUser());
+        // Act
+        Optional<UserDTO> result = oracleUserService.updateUser(999, new UserDTO());
 
 		// Assert
 		assertFalse(result.isPresent());
