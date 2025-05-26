@@ -2,9 +2,7 @@ version: 0.1          # debe ser exactamente 0.1
 component: build      # indica que esto es un build spec
 
 timeoutInSeconds: 3600  # opcional, tiempo máximo de ejecución (1 h)
-environment:
-  variables:
-    IMAGE_TAG: ${image_tag}  # la variable que definiste en “Parameters” del pipeline
+
 
 steps:
   - type: Command
