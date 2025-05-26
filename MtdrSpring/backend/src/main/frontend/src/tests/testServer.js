@@ -8,6 +8,7 @@ import {
   mockTasks,
   mockUnassignedTasks,
 } from "./mocks";
+import config from "../config";
 // Define all default handlers here
 const handlers = [
   rest.get(

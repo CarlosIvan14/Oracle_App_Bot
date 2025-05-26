@@ -117,7 +117,7 @@ public class TaskAssigneesController {
 	@GetMapping("/user/{projectUserId}/sprint/{sprintId}/real-hours")
 	public ResponseEntity<Double> getCompletedTasksStaticRealHoursByUserAndSprint(@PathVariable int projectUserId,
 			@PathVariable int sprintId) {
-		Double realHours = taskAssigneesService.getStaticRealHoursByUserAndSprint(projectUserId,sprintId);
+		Double realHours = taskAssigneesService.getStaticRealHoursByUserAndSprint(projectUserId, sprintId);
 		return new ResponseEntity<>(realHours, HttpStatus.OK);
 	}
 

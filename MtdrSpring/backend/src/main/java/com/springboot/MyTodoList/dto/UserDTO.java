@@ -1,5 +1,6 @@
 package com.springboot.MyTodoList.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.springboot.MyTodoList.model.OracleUser;
 
 public class UserDTO {
@@ -16,6 +17,9 @@ public class UserDTO {
 
 	private String phoneNumber;
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private String password;
+
 	public UserDTO(OracleUser user) {
 		this.idUser = user.getIdUser();
 		this.name = user.getName();
@@ -23,6 +27,15 @@ public class UserDTO {
 		this.status = user.getStatus();
 		this.telegramId = user.getTelegramId();
 		this.phoneNumber = user.getPhoneNumber();
+	}
+
+	public UserDTO(int idUser, String name, String email, String status, Long telegramId, String phoneNumber) {
+		this.idUser = idUser;
+		this.name = name;
+		this.email = email;
+		this.status = status;
+		this.telegramId = telegramId;
+		this.phoneNumber = phoneNumber;
 	}
 
 	public UserDTO() {
@@ -76,5 +89,13 @@ public class UserDTO {
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
+
+	public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
 }
