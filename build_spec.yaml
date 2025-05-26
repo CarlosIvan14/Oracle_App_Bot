@@ -1,18 +1,34 @@
-version: 0.1
+version: 0.1          # debe ser exactamente 0.1
+component: build      # indica que esto es un build spec
 
-phases:
-  pre_build:
-    commands:
-      - echo "Logging into OCIR (gestiona OCI DevOps)"
-  build:
-    commands:
-      - cd MtdrSpring/backend
-      - docker build -t iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${image_tag} -f Dockerfile .
-      - docker push iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${image_tag}
-  post_build:
-      commands:
-        - echo "✅ Imagen construida y subida: todolistapp-springboot:${image_tag}"
+timeoutInSeconds: 3600  # opcional, tiempo máximo de ejecución (1 h)
+environment:
+  variables:
+    IMAGE_TAG: ${image_tag}  # la variable que definiste en “Parameters” del pipeline
 
-artifacts:
-  files:
-    - '**/*'
+steps:
+  - type: Command
+    name: Entrar al código
+    command: |
+      echo "🛠️ Entrando al directorio MtdrSpring/backend..."
+      cd MtdrSpring/backend
+
+  - type: Command
+    name: Construir imagen
+    command: |
+      echo "🔨 Construyendo imagen Docker..."
+      docker build \
+        -t iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${IMAGE_TAG} \
+        -f Dockerfile \
+        .
+
+  - type: Command
+    name: Subir imagen
+    command: |
+      echo "Pushing imagen a OCIR..."
+      docker push iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${IMAGE_TAG}
+
+outputArtifacts:
+  - name: todolist-image
+    type: DOCKER_IMAGE
+    location: iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${IMAGE_TAG}
