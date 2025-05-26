@@ -12,7 +12,11 @@ public class UserRoleServiceBot {
 
 	private final RestTemplate rest;
 
+<<<<<<< HEAD
 	private final String apiBase = "http://localhost:8081/api";
+=======
+	private final String apiBase = "http://140.84.179.223/api";
+>>>>>>> springboot-bot
 
 	@Autowired
 	public UserRoleServiceBot(RestTemplateBuilder builder) {

@@ -88,7 +88,7 @@ export default function AllTasksCalendar() {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-4 text-white">
-        Todas las tareas del Sprint {sprintId}
+        Todas las tareas del Sprint
       </h1>
 
       {/* ==== CONTENEDOR ÚNICO ==== */}
@@ -132,7 +132,7 @@ export default function AllTasksCalendar() {
           onClick={() => setSelectedTask(null)}
         >
           <div
-            className="max-w-md w-full p-6 bg-[#212233] dark:text-white rounded-2xl"
+            className="max-w-md w-full p-6 bg-[#212233] text-white rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-2xl font-bold mb-4">{selectedTask.name}</h2>
