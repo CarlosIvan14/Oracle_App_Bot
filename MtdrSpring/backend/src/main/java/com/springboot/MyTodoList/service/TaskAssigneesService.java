@@ -139,14 +139,7 @@ public class TaskAssigneesService {
 	}
 
 	private Double getRealHoursFromTaskAssignees(List<TaskAssignees> taskAssignees) {
-<<<<<<< HEAD
 		return taskAssignees.stream().map(TaskAssignees::getTask).mapToDouble(Tasks::getRealHours).sum();
-=======
-		return taskAssignees.stream()
-        .map(TaskAssignees::getTask)
-        .mapToDouble(Tasks::getRealHours)
-        .sum();
->>>>>>> springboot-bot
 	}
 
 	// Nuevos métodos: obtener la cantidad de tareas con status "Done" para un ProjectUser
@@ -164,10 +157,7 @@ public class TaskAssigneesService {
 		List<TaskAssignees> taskAssignees = getCompletedTasksByUserAndSprint(projectUserId, sprintId);
 		return getRealHoursFromTaskAssignees(taskAssignees);
 	}
-<<<<<<< HEAD
-=======
 	
->>>>>>> springboot-bot
 
 	// tasks-user-daterange methods (R02 y R03)
 	public long getCountDoneTasksByUserByDateRange(int projectUserId, LocalDate from, LocalDate to) {

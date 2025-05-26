@@ -1,9 +1,6 @@
 package com.springboot.MyTodoList.dto;
 
-<<<<<<< HEAD
 import com.fasterxml.jackson.annotation.JsonProperty;
-=======
->>>>>>> springboot-bot
 import com.springboot.MyTodoList.model.OracleUser;
 
 public class UserDTO {
@@ -20,12 +17,9 @@ public class UserDTO {
 
 	private String phoneNumber;
 
-<<<<<<< HEAD
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
 
-=======
->>>>>>> springboot-bot
 	public UserDTO(OracleUser user) {
 		this.idUser = user.getIdUser();
 		this.name = user.getName();
@@ -35,7 +29,6 @@ public class UserDTO {
 		this.phoneNumber = user.getPhoneNumber();
 	}
 
-<<<<<<< HEAD
 	public UserDTO(int idUser, String name, String email, String status, Long telegramId, String phoneNumber) {
 		this.idUser = idUser;
 		this.name = name;
@@ -45,8 +38,6 @@ public class UserDTO {
 		this.phoneNumber = phoneNumber;
 	}
 
-=======
->>>>>>> springboot-bot
 	public UserDTO() {
 	}
 
@@ -99,7 +90,6 @@ public class UserDTO {
 		this.phoneNumber = phoneNumber;
 	}
 
-<<<<<<< HEAD
 	public String getPassword() {
         return password;
     }
@@ -108,6 +98,4 @@ public class UserDTO {
         this.password = password;
     }
 
-=======
->>>>>>> springboot-bot
 }
