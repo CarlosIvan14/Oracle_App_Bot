@@ -22,7 +22,7 @@ public class OpenAIService {
 	@Value("${openai.api.key}")
 	private String openaiApiKey;
 
-	@Value("${backend.base-url:http://140.84.179.223}")
+	@Value("${backend.base-url:http://localhost:8081}")
 	private String backendBaseUrl; // <‑‑ configurable
 
 	private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";

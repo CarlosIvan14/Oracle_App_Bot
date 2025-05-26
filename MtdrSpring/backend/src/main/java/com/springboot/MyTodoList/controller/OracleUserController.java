@@ -1,5 +1,6 @@
 package com.springboot.MyTodoList.controller;
 
+import com.springboot.MyTodoList.dto.UserDTO;
 import com.springboot.MyTodoList.model.LoginRequest;
 import com.springboot.MyTodoList.model.OracleUser;
 import com.springboot.MyTodoList.service.OracleUserService;
@@ -33,9 +34,9 @@ public class OracleUserController {
 
 	// Endpoint para obtener todos los usuarios
 	@GetMapping
-	public ResponseEntity<List<OracleUser>> getAllUsers() {
+	public ResponseEntity<List<UserDTO>> getAllUsers() {
 		try {
-			List<OracleUser> users = oracleUserService.getAllUsers();
+			List<UserDTO> users = oracleUserService.getAllUsersAsDTO();
 			return new ResponseEntity<>(users, HttpStatus.OK);
 		}
 		catch (Exception e) {
@@ -60,17 +61,17 @@ public class OracleUserController {
 		}
 	}
 
-	// Endpoint para login de usuario
+		// Endpoint para login de usuario
 	@PostMapping("/login")
-	public ResponseEntity<OracleUser> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+	public ResponseEntity<UserDTO> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
 		try {
-			Optional<OracleUser> user = oracleUserService.loginUser(loginRequest.getName(), loginRequest.getPassword());
-			if (user.isPresent()) {
-				return new ResponseEntity<>(user.get(), HttpStatus.OK);
-			}
-			else {
-				return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-			}
+			Optional<UserDTO> user = oracleUserService.loginUser(
+				loginRequest.getName(), 
+				loginRequest.getPassword()
+			);
+			
+			return user.map(userDTO -> new ResponseEntity<>(userDTO, HttpStatus.OK))
+					.orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
 		}
 		catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -80,19 +81,16 @@ public class OracleUserController {
 	// Endpoint para actualizar un usuario
 	// Se pueden actualizar campos como email, status, telegramId, phoneNumber o password
 	@PatchMapping("/{id}")
-	public ResponseEntity<OracleUser> updateUser(@PathVariable int id, @RequestBody OracleUser userUpdates) {
+	public ResponseEntity<UserDTO> updateUser(
+			@PathVariable int id, 
+			@Valid @RequestBody UserDTO userUpdates) {
 		try {
-			Optional<OracleUser> updatedUser = oracleUserService.updateUser(id, userUpdates);
-			if (updatedUser.isPresent()) {
-				return new ResponseEntity<>(updatedUser.get(), HttpStatus.OK);
-			}
-			else {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}
-		}
-		catch (Exception e) {
+			Optional<UserDTO> updatedUser = oracleUserService.updateUser(id, userUpdates);
+			return updatedUser
+				.map(userDTO -> new ResponseEntity<>(userDTO, HttpStatus.OK))
+				.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
 }

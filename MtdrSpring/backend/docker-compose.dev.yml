@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  oracleapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development 
+    ports:
+      - "8081:8081"
+    environment:
+      - openai.api.key=${OPENAI_API_KEY}
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
+    volumes:
+      - ./src:/app/src                    # For hot code reloading
+      - ./target:/app/target              
+      - ./pom.xml:/app/pom.xml            
+      - ./.env:/app/.env                  
+    entrypoint: ["mvn", "spring-boot:run"]

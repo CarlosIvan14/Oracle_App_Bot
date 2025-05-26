@@ -27,20 +27,20 @@ jobs:
         working-directory: MtdrSpring/backend
         run: mvn spring-javaformat:apply
 
-      # # CheckStyle check
-      # - name: Lint backend with checkstyle
-      #   working-directory: MtdrSpring/backend
-      #   run: mvn checkstyle:check
+      # CheckStyle check
+      - name: Lint backend with checkstyle
+        working-directory: MtdrSpring/backend
+        run: mvn checkstyle:check
 
-      # # Dependency Installation
-      # - name: Install backend dependencies
-      #   working-directory: MtdrSpring/backend
-      #   run: mvn clean install
+      # Dependency Installation
+      - name: Install backend dependencies
+        working-directory: MtdrSpring/backend
+        run: mvn clean install
       
-      # # Run backend tests
-      # - name: Run backend tests
-      #   working-directory: MtdrSpring/backend
-      #   run: mvn clean test
+      # Run backend tests
+      - name: Run backend tests
+        working-directory: MtdrSpring/backend
+        run: mvn clean test
       
       # FRONTEND
 
@@ -60,7 +60,7 @@ jobs:
       # Prettier check
       - name: Check frontend formatting with Prettier
         working-directory: MtdrSpring/backend/src/main/frontend  
-        run: npm run format-check
+        run: npm run format && npm run format-check
 
       # Eslint check
       - name: Lint frontend with eslint

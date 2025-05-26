@@ -139,10 +139,7 @@ public class TaskAssigneesService {
 	}
 
 	private Double getRealHoursFromTaskAssignees(List<TaskAssignees> taskAssignees) {
-		return taskAssignees.stream()
-        .map(TaskAssignees::getTask)
-        .mapToDouble(Tasks::getRealHours)
-        .sum();
+		return taskAssignees.stream().map(TaskAssignees::getTask).mapToDouble(Tasks::getRealHours).sum();
 	}
 
 	// Nuevos métodos: obtener la cantidad de tareas con status "Done" para un ProjectUser

@@ -1,0 +1,10 @@
+services:
+  oracleapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production  
+    ports:
+      - "8081:8081"
+    environment:
+      - openai.api.key=${OPENAI_API_KEY}

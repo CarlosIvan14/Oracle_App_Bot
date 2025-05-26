@@ -8,6 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
@@ -36,8 +37,6 @@ public class MyTodoListApplication implements CommandLineRunner {
 
 	/* -> NUEVO: URL del backend que usará el bot */
 	/* (se lee de application.properties o variable de entorno) */
-	@Value("${backend.base-url:http://140.84.179.223}")
-	private String backendBaseUrl;
 
 	private TaskServiceBot taskServiceBot;
 
@@ -54,6 +53,11 @@ public class MyTodoListApplication implements CommandLineRunner {
 
 	@Value("${telegram.bot.name}")
 	private String botName;
+
+	/* -> NUEVO: URL del backend que usará el bot */
+	/* (se lee de application.properties o variable de entorno) */
+	@Value("${backend.base-url:http://localhost:8081}")
+	private String backendBaseUrl;
 
 	public static void main(String[] args) {
 
@@ -89,7 +93,7 @@ public class MyTodoListApplication implements CommandLineRunner {
 
 		}
 		catch (TelegramApiException e) {
-			logger.error("Error registrando el bot:", e);
+			logger.error("Error registrando el botdfsdf:", e);
 		}
 	}
 
