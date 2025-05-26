@@ -338,7 +338,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                   <option value="">— Selecciona usuario —</option>
                   {allUsers.map((u) => (
                     <option key={u.idUser} value={u.idUser}>
-                      {u.name} ({u.roleUser})
+                      {u.name}
                     </option>
                   ))}
                 </select>
@@ -373,7 +373,7 @@ export default function NewTaskModal({ projectId, sprintId, onCreated }) {
                       </option>
                       {aiUsers.map((u) => (
                         <option key={u.idUser} value={u.idUser}>
-                          {u.name} ({u.roleUser})
+                          {u.name}
                         </option>
                       ))}
                     </select>
