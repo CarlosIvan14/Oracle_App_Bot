@@ -3,7 +3,6 @@ component: build      # indica que esto es un build spec
 
 timeoutInSeconds: 3600  # opcional, tiempo máximo de ejecución (1 h)
 
-
 steps:
   - type: Command
     name: Entrar al código
@@ -16,7 +15,7 @@ steps:
     command: |
       echo "🔨 Construyendo imagen Docker..."
       docker build \
-        -t iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${IMAGE_TAG} \
+        -t iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${image_tag} \
         -f Dockerfile \
         .
 
@@ -24,9 +23,9 @@ steps:
     name: Subir imagen
     command: |
       echo "Pushing imagen a OCIR..."
-      docker push iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${IMAGE_TAG}
+      docker push iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${image_tag}
 
 outputArtifacts:
   - name: todolist-image
     type: DOCKER_IMAGE
-    location: iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${IMAGE_TAG}
+    location: iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${image_tag}
