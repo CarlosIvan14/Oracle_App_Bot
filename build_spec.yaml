@@ -9,4 +9,10 @@ phases:
       - cd MtdrSpring/backend
       - docker build -t iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${image_tag} -f Dockerfile .
       - docker push iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${image_tag}
+  post_build:
+      commands:
+        - echo "✅ Imagen construida y subida: todolistapp-springboot:${image_tag}"
 
+artifacts:
+  files:
+    - '**/*'
