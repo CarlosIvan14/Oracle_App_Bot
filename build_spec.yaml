@@ -9,7 +9,3 @@ phases:
       - cd MtdrSpring/backend
       - docker build -t iad.ocir.io/axm8kysebnqa/todolistapp-springboot:${image_tag} -f Dockerfile .
       - docker push iad.ocir.io/axm8kysebnqa/todolistapp-springboot:${image_tag}
-
-artifacts:
-  files:
-    - '**/*'
