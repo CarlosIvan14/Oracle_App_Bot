@@ -3,22 +3,13 @@ version: 0.1
 phases:
   pre_build:
     commands:
-      - echo "Logging in to Oracle Cloud Infrastructure Container Registry..."
-      # OCI DevOps Managed Build ya maneja la autenticación automática 
-
+      - echo "Logging into OCIR (gestiona OCI DevOps)"
   build:
     commands:
-      - echo " Entrando al directorio MtdrSpring/backend..."
       - cd MtdrSpring/backend
-      - echo "Building Docker image..."
-      - docker build \
-          -t iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${IMAGE_TAG} \
-          -f Dockerfile \
-          .
-      - echo "Pushing Docker image..."
-      - docker push iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${IMAGE_TAG}
+      - docker build -t iad.ocir.io/axm8kysebnqa/todolistapp-springboot:${image_tag} -f Dockerfile .
+      - docker push iad.ocir.io/axm8kysebnqa/todolistapp-springboot:${image_tag}
 
-# (Opcional) puedes indicar artefactos si los necesitas más adelante
 artifacts:
   files:
     - '**/*'
