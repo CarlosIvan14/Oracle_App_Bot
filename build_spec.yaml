@@ -5,31 +5,15 @@ timeoutInSeconds: 3600  # opcional, tiempo máximo de ejecución (1 h)
 
 steps:
   - type: Command
-    name: Build Java artifact
+    name: Build & Push Docker image
     command: |
-      echo "🔧 Instalando Maven..."
-      yum install -y maven
-
-      echo "📦 Compilando el proyecto con Maven..."
+      echo "🔨 Construyendo y subiendo imagen Docker..."
       cd MtdrSpring/backend
-      mvn -B \
-        -Dmaven.multiModuleProjectDirectory="$(pwd)" \
-        clean package spring-boot:repackage
-        
-  - type: Command
-    name: Construir imagen
-    command: |
-      echo "🔨 Construyendo imagen Docker..."
-      cd MtdrSpring/backend
+      # Usa la variable image_tag para versionar la imagen
       docker build \
         -t iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${image_tag} \
         -f Dockerfile \
         .
-
-  - type: Command
-    name: Subir imagen
-    command: |
-      echo "Pushing imagen a OCIR..."
       docker push iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${image_tag}
 
 outputArtifacts:
