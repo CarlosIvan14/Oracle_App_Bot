@@ -5,10 +5,11 @@ timeoutInSeconds: 3600  # opcional, tiempo máximo de ejecución (1 h)
 
 steps:
   - type: Command
-    name: Entrar al código
+    name: Build Java artifact
     command: |
-      echo "🛠️ Entrando al directorio MtdrSpring/backend..."
+      echo "🔧 Compilando el proyecto con Maven..."
       cd MtdrSpring/backend
+      mvn clean package -DskipTests
 
   - type: Command
     name: Construir imagen
