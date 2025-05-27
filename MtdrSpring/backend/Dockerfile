@@ -1,14 +1,14 @@
-# 1) Stage: Compilación con Maven
-FROM maven:3.9-jdk-22 AS builder
+# 1) Stage: Compilación con Maven (JDK 22 sobre Alpine)
+FROM maven:3.9-eclipse-temurin-22-alpine AS builder
 WORKDIR /app
 COPY . .
 RUN mvn -B clean package spring-boot:repackage
 
-# 2) Stage: Runtime con OpenJDK
+# 2) Stage: Runtime con OpenJDK 22
 FROM openjdk:22
 WORKDIR /tmp/
 
-# Si necesitas cargar variables de entorno desde .env dentro del contenedor
+# Copia variables de entorno, si las usas dentro del contenedor
 COPY .env ./
 
 # Copia el JAR generado en el builder
