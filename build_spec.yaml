@@ -9,11 +9,13 @@ steps:
     command: |
       echo "🔧 Instalando Maven..."
       yum install -y maven
-      
+
       echo "📦 Compilando el proyecto con Maven..."
       cd MtdrSpring/backend
-      mvn clean package spring-boot:repackage
-
+      mvn -B \
+        -Dmaven.multiModuleProjectDirectory="$(pwd)" \
+        clean package spring-boot:repackage
+        
   - type: Command
     name: Construir imagen
     command: |
