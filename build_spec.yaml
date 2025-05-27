@@ -1,9 +1,20 @@
 version: 0.1          # debe ser exactamente 0.1
 component: build      # indica que esto es un build spec
 
-timeoutInSeconds: 3600  # opcional, tiempo máximo de ejecución (1 h)
+timeoutInSeconds: 3600  # 1 h
 
 steps:
+  - type: Command
+    name: Login to OCIR
+    command: |
+      echo "🔑 Autenticando en OCIR..."
+      # Ajusta la región si no es mx-queretaro-1
+      REGISTRY=mx-queretaro-1.ocir.io
+      echo "${auth_token_ocir}" \
+        | docker login $REGISTRY \
+            -u "${user_ocir}" \
+            --password-stdin
+
   - type: Command
     name: Build & Push Docker image
     command: |
@@ -12,15 +23,20 @@ steps:
 
       # Usa 'latest' si image_tag no está definido
       TAG=${image_tag:-latest}
+      REGISTRY=mx-queretaro-1.ocir.io
+      NAMESPACE=axm8kysebnqa
+      REPO=reacttodo/s78fu/todolistapp-springboot
 
+      # Build
       docker build \
-        -t iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:$TAG \
+        -t $REGISTRY/$NAMESPACE/$REPO:$TAG \
         -f Dockerfile \
         .
 
-      docker push iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:$TAG
+      # Push
+      docker push $REGISTRY/$NAMESPACE/$REPO:$TAG
 
 outputArtifacts:
   - name: todolist-image
     type: DOCKER_IMAGE
-    location: iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${TAG}
+    location: mx-queretaro-1.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${TAG}
