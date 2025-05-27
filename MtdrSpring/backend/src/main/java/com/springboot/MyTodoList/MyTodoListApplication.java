@@ -56,7 +56,7 @@ public class MyTodoListApplication implements CommandLineRunner {
 
 	/* -> NUEVO: URL del backend que usará el bot */
 	/* (se lee de application.properties o variable de entorno) */
-	@Value("${backend.base-url:http://localhost:8081}")
+	@Value("${backend.base-url:http://140.84.179.223}")
 	private String backendBaseUrl;
 
 	public static void main(String[] args) {

@@ -55,7 +55,7 @@ public class Sprint03Test {
 		Tasks task = new Tasks();
 		task.setName("Test Task");
 
-		String url = "http://localhost:8081/api/tasks";
+		String url = "http://140.84.179.223/api/tasks";
 		ResponseEntity<Tasks> response = new ResponseEntity<>(task, HttpStatus.OK);
 
 		when(restTemplate.postForEntity(eq(url), any(HttpEntity.class), eq(Tasks.class))).thenReturn(response);
@@ -82,7 +82,7 @@ public class Sprint03Test {
 		}
 
 		int projectId = 42;
-		String expectedUrl = "http://localhost:8081/api/sprints/project/" + projectId;
+		String expectedUrl = "http://140.84.179.223/api/sprints/project/" + projectId;
 
 		List<Sprint> mockSprints = Arrays.asList(new Sprint(), new Sprint());
 		ResponseEntity<List<Sprint>> responseEntity = new ResponseEntity<>(mockSprints, HttpStatus.OK);
@@ -116,7 +116,7 @@ public class Sprint03Test {
 
 		int sprintId = 1;
 		int projectUserId = 2;
-		String expectedUrl = "http://localhost:8081/api/task-assignees/user/2/sprint/1";
+		String expectedUrl = "http://140.84.179.223/api/task-assignees/user/2/sprint/1";
 
 		TaskAssignees[] mockResponse = { new TaskAssignees(), new TaskAssignees() };
 		when(restTemplate.getForEntity(eq(expectedUrl), eq(TaskAssignees[].class)))
