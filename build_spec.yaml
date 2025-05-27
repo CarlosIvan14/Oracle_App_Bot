@@ -37,6 +37,6 @@ steps:
       docker push $REGISTRY/$NAMESPACE/$REPO:$TAG
 
 outputArtifacts:
-  - name: todolist-image
-    type: DOCKER_IMAGE
-    location: mx-queretaro-1.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${TAG}
+  - name: todolist-image          # ① Identificador interno del artefacto
+    type: DOCKER_IMAGE            # ② Le indica a DevOps que es una imagen Docker
+    location: mx-queretaro-1.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${image_tag}
