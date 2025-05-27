@@ -1,18 +1,30 @@
-# 1) Stage: Compilación con Maven (JDK 22 sobre Alpine)
+# 1) Stage: Compilación con Maven (Eclipse Temurin JDK22 sobre Alpine) e instalación de Node
 FROM maven:3.9-eclipse-temurin-22-alpine AS builder
 WORKDIR /app
-COPY . .
-RUN mvn -B clean package spring-boot:repackage
 
-# 2) Stage: Runtime con OpenJDK 22
-FROM openjdk:22
-WORKDIR /tmp/
+# Copia sólo pom.xml para cachear dependencias
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
 
-# Copia variables de entorno, si las usas dentro del contenedor
+# Copia el resto del código
+COPY src ./src
 COPY .env ./
 
+# Instala Node.js y npm para el frontend-maven-plugin
+RUN apk add --no-cache nodejs npm
+
+# Compila el paquete completo (incluye frontend si aplica)
+RUN mvn -B clean package spring-boot:repackage
+
+# 2) Stage: Runtime con OpenJDK 22 (slim)
+FROM openjdk:22-jdk-slim
+WORKDIR /tmp/
+
+# Copia variables de entorno (sólo si es necesario dentro del contenedor)
+COPY --from=builder /app/.env ./
+
 # Copia el JAR generado en el builder
-COPY --from=builder /app/target/MyTodoList-0.0.1-SNAPSHOT.jar MyTodoList.jar
+COPY --from=builder /app/target/*SNAPSHOT.jar MyTodoList.jar
 
 # Puerto expuesto
 EXPOSE 8080
