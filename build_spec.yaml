@@ -25,7 +25,7 @@ steps:
       TAG=${image_tag:-latest}
       REGISTRY=mx-queretaro-1.ocir.io
       NAMESPACE=axm8kysebnqa
-      REPO=reacttodo/s78fu/todolistapp-springboot
+      REPO=reacttodo/xkmym/todolistapp-springboot
 
       # Build
       docker build \
@@ -39,4 +39,4 @@ steps:
 outputArtifacts:
   - name: todolist-image          # ① Identificador interno del artefacto
     type: DOCKER_IMAGE            # ② Le indica a DevOps que es una imagen Docker
-    location: mx-queretaro-1.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${image_tag}
+    location: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:${image_tag}
