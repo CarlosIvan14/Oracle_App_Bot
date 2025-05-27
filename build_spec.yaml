@@ -5,16 +5,6 @@ timeoutInSeconds: 3600  # opcional, tiempo máximo de ejecución (1 h)
 
 steps:
   - type: Command
-    name: Build Java artifact
-    command: |
-      echo "🔧 Instalando Maven..."
-      yum install -y maven
-      
-      echo "📦 Compilando el proyecto con Maven..."
-      cd MtdrSpring/backend
-      mvn clean package -DskipTests
-
-  - type: Command
     name: Construir imagen
     command: |
       echo "🔨 Construyendo imagen Docker..."
