@@ -29,5 +29,5 @@ COPY --from=builder /app/target/*SNAPSHOT.jar MyTodoList.jar
 # Puerto expuesto
 EXPOSE 8080
 
-COPY target/MyTodoList-0.0.1-SNAPSHOT.jar MyTodoList.jar
+# Entrada de la aplicación
 ENTRYPOINT ["java","-jar","MyTodoList.jar"]
