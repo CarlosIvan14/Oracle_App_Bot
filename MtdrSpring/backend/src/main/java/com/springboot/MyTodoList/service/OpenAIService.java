@@ -22,7 +22,7 @@ public class OpenAIService {
 	@Value("${openai.api.key}")
 	private String openaiApiKey;
 
-	@Value("${backend.base-url:http://140.84.179.223}")
+	@Value("${backend.base-url:http://140.84.174.78}")
 	
 	private String backendBaseUrl; // <‑‑ configurable
 

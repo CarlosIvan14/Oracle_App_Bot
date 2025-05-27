@@ -30,7 +30,7 @@ public class TaskServiceBot {
 
 	private final RestTemplate restTemplate;
 
-	private final String apiBaseUrl = "http://140.84.179.223/api";
+	private final String apiBaseUrl = "http://140.84.174.78/api";
 
 	@Autowired
 	public TaskServiceBot(RestTemplateBuilder restTemplateBuilder) {
