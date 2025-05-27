@@ -1,33 +1,33 @@
-# 1) Stage: Compilación con Maven (Eclipse Temurin JDK22 sobre Alpine) e instalación de Node
+# ---------- Etapa 1: build con Maven ----------
 FROM maven:3.9-eclipse-temurin-22-alpine AS builder
 WORKDIR /app
 
-# Copia sólo pom.xml para cachear dependencias
+# 1) Cacha dependencias de Maven
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copia el resto del código
-COPY src ./src
+# 2) Copia el código fuente y el .env
+COPY . .
 COPY .env ./
 
-# Instala Node.js y npm para el frontend-maven-plugin
-RUN apk add --no-cache nodejs npm
+# 3) Compila, saltando la descarga de Node/NPM
+#    -Dskip.installnodenpm evita install-node-and-npm :contentReference[oaicite:0]{index=0}
+#    -Dskip.npm evita ejecuciones de npm :contentReference[oaicite:1]{index=1}
+RUN mvn -B \
+    -Dmaven.multiModuleProjectDirectory=/app \
+    -Dskip.installnodenpm=true \
+    -Dskip.npm=true \
+    clean package spring-boot:repackage
 
-# Compila el paquete completo (incluye frontend si aplica)
-RUN mvn -B clean package spring-boot:repackage
-
-# 2) Stage: Runtime con OpenJDK 22 (slim)
+# ---------- Etapa 2: runtime ligero ----------
 FROM openjdk:22-jdk-slim
 WORKDIR /tmp/
 
-# Copia variables de entorno (sólo si es necesario dentro del contenedor)
-COPY --from=builder /app/.env ./
+# Copia .env si tu app la necesita en runtime
+COPY .env ./
 
-# Copia el JAR generado en el builder
-COPY --from=builder /app/target/*SNAPSHOT.jar MyTodoList.jar
+# Copia el JAR generado (cualquier SNAPSHOT.jar)
+COPY --from=builder /app/target/*.jar MyTodoList.jar
 
-# Puerto expuesto
 EXPOSE 8080
-
-# Entrada de la aplicación
 ENTRYPOINT ["java","-jar","MyTodoList.jar"]

@@ -9,15 +9,18 @@ steps:
     command: |
       echo "🔨 Construyendo y subiendo imagen Docker..."
       cd MtdrSpring/backend
-      # Usa la variable image_tag para versionar la imagen
+
+      # Usa 'latest' si image_tag no está definido
       TAG=${image_tag:-latest}
+
       docker build \
         -t iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:$TAG \
         -f Dockerfile \
         .
+
       docker push iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:$TAG
 
 outputArtifacts:
   - name: todolist-image
     type: DOCKER_IMAGE
-    location: iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${image_tag}
+    location: iad.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${TAG}
