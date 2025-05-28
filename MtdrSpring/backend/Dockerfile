@@ -1,10 +1,13 @@
 FROM openjdk:11-jre-slim
 
-WORKDIR /tmp/
+WORKDIR /app
 
-COPY .env ./
+# Copy the JAR file first (better layer caching)
+COPY target/MyTodoList-*.jar app.jar
+
+# Copy configuration files
+COPY .env .
 
 EXPOSE 8080
 
-COPY target/MyTodoList-0.0.1-SNAPSHOT.jar MyTodoList.jar
-ENTRYPOINT ["java","-jar","MyTodoList.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

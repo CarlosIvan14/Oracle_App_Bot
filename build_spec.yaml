@@ -5,23 +5,27 @@ timeoutInSeconds: 3600  # 1 h
 
 steps:
   - type: Command
+    name: Install Java 11
+    command: |
+      echo "📦 Installing Java 11..."
+      apt-get update
+      apt-get install -y openjdk-11-jdk
+      java -version
+
+  - type: Command
     name: Build Maven Project
     command: |
       echo "🔨 Compilando proyecto Maven..."
       cd MtdrSpring/backend
       
-      # Check Java version
-      echo "Java version in build environment:"
+      # Verify Java version
+      echo "Java version:"
       java -version
       
-      # Set JAVA_HOME to ensure consistency
-      export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
-      echo "JAVA_HOME set to: $JAVA_HOME"
-      
-      # Compile the project with explicit Java version
+      # Compile with explicit Java version
       mvn clean package spring-boot:repackage -Dmaven.compiler.source=11 -Dmaven.compiler.target=11
       
-      # Verify the JAR was created
+      # Verify the JAR
       ls -la target/*.jar
 
   - type: Command
