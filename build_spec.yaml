@@ -5,21 +5,22 @@ timeoutInSeconds: 3600  # 1 h
 
 steps:
   - type: Command
-    name: Test Maven Installation
+    name: Build Application
     command: |
-      echo "🧪 Testing Maven environment..."
-      mvn -version
-      echo "Creating test project..."
-      mvn archetype:generate -B \
-        -DarchetypeGroupId=org.apache.maven.archetypes \
-        -DarchetypeArtifactId=maven-archetype-quickstart \
-        -DgroupId=com.example \
-        -DartifactId=test-project \
-        -Dversion=1.0-SNAPSHOT
-      cd test-project
-      echo "Running simple build..."
-      mvn clean package
+      echo "🔨 Building your Spring Boot application..."
+      ls
+      cd MtdrSpring/backend  # Adjust path if needed
+      
+      # Clean build with Java 11 compatibility
+      mvn clean package spring-boot:repackage \
+        -Dmaven.compiler.source=11 \
+        -Dmaven.compiler.target=11
+      
+      # Verify the output
+      echo "Build artifacts:"
       ls -la target/
+      echo "JAR size:"
+      du -h target/*.jar
     image: maven:3.8.6-openjdk-11-slim
 
   - type: Command
