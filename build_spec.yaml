@@ -8,6 +8,7 @@ env:
     REGISTRY: mx-queretaro-1.ocir.io
     NAMESPACE: axm8kysebnqa
     REPO: reacttodo/s78fu/todolistapp-springboot
+    TAG: ${image_tag}     # se inyecta el parámetro image_tag
 
 steps:
   - type: Command
@@ -25,7 +26,9 @@ steps:
       echo "🔨 Construyendo y subiendo imagen multi-stage..."
       cd MtdrSpring/backend
 
-      TAG=${image_tag:-latest}
+      # Si no pasaron image_tag, caemos en 'latest'
+      TAG=${TAG:-latest}
+      echo "Usando TAG = $TAG"
 
       docker build \
         -f Dockerfile \
@@ -37,4 +40,5 @@ steps:
 outputArtifacts:
   - name: todolist-image
     type: DOCKER_IMAGE
-    location: ${REGISTRY}/${NAMESPACE}/${REPO}:${image_tag:-latest}
+    # Aquí sí usamos la variable de entorno $TAG que ya existe
+    location: $REGISTRY/$NAMESPACE/$REPO:$TAG
