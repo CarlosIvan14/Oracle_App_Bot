@@ -1,15 +1,14 @@
-version: 0.1          # no lo cambies
+version: 0.1
 component: build
 
-timeoutInSeconds: 3600  # 1 hora
+timeoutInSeconds: 3600
 
-# si quieres inyectar el tag dinámico desde la variable `image_tag`, 
-# puedes usarlo para sobreescribir IMAGE_VERSION
 env:
   variables:
-    DOCKER_REGISTRY: mx-queretaro-1.ocir.io/axm8kysebnqa/reacttodo/s78fu
-    # si no pasas image_tag, por defecto 0.1 (igual que en tu script)
-    IMAGE_VERSION: ${image_tag:-0.1}
+    # Ajusta según tu namespace y repo
+    REGISTRY: mx-queretaro-1.ocir.io
+    NAMESPACE: axm8kysebnqa
+    REPO: reacttodo/s78fu/todolistapp-springboot
 
 steps:
   - type: Command
@@ -17,33 +16,28 @@ steps:
     command: |
       echo "🔑 Autenticando en OCIR..."
       echo "${auth_token_ocir}" \
-        | docker login mx-queretaro-1.ocir.io \
+        | docker login $REGISTRY \
             -u "${user_ocir}" \
             --password-stdin
-  - type: Command
-    name: Instalar Java 11
-    command: |
-      echo "📦 Instalando OpenJDK 11..."
-      sudo yum install -y java-11-openjdk-devel
-      export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
-      export PATH=$JAVA_HOME/bin:$PATH
 
   - type: Command
-    name: Ejecutar build.sh
+    name: Build & Push Docker image
     command: |
-      echo "🔨 Ejecutando build.sh"
+      echo "🔨 Construyendo y subiendo imagen multi-stage..."
+      # nos movemos al contexto donde está Dockerfile
       cd MtdrSpring/backend
-      chmod +x build.sh
 
-      # exportar las vars que tu script espera
-      export DOCKER_REGISTRY=${DOCKER_REGISTRY}
-      export IMAGE_VERSION=${IMAGE_VERSION}
+      # tag dinámico: usa image_tag si viene definido, si no "latest"
+      TAG=${image_tag:-latest}
 
-      ./build.sh
+      docker build \
+        -f Dockerfile \
+        -t $REGISTRY/$NAMESPACE/$REPO:$TAG \
+        .
+
+      docker push $REGISTRY/$NAMESPACE/$REPO:$TAG
 
 outputArtifacts:
   - name: todolist-image
     type: DOCKER_IMAGE
-    # Aquí definimos dónde está la imagen final, usando el mismo tag
-    location: mx-queretaro-1.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${IMAGE_VERSION}
-
+    location: ${REGISTRY}/${NAMESPACE}/${REPO}:${image_tag:-latest}
