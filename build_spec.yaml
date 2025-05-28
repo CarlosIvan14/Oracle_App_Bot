@@ -47,4 +47,4 @@ steps:
 outputArtifacts:
   - name: todolist-image
     type: DOCKER_IMAGE
-    location: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:${image_tag}
+    location: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:latest
