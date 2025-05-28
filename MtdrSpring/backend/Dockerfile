@@ -1,33 +1,42 @@
-# ---------- Etapa 1: build con Maven ----------
-FROM maven:3.9-eclipse-temurin-22-alpine AS builder
+# ---------- Etapa 1: build del frontend React ----------
+FROM node:18-alpine AS frontend-build
+WORKDIR /app/frontend
+
+# Copia sólo package.json para cachear npm install
+COPY frontend/package*.json ./
+RUN npm ci
+
+# Copia el resto del código y genera los archivos estáticos
+COPY frontend ./
+RUN npm run build
+
+# ---------- Etapa 2: build de la aplicación Spring Boot ----------
+FROM maven:3.9-eclipse-temurin-22-alpine AS backend-build
 WORKDIR /app
 
-# 1) Cacha dependencias de Maven
-COPY pom.xml .
+# Cachear dependencias de Maven
+COPY pom.xml ./
 RUN mvn dependency:go-offline -B
 
-# 2) Copia el código fuente y el .env
+# Copia todo el código del backend
 COPY . .
-COPY .env ./
 
-# 3) Compila, saltando la descarga de Node/NPM
-#    -Dskip.installnodenpm evita install-node-and-npm :contentReference[oaicite:0]{index=0}
-#    -Dskip.npm evita ejecuciones de npm :contentReference[oaicite:1]{index=1}
-RUN mvn -B \
-    -Dmaven.multiModuleProjectDirectory=/app \
-    -Dskip.installnodenpm=true \
-    -Dskip.npm=true \
-    clean package spring-boot:repackage
+# Inyecta los archivos estáticos de React dentro de src/main/resources/static
+# (Spring Boot los servirá automáticamente)
+COPY --from=frontend-build /app/frontend/build ./src/main/resources/static
 
-# ---------- Etapa 2: runtime ligero ----------
+# Construye el JAR final
+RUN mvn -B clean package spring-boot:repackage
+
+# ---------- Etapa 3: runtime ligero ----------
 FROM openjdk:22-jdk-slim
-WORKDIR /tmp/
+WORKDIR /app
 
-# Copia .env si tu app la necesita en runtime
+# Copia el JAR generado
+COPY --from=backend-build /app/target/*.jar app.jar
+
+# Si tu aplicación necesita .env en runtime:
 COPY .env ./
-
-# Copia el JAR generado (cualquier SNAPSHOT.jar)
-COPY --from=builder /app/target/*.jar MyTodoList.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","MyTodoList.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
