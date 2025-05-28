@@ -10,8 +10,16 @@ steps:
       echo "🔨 Compilando proyecto Maven..."
       cd MtdrSpring/backend
       
-      # Compile the project (similar to your build.sh)
-      mvn clean package spring-boot:repackage
+      # Check Java version
+      echo "Java version in build environment:"
+      java -version
+      
+      # Set JAVA_HOME to ensure consistency
+      export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+      echo "JAVA_HOME set to: $JAVA_HOME"
+      
+      # Compile the project with explicit Java version
+      mvn clean package spring-boot:repackage -Dmaven.compiler.source=11 -Dmaven.compiler.target=11
       
       # Verify the JAR was created
       ls -la target/*.jar
