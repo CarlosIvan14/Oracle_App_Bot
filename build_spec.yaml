@@ -20,9 +20,6 @@ steps:
       ls -la target/
       find target/ -name "*.jar" -exec du -h {} \;
     image: maven:3.8.6-amazoncorretto-11
-    exportedArtifacts:
-      - name: maven-build-artifacts
-        path: MtdrSpring/backend/target
 
   - type: Command
     name: Login to OCIR
@@ -48,9 +45,6 @@ steps:
       docker push $FULL_IMAGE_NAME
 
 outputArtifacts:
-  - name: maven-build-artifacts
-    type: ARTIFACT
-    location: MtdrSpring/backend/target
   - name: todolist-image
     type: DOCKER_IMAGE
     location: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:${image_tag}
