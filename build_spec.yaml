@@ -4,13 +4,23 @@ component: build      # indica que esto es un build spec
 timeoutInSeconds: 3600  # 1 h
 
 steps:
+steps:
   - type: Command
-    name: Build Maven Project
+    name: Test Maven Installation
     command: |
-      echo "🔨 Compilando proyecto Maven..."
-      cd MtdrSpring/backend
-      mvn clean package spring-boot:repackage
-      ls -la target/*.jar  # Verify build output
+      echo "🧪 Testing Maven environment..."
+      mvn -version
+      echo "Creating test project..."
+      mvn archetype:generate -B \
+        -DarchetypeGroupId=org.apache.maven.archetypes \
+        -DarchetypeArtifactId=maven-archetype-quickstart \
+        -DgroupId=com.example \
+        -DartifactId=test-project \
+        -Dversion=1.0-SNAPSHOT
+      cd test-project
+      echo "Running simple build..."
+      mvn clean package
+      ls -la target/
     image: maven:3.8.6-openjdk-11-slim
 
   - type: Command
