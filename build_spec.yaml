@@ -5,6 +5,18 @@ timeoutInSeconds: 3600  # 1 h
 
 steps:
   - type: Command
+    name: Build Maven Project
+    command: |
+      echo "🔨 Compilando proyecto Maven..."
+      cd MtdrSpring/backend
+      
+      # Compile the project (similar to your build.sh)
+      mvn clean package spring-boot:repackage
+      
+      # Verify the JAR was created
+      ls -la target/*.jar
+
+  - type: Command
     name: Login to OCIR
     command: |
       echo "🔑 Autenticando en OCIR..."
@@ -27,10 +39,10 @@ steps:
       NAMESPACE=ax8nnzejeioc   
       REPO=reacttodo/xkmym/todolistapp-springboot
 
-      # Build
+      # Build with simple Dockerfile
       docker build \
         -t $REGISTRY/$NAMESPACE/$REPO:$TAG \
-        -f Dockerfile \
+        -f Dockerfile.simple \
         .
 
       # Push
