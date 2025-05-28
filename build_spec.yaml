@@ -35,16 +35,27 @@ steps:
     command: |
       echo "🐳 Building Docker image..."
       cd MtdrSpring/backend
+
+      # Use the OCI parameter or fallback to 'latest'
+      TAG="${image_tag:-latest}"
+      echo "Using tag: $TAG"
       
-      TAG=${image_tag:-latest}
       FULL_IMAGE_NAME="mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:$TAG"
       
-      docker build -t $FULL_IMAGE_NAME -f Dockerfile .
-      
+      echo "Full image name: $FULL_IMAGE_NAME"
+      echo "=== Docker images before build ==="
+      docker images
+
+      docker build -t "$FULL_IMAGE_NAME" -f Dockerfile .
+
+      echo "=== Docker images after build ==="
+      docker images | grep todolistapp || true
+
       echo "🚀 Pushing image to OCIR..."
-      docker push $FULL_IMAGE_NAME
+      docker push "$FULL_IMAGE_NAME"
+
 
 outputArtifacts:
   - name: todolist-image
     type: DOCKER_IMAGE
-    location: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:latest
+    location: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:${image_tag}
