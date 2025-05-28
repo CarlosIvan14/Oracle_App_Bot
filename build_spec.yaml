@@ -7,19 +7,26 @@ steps:
   - type: Command
     name: Build Application
     command: |
-      echo "🔨 Building your Spring Boot application..."
-      ls
-      cd MtdrSpring/backend  # Adjust path if needed
+      echo "🔨 Building with enforced Java 11..."
       
-      # Clean build with Java 11 compatibility
+      # Explicitly set Java 11
+      export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+      export PATH=$JAVA_HOME/bin:$PATH
+      
+      # Verify versions
+      echo "Java version:"
+      java -version
+      echo "Maven version:"
+      mvn -version
+      
+      # Build
+      cd MtdrSpring/backend
       mvn clean package spring-boot:repackage \
         -Dmaven.compiler.source=11 \
         -Dmaven.compiler.target=11
       
-      # Verify the output
-      echo "Build artifacts:"
-      ls -la target/
-      echo "JAR size:"
+      # Verify output
+      ls -la target/*.jar
       du -h target/*.jar
     image: maven:3.8.6-openjdk-11-slim
 
