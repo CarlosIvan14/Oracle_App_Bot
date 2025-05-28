@@ -1,13 +1,11 @@
+FROM maven:3.8.6-amazoncorretto-11 as build
+WORKDIR /build
+COPY . .
+RUN mvn clean package spring-boot:repackage
+
 FROM openjdk:11-jre-slim
-
 WORKDIR /app
-
-# Copy the JAR file first (better layer caching)
-COPY target/MyTodoList-*.jar app.jar
-
-# Copy configuration files
-COPY .env . 
-
+COPY --from=build /build/target/MyTodoList-*.jar app.jar
+COPY .env .
 EXPOSE 8080
-
 ENTRYPOINT ["java", "-jar", "app.jar"]

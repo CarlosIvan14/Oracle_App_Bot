@@ -1,61 +1,42 @@
-version: 0.1
-component: build
-timeoutInSeconds: 3600
+version: 0.1          # debe ser exactamente 0.1
+component: build      # indica que esto es un build spec
+
+timeoutInSeconds: 3600  # 1 h
 
 steps:
   - type: Command
-    name: Build Application
-    command: |
-      echo "🔨 Building Spring Boot application..."
-      cd MtdrSpring/backend
-      
-      echo "=== JAVA VERSION ==="
-      java -version
-      echo "=== MAVEN VERSION ==="
-      mvn -version
-      
-      mvn clean package spring-boot:repackage
-      
-      echo "=== BUILD OUTPUT ==="
-      ls -la target/
-      find target/ -name "*.jar" -exec du -h {} \;
-    image: maven:3.8.6-amazoncorretto-11
-
-  - type: Command
     name: Login to OCIR
     command: |
-      echo "🔑 Authenticating to OCIR..."
-      echo "${auth_token_ocir}" | \
-      docker login mx-queretaro-1.ocir.io \
-        -u "${user_ocir}" \
-        --password-stdin
+      echo "🔑 Autenticando en OCIR..."
+      # Ajusta la región si no es mx-queretaro-1
+      REGISTRY=mx-queretaro-1.ocir.io
+      echo "${auth_token_ocir}" \
+        | docker login $REGISTRY \
+            -u "${user_ocir}" \
+            --password-stdin
 
   - type: Command
-    name: Build & Push Docker Image
+    name: Build & Push Docker image
     command: |
-      echo "🐳 Building Docker image..."
+      echo "🔨 Construyendo y subiendo imagen Docker..."
       cd MtdrSpring/backend
 
-      # Use the OCI parameter or fallback to 'latest'
-      TAG="${image_tag:-latest}"
-      echo "Using tag: $TAG"
-      
-      FULL_IMAGE_NAME="mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:$TAG"
-      
-      echo "Full image name: $FULL_IMAGE_NAME"
-      echo "=== Docker images before build ==="
-      docker images
+      # Usa 'latest' si image_tag no está definido
+      TAG=${image_tag:-latest}
+      REGISTRY=mx-queretaro-1.ocir.io
+      NAMESPACE=ax8nnzejeioc   
+      REPO=reacttodo/xkmym/todolistapp-springboot
 
-      docker build -t "$FULL_IMAGE_NAME" -f Dockerfile .
+      # Build
+      docker build \
+        -t $REGISTRY/$NAMESPACE/$REPO:$TAG \
+        -f Dockerfile \
+        .
 
-      echo "=== Docker images after build ==="
-      docker images | grep todolistapp || true
-
-      echo "🚀 Pushing image to OCIR..."
-      docker push "$FULL_IMAGE_NAME"
-
+      # Push
+      docker push $REGISTRY/$NAMESPACE/$REPO:$TAG
 
 outputArtifacts:
-  - name: todolist-image
-    type: DOCKER_IMAGE
+  - name: todolist-image          # ① Identificador interno del artefacto
+    type: DOCKER_IMAGE            # ② Le indica a DevOps que es una imagen Docker
     location: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:${image_tag}
