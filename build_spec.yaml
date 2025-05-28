@@ -7,28 +7,31 @@ steps:
   - type: Command
     name: Build Application
     command: |
-      echo "🔨 Building with enforced Java 11..."
+      echo "🚀 FORCING Java 11 Environment..."
       
-      # Explicitly set Java 11
-      export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+      # Nuclear option - find and use Java 11 explicitly
+      export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
       export PATH=$JAVA_HOME/bin:$PATH
       
-      # Verify versions
+      # Verify environment
+      echo "=== ENVIRONMENT VERIFICATION ==="
+      echo "Java path: $(which java)"
       echo "Java version:"
       java -version
+      echo "Javac version:"
+      javac -version
       echo "Maven version:"
       mvn -version
       
-      # Build
+      # Build with absolute certainty
       cd MtdrSpring/backend
-      mvn clean package spring-boot:repackage \
-        -Dmaven.compiler.source=11 \
-        -Dmaven.compiler.target=11
+      mvn clean package spring-boot:repackage
       
       # Verify output
-      ls -la target/*.jar
-      du -h target/*.jar
-    image: maven:3.8.6-openjdk-11-slim
+      echo "=== BUILD OUTPUT ==="
+      ls -la target/
+      find target/ -name "*.jar" -exec du -h {} \;
+    image: maven:3.8.6-openjdk-11
 
   - type: Command
     name: Login to OCIR
