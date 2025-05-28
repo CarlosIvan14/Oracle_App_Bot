@@ -59,7 +59,7 @@ steps:
       # Build with simple Dockerfile
       docker build \
         -t $REGISTRY/$NAMESPACE/$REPO:$TAG \
-        -f Dockerfile.simple \
+        -f Dockerfile \
         .
 
       # Push
