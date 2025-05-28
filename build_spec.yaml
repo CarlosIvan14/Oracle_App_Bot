@@ -2,36 +2,28 @@ version: 0.1
 component: build
 timeoutInSeconds: 3600
 
-# Artifacts declaration must come BEFORE steps that use them
-artifacts:
-  - name: maven-build-artifacts
-    type: ARTIFACT
-    location: MtdrSpring/backend/target  # Preserves the entire target directory
-
 steps:
-  # Step 1: Build with Maven (using guaranteed Java 11 image)
   - type: Command
     name: Build Application
     command: |
       echo "🔨 Building Spring Boot application..."
       cd MtdrSpring/backend
       
-      # Verify environment
       echo "=== JAVA VERSION ==="
       java -version
       echo "=== MAVEN VERSION ==="
       mvn -version
       
-      # Build with Spring Boot repackage
       mvn clean package spring-boot:repackage
       
-      # Verify JAR creation
       echo "=== BUILD OUTPUT ==="
       ls -la target/
       find target/ -name "*.jar" -exec du -h {} \;
-    image: maven:3.8.6-amazoncorretto-11  # More reliable than openjdk image
+    image: maven:3.8.6-amazoncorretto-11
+    exportedArtifacts:
+      - name: maven-build-artifacts
+        path: MtdrSpring/backend/target
 
-  # Step 2: OCIR Login
   - type: Command
     name: Login to OCIR
     command: |
@@ -41,25 +33,24 @@ steps:
         -u "${user_ocir}" \
         --password-stdin
 
-  # Step 3: Docker Build & Push
   - type: Command
     name: Build & Push Docker Image
     command: |
       echo "🐳 Building Docker image..."
       cd MtdrSpring/backend
       
-      # Set image tag (default to 'latest')
       TAG=${image_tag:-latest}
       FULL_IMAGE_NAME="mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:$TAG"
       
-      # Build using the preserved target/ directory
       docker build -t $FULL_IMAGE_NAME -f Dockerfile .
       
-      # Push to registry
       echo "🚀 Pushing image to OCIR..."
       docker push $FULL_IMAGE_NAME
 
 outputArtifacts:
+  - name: maven-build-artifacts
+    type: ARTIFACT
+    location: MtdrSpring/backend/target
   - name: todolist-image
     type: DOCKER_IMAGE
     location: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:${image_tag}
