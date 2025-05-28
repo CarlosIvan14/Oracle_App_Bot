@@ -1,71 +1,65 @@
-version: 0.1          # debe ser exactamente 0.1
-component: build      # indica que esto es un build spec
+version: 0.1
+component: build
+timeoutInSeconds: 3600
 
-timeoutInSeconds: 3600  # 1 h
+# Artifacts declaration must come BEFORE steps that use them
+artifacts:
+  - name: maven-build-artifacts
+    type: ARTIFACT
+    location: MtdrSpring/backend/target  # Preserves the entire target directory
 
 steps:
+  # Step 1: Build with Maven (using guaranteed Java 11 image)
   - type: Command
     name: Build Application
     command: |
-      echo "🚀 FORCING Java 11 Environment..."
-      
-      # Nuclear option - find and use Java 11 explicitly
-      export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
-      export PATH=$JAVA_HOME/bin:$PATH
+      echo "🔨 Building Spring Boot application..."
+      cd MtdrSpring/backend
       
       # Verify environment
-      echo "=== ENVIRONMENT VERIFICATION ==="
-      echo "Java path: $(which java)"
-      echo "Java version:"
+      echo "=== JAVA VERSION ==="
       java -version
-      echo "Javac version:"
-      javac -version
-      echo "Maven version:"
+      echo "=== MAVEN VERSION ==="
       mvn -version
       
-      # Build with absolute certainty
-      cd MtdrSpring/backend
+      # Build with Spring Boot repackage
       mvn clean package spring-boot:repackage
       
-      # Verify output
+      # Verify JAR creation
       echo "=== BUILD OUTPUT ==="
       ls -la target/
       find target/ -name "*.jar" -exec du -h {} \;
-    image: maven:3.8.6-openjdk-11
+    image: maven:3.8.6-amazoncorretto-11  # More reliable than openjdk image
 
+  # Step 2: OCIR Login
   - type: Command
     name: Login to OCIR
     command: |
-      echo "🔑 Autenticando en OCIR..."
-      # Ajusta la región si no es mx-queretaro-1
-      REGISTRY=mx-queretaro-1.ocir.io
-      echo "${auth_token_ocir}" \
-        | docker login $REGISTRY \
-            -u "${user_ocir}" \
-            --password-stdin
+      echo "🔑 Authenticating to OCIR..."
+      echo "${auth_token_ocir}" | \
+      docker login mx-queretaro-1.ocir.io \
+        -u "${user_ocir}" \
+        --password-stdin
 
+  # Step 3: Docker Build & Push
   - type: Command
-    name: Build & Push Docker image
+    name: Build & Push Docker Image
     command: |
-      echo "🔨 Construyendo y subiendo imagen Docker..."
+      echo "🐳 Building Docker image..."
       cd MtdrSpring/backend
-
-      # Usa 'latest' si image_tag no está definido
+      
+      # Set image tag (default to 'latest')
       TAG=${image_tag:-latest}
-      REGISTRY=mx-queretaro-1.ocir.io
-      NAMESPACE=ax8nnzejeioc   
-      REPO=reacttodo/xkmym/todolistapp-springboot
-
-      # Build with simple Dockerfile
-      docker build \
-        -t $REGISTRY/$NAMESPACE/$REPO:$TAG \
-        -f Dockerfile \
-        .
-
-      # Push
-      docker push $REGISTRY/$NAMESPACE/$REPO:$TAG
+      FULL_IMAGE_NAME="mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:$TAG"
+      
+      # Build using the preserved target/ directory
+      docker build -t $FULL_IMAGE_NAME -f Dockerfile .
+      
+      # Push to registry
+      echo "🚀 Pushing image to OCIR..."
+      docker push $FULL_IMAGE_NAME
 
 outputArtifacts:
-  - name: todolist-image          # ① Identificador interno del artefacto
-    type: DOCKER_IMAGE            # ② Le indica a DevOps que es una imagen Docker
+  - name: todolist-image
+    type: DOCKER_IMAGE
     location: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:${image_tag}

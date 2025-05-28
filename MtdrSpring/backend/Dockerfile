@@ -6,7 +6,7 @@ WORKDIR /app
 COPY target/MyTodoList-*.jar app.jar
 
 # Copy configuration files
-COPY .env .
+COPY .env . 
 
 EXPOSE 8080
 
