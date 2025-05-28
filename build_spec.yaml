@@ -20,7 +20,14 @@ steps:
         | docker login mx-queretaro-1.ocir.io \
             -u "${user_ocir}" \
             --password-stdin
-
+  - type: Command
+    name: Instalar Java 11
+    command: |
+      echo "📦 Instalando OpenJDK 11..."
+      sudo yum install -y java-11-openjdk-devel
+      export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+      export PATH=$JAVA_HOME/bin:$PATH
+      
   - type: Command
     name: Ejecutar build.sh
     command: |
@@ -39,3 +46,8 @@ outputArtifacts:
     type: DOCKER_IMAGE
     # Aquí definimos dónde está la imagen final, usando el mismo tag
     location: mx-queretaro-1.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${IMAGE_VERSION}
+    outputArtifacts:
+  - name: todolist-image          # ① Identificador interno del artefacto
+    type: DOCKER_IMAGE            # ② Le indica a DevOps que es una imagen Docker
+    location: mx-queretaro-1.ocir.io/axm8kysebnqa/reacttodo/s78fu/todolistapp-springboot:${image_tag}
+
