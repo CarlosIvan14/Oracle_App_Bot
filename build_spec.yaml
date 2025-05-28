@@ -24,7 +24,7 @@ steps:
       # Usa 'latest' si image_tag no está definido
       TAG=${image_tag:-latest}
       REGISTRY=mx-queretaro-1.ocir.io
-      NAMESPACE=axm8kysebnqa
+      NAMESPACE=ax8nnzejeioc   
       REPO=reacttodo/xkmym/todolistapp-springboot
 
       # Build
