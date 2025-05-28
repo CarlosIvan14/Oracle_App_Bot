@@ -4,7 +4,6 @@ WORKDIR /app/frontend
 
 COPY src/main/frontend/package*.json ./
 RUN npm ci
-
 COPY src/main/frontend ./
 RUN npm run build
 
@@ -12,24 +11,28 @@ RUN npm run build
 FROM maven:3.9-eclipse-temurin-22-alpine AS backend-build
 WORKDIR /app
 
+# 2.1 Dependencias offline
 COPY pom.xml ./
 RUN mvn dependency:go-offline -B
 
+# 2.2 Código backend
 COPY . ./
-RUN mkdir -p src/main/resources/static \
-    && cp -r frontend-build/build src/main/resources/static
 
-# Empaqueta JAR sin volver a invocar al plugin frontend-maven
+# 2.3 Inyectar los assets del frontend compilado
+RUN mkdir -p src/main/resources/static
+COPY --from=frontend-build /app/frontend/build src/main/resources/static
+
+# 2.4 Empaquetar el JAR sin intentar volver a descargar Node
 RUN mvn -Dfrontend.skip=true -B clean package spring-boot:repackage
 
 # ---------- Etapa 3: runtime ligero con .env ----------
 FROM openjdk:22-jdk-slim
 WORKDIR /app
 
-# Copiamos variables de entorno
+# Variables de entorno en runtime
 COPY .env ./
 
-# Copiamos el JAR listo
+# JAR final
 COPY --from=backend-build /app/target/*.jar app.jar
 
 EXPOSE 8080

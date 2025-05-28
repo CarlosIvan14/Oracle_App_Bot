@@ -5,7 +5,6 @@ timeoutInSeconds: 3600
 
 env:
   variables:
-    # Ajusta según tu namespace y repo
     REGISTRY: mx-queretaro-1.ocir.io
     NAMESPACE: axm8kysebnqa
     REPO: reacttodo/s78fu/todolistapp-springboot
@@ -21,13 +20,11 @@ steps:
             --password-stdin
 
   - type: Command
-    name: Build & Push Docker image
+    name: Build & Push multi-stage
     command: |
       echo "🔨 Construyendo y subiendo imagen multi-stage..."
-      # nos movemos al contexto donde está Dockerfile
       cd MtdrSpring/backend
 
-      # tag dinámico: usa image_tag si viene definido, si no "latest"
       TAG=${image_tag:-latest}
 
       docker build \
