@@ -21,8 +21,7 @@ steps:
       echo "🔨 Construyendo y subiendo imagen Docker..."
       cd MtdrSpring/backend
 
-      # Usa 'latest' si image_tag no está definido
-      TAG=${image_tag:-latest}
+      TAG=latest  # Always use latest
       REGISTRY=mx-queretaro-1.ocir.io
       NAMESPACE=ax8nnzejeioc   
       REPO=reacttodo/xkmym/todolistapp-springboot
@@ -39,4 +38,4 @@ steps:
 outputArtifacts:
   - name: todolist-image          # ① Identificador interno del artefacto
     type: DOCKER_IMAGE            # ② Le indica a DevOps que es una imagen Docker
-    location: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:${image_tag}
+    location: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:latest
