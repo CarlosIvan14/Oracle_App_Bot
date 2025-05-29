@@ -20,21 +20,36 @@ steps:
             --password-stdin
 
   - type: Command
-    name: Build & Push multi-stage
+    name: Build & Push multi-stage con TAG dinámico
     command: |
-      echo "🔨 Construyendo y subiendo imagen multi-stage..."
+      echo "🔨 Generando TAG dinámico y construyendo imagen..."
       cd MtdrSpring/backend
 
-      TAG=${image_tag:-latest}
+      # SHA corto del commit
+      GIT_SHA=$(git rev-parse --short HEAD)
+      # Timestamp UTC opcional
+      TIMESTAMP=$(date -u +%Y%m%d%H%M%S)
+      # Formato de TAG
+      TAG="${TIMESTAMP}-${GIT_SHA}"
+      echo "Usando TAG = $TAG"
 
+      # Construcción y push
       docker build \
         -f Dockerfile \
         -t $REGISTRY/$NAMESPACE/$REPO:$TAG \
         .
-
       docker push $REGISTRY/$NAMESPACE/$REPO:$TAG
+
+      # Guardamos el TAG en un archivo para exportarlo
+      echo "TAG=$TAG" > build_env_vars
+
+  - type: ExportVariables
+    name: Exportar TAG
+    variables:
+      - env-file: build_env_vars
 
 outputArtifacts:
   - name: todolist-image
     type: DOCKER_IMAGE
-    location: ${REGISTRY}/${NAMESPACE}/${REPO}:${image_tag}
+    # Ahora usamos $TAG que acabamos de exportar
+    location: $REGISTRY/$NAMESPACE/$REPO:$TAG
