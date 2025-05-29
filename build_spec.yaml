@@ -8,6 +8,8 @@ env:
     REGISTRY: mx-queretaro-1.ocir.io
     NAMESPACE: axm8kysebnqa
     REPO: reacttodo/s78fu/todolistapp-springboot
+  exportedVariables:
+    - BUILDRUN_HASH
 
 steps:
   - type: Command
@@ -18,25 +20,28 @@ steps:
         | docker login $REGISTRY \
             -u "${user_ocir}" \
             --password-stdin
-
+  - type: Command
+    name: "Define unique image tag"
+    timeoutInSeconds: 40
+    command: |
+      export BUILDRUN_HASH=`echo ${OCI_BUILD_RUN_ID} | rev | cut -c 1-7`
+      echo "BUILDRUN_HASH: " $BUILDRUN_HASH
   - type: Command
     name: Build & Push multi-stage (no cache, pull base + prev image)
     command: |
       cd MtdrSpring/backend
-      TAG=${image_tag:-latest}
-      # 1) intenta bajar la imagen previa (latest), si existe
-      docker pull ${REGISTRY}/${NAMESPACE}/${REPO}:${TAG} || true
+      
+      docker pull ${REGISTRY}/${NAMESPACE}/${REPO}:${BUILDRUN_HASH} || true
 
-      # 2) construye forzando pull de la imagen base y sin usar cache local
       docker build --pull --no-cache \
         -f Dockerfile \
-        -t ${REGISTRY}/${NAMESPACE}/${REPO}:${TAG} \
+        -t ${REGISTRY}/${NAMESPACE}/${REPO}:${BUILDRUN_HASH} \
         .
 
       # 3) push siempre sobre 'latest'
-      docker push ${REGISTRY}/${NAMESPACE}/${REPO}:${TAG}
+      docker push ${REGISTRY}/${NAMESPACE}/${REPO}:${BUILDRUN_HASH}
 
 outputArtifacts:
   - name: todolist-image
     type: DOCKER_IMAGE
-    location: ${REGISTRY}/${NAMESPACE}/${REPO}:${image_tag}
+    location: ${REGISTRY}/${NAMESPACE}/${REPO}:${BUILDRUN_HASH}
