@@ -15,23 +15,28 @@ steps:
     command: |
       echo "🔑 Autenticando en OCIR..."
       echo "${auth_token_ocir}" \
-        | docker login ${REGISTRY} \
+        | docker login $REGISTRY \
             -u "${user_ocir}" \
             --password-stdin
 
   - type: Command
-    name: Build & Push multi-stage con TAG por commit
+    name: Build & Push multi-stage (no cache, pull base + prev image)
     command: |
-      echo "🔨 Construyendo imagen con tag $OCI_PRIMARY_SOURCE_COMMIT_HASH..."
       cd MtdrSpring/backend
+      TAG=${image_tag:-latest}
+      # 1) intenta bajar la imagen previa (latest), si existe
+      docker pull ${REGISTRY}/${NAMESPACE}/${REPO}:${TAG} || true
 
-      docker build -f Dockerfile \
-        -t ${REGISTRY}/${NAMESPACE}/${REPO}:${OCI_PRIMARY_SOURCE_COMMIT_HASH} \
+      # 2) construye forzando pull de la imagen base y sin usar cache local
+      docker build --pull --no-cache \
+        -f Dockerfile \
+        -t ${REGISTRY}/${NAMESPACE}/${REPO}:${TAG} \
         .
 
-      docker push ${REGISTRY}/${NAMESPACE}/${REPO}:${OCI_PRIMARY_SOURCE_COMMIT_HASH}
+      # 3) push siempre sobre 'latest'
+      docker push ${REGISTRY}/${NAMESPACE}/${REPO}:${TAG}
 
 outputArtifacts:
   - name: todolist-image
     type: DOCKER_IMAGE
-    location: ${REGISTRY}/${NAMESPACE}/${REPO}:${OCI_PRIMARY_SOURCE_COMMIT_HASH}
+    location: ${REGISTRY}/${NAMESPACE}/${REPO}:${image_tag}
