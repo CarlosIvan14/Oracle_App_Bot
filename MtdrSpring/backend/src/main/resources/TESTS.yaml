@@ -57,9 +57,6 @@ steps:
 
 # Optional: Define output artifacts for test reports
 outputArtifacts:
-  - name: jmeter-results
-    type: GENERIC_ARTIFACT
-    location: "${OCI_WORKSPACE_DIR}/Oracle_App_Bot/MtdrSpring/jmeter-performance/results/" # Adjust to your actual JMeter results path
   - name: playwright-report
     type: GENERIC_ARTIFACT
     location: "${OCI_WORKSPACE_DIR}/Oracle_App_Bot/MtdrSpring/backend/src/main/frontend/playwright-report/" # Adjust path
