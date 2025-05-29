@@ -45,7 +45,7 @@ function Login({ onLogin }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#212233]">
       <div className="bg-black bg-opacity-50 p-8 rounded-2xl shadow-lg w-80">
-        <h2 className="text-2xl text-white font-bold mb-4">Loginss</h2>
+        <h2 className="text-2xl text-white font-bold mb-4">Loginsssss</h2>
         {error && <p className="text-red-400">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div>
