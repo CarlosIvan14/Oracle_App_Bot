@@ -8,7 +8,6 @@ env:
     REGISTRY: mx-queretaro-1.ocir.io
     NAMESPACE: axm8kysebnqa
     REPO: reacttodo/s78fu/todolistapp-springboot
-    TAG: ${OCI_BUILD_RUN_ID}      # ← usamos el build‐run ID como tag dinámico
 
 steps:
   - type: Command
@@ -21,18 +20,18 @@ steps:
             --password-stdin
 
   - type: Command
-    name: Build & Push multi-stage con TAG único
+    name: Build & Push multi-stage con TAG por commit
     command: |
-      echo "🔨 Construyendo y subiendo imagen con tag $TAG..."
+      echo "🔨 Construyendo imagen con tag $OCI_PRIMARY_SOURCE_COMMIT_HASH..."
       cd MtdrSpring/backend
 
       docker build -f Dockerfile \
-        -t ${REGISTRY}/${NAMESPACE}/${REPO}:${TAG} \
+        -t ${REGISTRY}/${NAMESPACE}/${REPO}:${OCI_PRIMARY_SOURCE_COMMIT_HASH} \
         .
 
-      docker push ${REGISTRY}/${NAMESPACE}/${REPO}:${TAG}
+      docker push ${REGISTRY}/${NAMESPACE}/${REPO}:${OCI_PRIMARY_SOURCE_COMMIT_HASH}
 
 outputArtifacts:
   - name: todolist-image
     type: DOCKER_IMAGE
-    location: ${REGISTRY}/${NAMESPACE}/${REPO}:${TAG}
+    location: ${REGISTRY}/${NAMESPACE}/${REPO}:${OCI_PRIMARY_SOURCE_COMMIT_HASH}
