@@ -1,75 +1,47 @@
-version: 0.1          # debe ser exactamente 0.1
-component: build      # indica que esto es un build spec
+version: 0.1
+component: build
 
-timeoutInSeconds: 3600  # 1 h
+timeoutInSeconds: 3600
+
+env:
+  variables:
+    REGISTRY: mx-queretaro-1.ocir.io
+    NAMESPACE: ax8nnzejeioc
+    REPO: reacttodo/xkmym/todolistapp-springboot
+  exportedVariables:
+    - BUILDRUN_HASH
 
 steps:
   - type: Command
     name: Login to OCIR
     command: |
       echo "🔑 Autenticando en OCIR..."
-      # Ajusta la región si no es mx-queretaro-1
-      REGISTRY=mx-queretaro-1.ocir.io
       echo "${auth_token_ocir}" \
         | docker login $REGISTRY \
             -u "${user_ocir}" \
             --password-stdin
-
   - type: Command
-    name: Build & Push Docker image
+    name: "Define unique image tag"
+    timeoutInSeconds: 40
     command: |
-      echo "🔨 Construyendo y subiendo imagen Docker..."
+      export BUILDRUN_HASH=echo ${OCI_BUILD_RUN_ID} | rev | cut -c 1-7
+      echo "BUILDRUN_HASH: " $BUILDRUN_HASH
+  - type: Command
+    name: Build & Push multi-stage (no cache, pull base + prev image)
+    command: |
       cd MtdrSpring/backend
+      
+      docker pull ${REGISTRY}/${NAMESPACE}/${REPO}:${BUILDRUN_HASH} || true
 
-      # Use a unique tag, e.g., the Git commit SHA or build ID
-      # For OCI DevOps, you can use predefined variables like ${BUILDRUN_HASH}
-      # For simplicity, let's assume a variable $UNIQUE_TAG is available
-      # In a real OCI DevOps pipeline, you might use something like:
-      # TAG=${BUILDRUN_HASH:0:7} # First 7 chars of the commit hash
-      # Or, if you pass it as a parameter or derive it:
-      TAG=$(git rev-parse --short HEAD) # Example: gets short git commit hash
-
-      # If your CI system provides a build number, use that:
-      # TAG=${BUILD_NUMBER} 
-
-      # For this example, let's assume your CI system sets BUILDRUN_HASH
-      TAG=${BUILDRUN_HASH:-$(date +%s)} # Fallback to timestamp if BUILDRUN_HASH is not set
-
-      REGISTRY=mx-queretaro-1.ocir.io
-      NAMESPACE=ax8nnzejeioc   
-      REPO=reacttodo/xkmym/todolistapp-springboot
-
-      # Build
-      echo "Building with tag: $TAG"
-      docker build \
-        -t $REGISTRY/$NAMESPACE/$REPO:$TAG \
+      docker build --pull --no-cache \
         -f Dockerfile \
+        -t ${REGISTRY}/${NAMESPACE}/${REPO}:${BUILDRUN_HASH} \
         .
 
-      # Push
-      docker push $REGISTRY/$NAMESPACE/$REPO:$TAG
-
-      # Also push 'latest' if you still want it for other purposes (optional)
-      docker tag $REGISTRY/$NAMESPACE/$REPO:$TAG $REGISTRY/$NAMESPACE/$REPO:latest
-      docker push $REGISTRY/$NAMESPACE/$REPO:latest
+      # 3) push siempre sobre 'latest'
+      docker push ${REGISTRY}/${NAMESPACE}/${REPO}:${BUILDRUN_HASH}
 
 outputArtifacts:
   - name: todolist-image
     type: DOCKER_IMAGE
-    # Update the location to use the dynamic tag for the primary artifact
-    # This might require your deployment pipeline to know the tag.
-    # A common practice is to output the tag to a file or parameter.
-    # For now, let's assume the deployment pipeline will handle getting the specific tag.
-    # If the deployment pipeline consumes an artifact definition that includes the specific tag,
-    # you might need to generate this location dynamically in the build.
-    # A simpler approach for now might be to still output :latest if the deployment pipeline
-    # is set up to *derive* the specific tag some other way or if you use a different mechanism
-    # to pass the tag.
-    #
-    # For OCI DevOps, you can parametrize the deployment manifest or use a manifest artifact
-    # that your build pipeline updates.
-    #
-    # Let's assume your deployment pipeline will be updated to use the specific tag.
-    # The output artifact here might point to latest if that's what downstream stages expect to *reference*
-    # before substituting. The key is that the *actual image* pushed has a unique tag.
-    location: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:latest
+    location: ${REGISTRY}/${NAMESPACE}/${REPO}:${BUILDRUN_HASH}
