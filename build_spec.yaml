@@ -1,7 +1,4 @@
-version: 0.1
-component: build
-
-timeoutInSeconds: 3600
+version: 0.2
 
 env:
   variables:
@@ -9,47 +6,31 @@ env:
     NAMESPACE: axm8kysebnqa
     REPO: reacttodo/s78fu/todolistapp-springboot
 
-steps:
-  - type: Command
-    name: Login to OCIR
-    command: |
-      echo "🔑 Autenticando en OCIR..."
-      echo "${auth_token_ocir}" \
-        | docker login $REGISTRY \
-            -u "${user_ocir}" \
-            --password-stdin
+phases:
+  install:
+    runtime-versions:
+      docker: 20
+  build:
+    commands:
+      - echo "🔑 Autenticando…"
+      - echo "${auth_token_ocir}" | docker login $REGISTRY -u "${user_ocir}" --password-stdin
+      - echo "🔨 Preparando build…"
+      - cd MtdrSpring/backend
+      # 1) SHA corto
+      - GIT_SHA=$(git rev-parse --short HEAD)
+      # 2) Timestamp
+      - TIMESTAMP=$(date -u +%Y%m%d%H%M%S)
+      # 3) Tag final
+      - TAG="${TIMESTAMP}-${GIT_SHA}"
+      - echo "Usando TAG = $TAG"
+      # 4) Build y push
+      - docker build -f Dockerfile -t $REGISTRY/$NAMESPACE/$REPO:$TAG .
+      - docker push $REGISTRY/$NAMESPACE/$REPO:$TAG
+      # 5) Guardo la URI completa para el artifact
+      - echo "IMAGE_URI=$REGISTRY/$NAMESPACE/$REPO:$TAG" > image.properties
 
-  - type: Command
-    name: Build & Push multi-stage con TAG dinámico
-    command: |
-      echo "🔨 Generando TAG dinámico y construyendo imagen..."
-      cd MtdrSpring/backend
-
-      # SHA corto del commit
-      GIT_SHA=$(git rev-parse --short HEAD)
-      # Timestamp UTC opcional
-      TIMESTAMP=$(date -u +%Y%m%d%H%M%S)
-      # Formato de TAG
-      TAG="${TIMESTAMP}-${GIT_SHA}"
-      echo "Usando TAG = $TAG"
-
-      # Construcción y push
-      docker build \
-        -f Dockerfile \
-        -t $REGISTRY/$NAMESPACE/$REPO:$TAG \
-        .
-      docker push $REGISTRY/$NAMESPACE/$REPO:$TAG
-
-      # Guardamos el TAG en un archivo para exportarlo
-      echo "TAG=$TAG" > build_env_vars
-
-  - type: ExportVariables
-    name: Exportar TAG
-    variables:
-      - env-file: build_env_vars
-
-outputArtifacts:
-  - name: todolist-image
-    type: DOCKER_IMAGE
-    # Ahora usamos $TAG que acabamos de exportar
-    location: $REGISTRY/$NAMESPACE/$REPO:$TAG
+artifacts:
+  dockerImages:
+    - name: todolist-image
+      # OCI DevOps v0.2 sustituye variables al vuelo
+      imageUri: $REGISTRY/$NAMESPACE/$REPO:$TAG
