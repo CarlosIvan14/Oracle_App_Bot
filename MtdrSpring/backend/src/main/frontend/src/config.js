@@ -1,5 +1,5 @@
 const config = {
-  apiBaseUrl: "http://localhost:8081",
+  apiBaseUrl: "http://http://140.84.179.223/",
 };
 
 //const config = {
