@@ -8,7 +8,7 @@ docker run --network="host" \
   -v "$SCRIPT_DIR":/zap/wrk/:rw \
   -t zaproxy/zap-stable \
   zap.sh -cmd \
-  -quickurl http://http://140.84.179.223/ \
+  -quickurl http://140.84.179.223/ \
   -quickout /zap/wrk/result.xml
 
 # Optional: Print confirmation
