@@ -30,9 +30,7 @@ steps:
     name: Build & Push multi-stage (no cache, pull base + prev image)
     command: |
       cd MtdrSpring/backend
-      
-      docker pull ${REGISTRY}/${NAMESPACE}/${REPO}:${BUILDRUN_HASH} || true
-
+    
       docker build --pull --no-cache \
         -f Dockerfile \
         -t ${REGISTRY}/${NAMESPACE}/${REPO}:${BUILDRUN_HASH} \
