@@ -1,65 +1,156 @@
+---
 version: 0.1
-component: build
-timeoutInSeconds: 7200 # Adjust as needed for all tests
-
+component: command
+timeoutInSeconds: 7200
+shell: bash
+failImmediatelyOnError: true
 env:
   variables:
-    # These should be passed as parameters from the OCI DevOps pipeline
-    # or discovered if possible.
-    # Example: The external IP of your Kubernetes LoadBalancer service.
-    APP_HOSTNAME: "140.84.179.223" # Replace with actual dynamic value/parameter
-    APP_PORT: "80"                 # Replace with actual dynamic value/parameter
-    APP_PROTOCOL: "http"
-
+    APP_HOSTNAME: 140.84.174.78
+    APP_PORT: "80"
+    APP_PROTOCOL: http
 steps:
   - type: Command
-    name: "Setup: Display Workspace and Install Node.js (if needed)"
+    name: Setup Workspace
     command: |
-      echo "OCI Workspace: ${OCI_WORKSPACE_DIR}"
-      ls -la ${OCI_WORKSPACE_DIR} # Should show Oracle_App_Bot
-
-      # Example: Install Node.js 18 using nvm if not on a pre-configured image
-      # curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-      # export NVM_DIR="$HOME/.nvm"
-      # [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-      # nvm install 18
-      # nvm use 18
-      # node -v
-      # npm -v
-      echo "Node.js setup (if any) complete."
-
+      echo "OCI Workspace dir: /home/a01643269/reacttodo"
+      ls -la "/home/a01643269/reacttodo"
   - type: Command
-    name: "Run Playwright E2E Tests"
-    timeoutInSeconds: 1800 # Adjust timeout
+    name: Run Playwright E2E Tests
+    timeoutInSeconds: 1800
     command: |
-      cd "${OCI_WORKSPACE_DIR}/Oracle_App_Bot/MtdrSpring/backend/src/main/frontend"
+      cd "/home/a01643269/reacttodo/Oracle_App_Bot/MtdrSpring/backend/src/main/frontend"
       npm install
-      # You may need to configure Playwright to use APP_HOSTNAME and APP_PORT
-      # e.g., by setting an environment variable that your Playwright config reads
-      # export BASE_URL=${APP_PROTOCOL}://${APP_HOSTNAME}:${APP_PORT}
-      # Or by passing them directly if your test script supports it.
-      # Ensure browsers are available (npx playwright install or pre-baked in image)
-      # npx playwright install --with-deps 
       npm run test-e2e
-    onFailure: "ABORT"
-
   - type: Command
-    name: "Run OWASP Security Tests"
-    timeoutInSeconds: 2400 # Adjust timeout
+    name: Run OWASP Security Tests
+    timeoutInSeconds: 2400
     command: |
-      cd "${OCI_WORKSPACE_DIR}/Oracle_App_Bot/MtdrSpring/backend/src/main/frontend"
-      # npm install might have already run in the Playwright step if it's the same package.json
-      # If not, run npm install here.
-      # Your OWASP ZAP script (npm run test-security) will also need to target the deployed application.
-      # export TARGET_APP_URL=${APP_PROTOCOL}://${APP_HOSTNAME}:${APP_PORT}
+      cd "/home/a01643269/reacttodo/Oracle_App_Bot/MtdrSpring/backend/src/main/frontend"
       npm run test-security
-    onFailure: "ABORT"
 
-# Optional: Define output artifacts for test reports
-outputArtifacts:
-  - name: playwright-report
-    type: GENERIC_ARTIFACT
-    location: "${OCI_WORKSPACE_DIR}/Oracle_App_Bot/MtdrSpring/backend/src/main/frontend/playwright-report/" # Adjust path
-  - name: owasp-report
-    type: GENERIC_ARTIFACT
-    location: "${OCI_WORKSPACE_DIR}/Oracle_App_Bot/MtdrSpring/backend/src/main/frontend/security-reports/" # Adjust path
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todolistapp-springboot-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todolistapp-springboot
+  template:
+    metadata:
+      labels:
+        app: todolistapp-springboot
+        version: v1
+    spec:
+      containers:
+        - name: todolistapp-springboot
+          image: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:latest
+          imagePullPolicy: Always
+          env:
+            - name: db_user
+              value: "TODOUSER"
+            - name: db_url
+              value: "jdbc:oracle:thin:@reacttodoxkmym_medium?TNS_ADMIN=/mtdrworkshop/creds"
+            - name: OCI_REGION
+              value: "mx-queretaro-1"
+            - name: dbpassword
+              value: "Ci1402043005"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: creds
+              mountPath: /mtdrworkshop/creds
+      restartPolicy: Always
+      volumes:
+        - name: creds
+          secret:
+            secretName: db-wallet-secret
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: todolistapp-springboot
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todolistapp-springboot-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todolistapp-springboot
+  template:
+    metadata:
+      labels:
+        app: todolistapp-springboot
+        version: v1
+    spec:
+      containers:
+        - name: todolistapp-springboot
+          image: mx-queretaro-1.ocir.io/ax8nnzejeioc/reacttodo/xkmym/todolistapp-springboot:${BUILDRUN_HASH}
+          imagePullPolicy: Always
+          env:
+            - name: db_user
+              value: "TODOUSER"
+            - name: db_url
+              value: "jdbc:oracle:thin:@reacttodoxkmym_medium?TNS_ADMIN=/mtdrworkshop/creds"
+            - name: OCI_REGION
+              value: "mx-queretaro-1"
+            - name: dbpassword
+              value: "Ci1402043005"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: creds
+              mountPath: /mtdrworkshop/creds
+      restartPolicy: Always
+      volumes:
+        - name: creds
+          secret:
+            secretName: db-wallet-secret
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: todolistapp-springboot
+
+
+
+
+version: 0.1
+component: command
+
+# Fail fast on cualquier error
+failImmediatelyOnError: true
+
+steps:
+  - name: Checkout springboot-bot branch
+    type: Command
+    command: |
+      # Clona sólo la rama springboot-bot en el directorio de trabajo
+      git clone https://github.com/CarlosIvan14/Oracle_App_Bot.git tests
+
+
+  - name: Run Playwright E2E tests
+    type: Command
+    command: |
+      cd MtdrSpring/backend/src/main/frontend
+      npm install
+      npm run test-e2e
+
+  - name: Run OWASP security tests
+    type: Command
+    command: |
+      cd MtdrSpring/backend/src/main/frontend
+      npm run test-security
