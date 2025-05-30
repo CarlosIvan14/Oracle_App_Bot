@@ -60,7 +60,7 @@ function Home({ user }) {
   return (
     <div className="p-6 ">
       <div className="mb-4 flex items-center justify-center">
-        <h1 className="text-3xl text-white font-bold mb-4">Tus Proyectoss</h1>
+        <h1 className="text-3xl text-white font-bold mb-4">Tus Proyectos</h1>
       </div>
       <div className="mb-4 flex items-center justify-center">
         <input
