@@ -1,4 +1,4 @@
-FROM maven:3.8.6-amazoncorretto-11 as build
+FROM ghcr.io/eclipse-temurin/maven:3.8.6-amazoncorretto-11 as build
 WORKDIR /build
 COPY . .
 RUN mvn clean package spring-boot:repackage
