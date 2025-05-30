@@ -1,5 +1,6 @@
 package com.springboot.MyTodoList.service;
 
+import com.springboot.MyTodoList.dto.UserDTO;
 import com.springboot.MyTodoList.model.OracleUser;
 import com.springboot.MyTodoList.repository.OracleUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,10 @@ public class OracleUserService {
 
 	@Autowired
 	private OracleUserRepository oracleUserRepository;
+
+	public List<UserDTO> getAllUsersAsDTO() {
+		return oracleUserRepository.findAllUsersAsDTO();
+	}
 
 	public List<OracleUser> getAllUsers() {
 		return oracleUserRepository.findAll();
@@ -30,18 +35,19 @@ public class OracleUserService {
 	}
 
 	// Login de usuario: se busca por nombre y se compara la contraseña
-	public Optional<OracleUser> loginUser(String name, String password) {
+	public Optional<UserDTO> loginUser(String name, String password) {
 		Optional<OracleUser> user = oracleUserRepository.findByName(name);
 		if (user.isPresent() && BCrypt.checkpw(password, user.get().getPassword())) {
-			return user;
+			return Optional.of(new UserDTO(user.get()));
 		}
 		else {
 			return Optional.empty();
 		}
 	}
 
-	public Optional<OracleUser> updateUser(int id, OracleUser userUpdates) {
+	public Optional<UserDTO> updateUser(int id, UserDTO userUpdates) {
 		return oracleUserRepository.findById(id).map(user -> {
+			// Update only the fields present in UserDTO
 			if (userUpdates.getName() != null) {
 				user.setName(userUpdates.getName());
 			}
@@ -61,7 +67,9 @@ public class OracleUserService {
 				String hashedPassword = BCrypt.hashpw(userUpdates.getPassword(), BCrypt.gensalt());
 				user.setPassword(hashedPassword);
 			}
-			return oracleUserRepository.save(user);
+			
+			OracleUser savedUser = oracleUserRepository.save(user);
+			return new UserDTO(savedUser); // Convert to DTO before returning
 		});
 	}
 

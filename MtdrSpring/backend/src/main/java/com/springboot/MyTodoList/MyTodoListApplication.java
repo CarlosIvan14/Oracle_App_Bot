@@ -8,6 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
@@ -34,8 +35,11 @@ public class MyTodoListApplication implements CommandLineRunner {
 	@Autowired
 	private SprintsServiceBot sprintsServiceBot;
 
-	@Autowired
+	/* -> NUEVO: URL del backend que usará el bot */
+	/* (se lee de application.properties o variable de entorno) */
+
 	private TaskServiceBot taskServiceBot;
+
 
 	@Autowired
 	private TaskCreationServiceBot taskCreationServiceBot;
@@ -76,7 +80,7 @@ public class MyTodoListApplication implements CommandLineRunner {
 	public void run(String... args) {
 
 		try {
-			/* Instanciar la API de Telegram*/
+			/* Instanciar la API de Telegram */
 			TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
 
 			/* Registrar nuestro bot: <<—— SE AÑADE backendBaseUrl */

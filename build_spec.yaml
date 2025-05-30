@@ -1,0 +1,15 @@
+version: 0.1
+
+phases:
+  build:
+    commands:
+      - echo "🛠️  Entrando al directorio MtdrSpring/backend..."
+      - cd MtdrSpring/backend
+      - echo "🔑  Autenticando en OCIR..."
+      - oci artifacts login --region $OCI_REGION iad.ocir.io
+      - echo "🏗️  Construyendo imagen Docker..."
+      - docker build -t iad.ocir.io/axm8kysebnqa/todolistapp-springboot:$image_tag .
+      - echo "📤  Subiendo imagen a OCIR..."
+      - docker push iad.ocir.io/axm8kysebnqa/todolistapp-springboot:$image_tag
+
+artifacts: {}

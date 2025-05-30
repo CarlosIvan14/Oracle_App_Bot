@@ -1,0 +1,34 @@
+{
+  "Dev Login Endpoint Test" : {
+    "transaction" : "Dev Login Endpoint Test",
+    "sampleCount" : 100,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 1008.4300000000002,
+    "medianResTime" : 1001.5,
+    "minResTime" : 960.0,
+    "maxResTime" : 1150.0,
+    "pct1ResTime" : 1054.8,
+    "pct2ResTime" : 1093.6,
+    "pct3ResTime" : 1149.5699999999997,
+    "throughput" : 4.839334107626791,
+    "receivedKBytesPerSec" : 2.2778896873790164,
+    "sentKBytesPerSec" : 1.1058634581881532
+  },
+  "Total" : {
+    "transaction" : "Total",
+    "sampleCount" : 100,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 1008.4300000000002,
+    "medianResTime" : 1001.5,
+    "minResTime" : 960.0,
+    "maxResTime" : 1150.0,
+    "pct1ResTime" : 1054.8,
+    "pct2ResTime" : 1093.6,
+    "pct3ResTime" : 1149.5699999999997,
+    "throughput" : 4.839334107626791,
+    "receivedKBytesPerSec" : 2.2778896873790164,
+    "sentKBytesPerSec" : 1.1058634581881532
+  }
+}
