@@ -1,22 +1,16 @@
-# Build stage - Red Hat UBI with Maven
-FROM registry.access.redhat.com/ubi8/openjdk-11:latest as build
-
-USER root
-RUN microdnf install -y maven
-USER default
-
+# Build stage - GitHub Container Registry
+FROM ghcr.io/library/maven:3.8.6-amazoncorretto-11 as build
 WORKDIR /build
 COPY . .
 RUN mvn clean package spring-boot:repackage
 
-# Runtime stage - Red Hat UBI with Node.js
-FROM registry.access.redhat.com/ubi8/openjdk-11-runtime:latest
+# Runtime stage - GitHub Container Registry
+FROM ghcr.io/library/amazoncorretto:11-alpine-jdk
 
-USER root
-# Install Node.js 18
-RUN curl -fsSL https://rpm.nodesource.com/setup_18.x | bash - && \
-    microdnf install -y nodejs && \
-    microdnf clean all
+# Install Node.js 18 on Alpine
+RUN apk add --no-cache curl bash && \
+    curl -fsSL https://unofficial-builds.nodejs.org/download/release/v18.20.2/node-v18.20.2-linux-x64-musl.tar.xz | tar -xJ -C /usr/local --strip-components=1 && \
+    apk del curl
 
 WORKDIR /app
 COPY --from=build /build/target/MyTodoList-*.jar app.jar
