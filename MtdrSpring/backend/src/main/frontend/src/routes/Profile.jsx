@@ -27,7 +27,7 @@ function Profile({ user }) {
       <h1 className="text-4xl font-bold mb-2">Perfil de {user.name}</h1>
       <p className="mb-6 text-gray-400">
         {/* Subtítulo o descripción */}
-        I'm a creative web developerl
+        I'm a creative web developer
       </p>
 
       {/* Contenedor principal (dos columnas en pantallas medianas) */}
