@@ -3,7 +3,7 @@ WORKDIR /build
 COPY . .
 RUN mvn clean package spring-boot:repackage
 
-FROM amazoncorretto:11-alpine-jdk
+FROM eclipse-temurin:11-jre-alpine
 
 RUN yum update -y && \
     curl -fsSL https://rpm.nodesource.com/setup_18.x | bash - && \
