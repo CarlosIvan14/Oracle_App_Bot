@@ -39,7 +39,7 @@ function Reports() {
   /* ------------- estados base (KPIs originales) ---------------- */
   const [sprints, setSprints] = useState([]);
   const [members, setMembers] = useState([]); // {id:idProjectUser,name}
-  // const [memberColors, setMemberColors] = useState({});
+  const [memberColors, setMemberColors] = useState({});
   const [filterType, setFilterType] = useState("sprint");
   const [selectedSprint, setSelectedSprint] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
@@ -77,36 +77,32 @@ function Reports() {
         ]);
         const colors = Object.fromEntries(devs.map((d) => [d.id, d.color]));
         colors.all = "#8884d8";
-        // setMemberColors(colors);
+        setMemberColors(colors);
       })
       .catch(console.error);
   }, [projectId]);
   useEffect(() => {
     if (sprints.length === 0 || members.length === 0) return;
-
+  
     const devs = members.filter((m) => m.id !== "all");
     const makeBlank = () => {
       const row = {};
-      devs.forEach((d) => {
-        row[d.id] = 0;
-      });
+      devs.forEach((d) => { row[d.id] = 0; });
       return row;
     };
-
+  
     (async () => {
       // 1) Gráfica 1: total hours por sprint
       const g1 = await Promise.all(
         sprints.map(async (sp) => {
           const raw = await fetch(
-            `${config.apiBaseUrl}/api/task-assignees/team-sprint/${sp.id}/real-hours`,
-          )
-            .then((r) => r.json())
-            .catch(() => 0);
+            `${config.apiBaseUrl}/api/task-assignees/team-sprint/${sp.id}/real-hours`
+          ).then((r) => r.json()).catch(() => 0);
           return { sprintName: sp.name, hours: Number(raw) || 0 };
-        }),
+        })
       );
       setTotalHoursBySprint(g1);
-
+  
       // 2) Gráfica 2: horas por dev por sprint
       const g2 = await Promise.all(
         sprints.map(async (sp) => {
@@ -114,18 +110,16 @@ function Reports() {
           await Promise.all(
             devs.map(async (d) => {
               const raw = await fetch(
-                `${config.apiBaseUrl}/api/task-assignees/user/${d.id}/sprint/${sp.id}/real-hours`,
-              )
-                .then((r) => r.json())
-                .catch(() => 0);
+                `${config.apiBaseUrl}/api/task-assignees/user/${d.id}/sprint/${sp.id}/real-hours`
+              ).then((r) => r.json()).catch(() => 0);
               row[d.id] = Number(raw) || 0;
-            }),
+            })
           );
           return row;
-        }),
+        })
       );
       setHoursByDevPerSprint(g2);
-
+  
       // 3) Gráfica 3: tareas completadas por dev por sprint
       const g3 = await Promise.all(
         sprints.map(async (sp) => {
@@ -133,20 +127,19 @@ function Reports() {
           await Promise.all(
             devs.map(async (d) => {
               const c = await fetch(
-                `${config.apiBaseUrl}/api/task-assignees/user/${d.id}/sprint/${sp.id}/done/count`,
-              )
-                .then((r) => r.json())
-                .catch(() => 0);
+                `${config.apiBaseUrl}/api/task-assignees/user/${d.id}/sprint/${sp.id}/done/count`
+              ).then((r) => r.json()).catch(() => 0);
               row[d.id] = Number(c) || 0;
-            }),
+            })
           );
           return row;
-        }),
+        })
       );
       setTasksByDevPerSprint(g3);
     })();
+  
   }, [sprints, members]);
-
+  
   /* ============================================================= *
    *                BOTÓN  «Generar Reporte»                       *
    * ============================================================= */
@@ -233,6 +226,7 @@ function Reports() {
          ===========================================================*/
 
       /* ---- Gráfica 1  (team hours por sprint) ----------------- */
+     
 
       /* --------------- guardar KPI / tabla --------------------- */
       setReportData({
@@ -271,15 +265,16 @@ function Reports() {
   );
 
   const PIE_COLORS = [
-    "#eff6ff", // blue-50
-    "#dbeafe", // blue-100
-    "#bfdbfe", // blue-200
-    "#93c5fd", // blue-300
-    "#60a5fa", // blue-400
-    "#3b82f6", // blue-500
-    "#2563eb", // blue-600
-    "#1d4ed8", // blue-700
-  ];
+  "#eff6ff", // blue-50
+  "#dbeafe", // blue-100
+  "#bfdbfe", // blue-200
+  "#93c5fd", // blue-300
+  "#60a5fa", // blue-400
+  "#3b82f6", // blue-500
+  "#2563eb", // blue-600
+  "#1d4ed8", // blue-700
+];
+
 
   /* ============================================================= */
   /* =========================== UI ============================== */
@@ -386,54 +381,44 @@ function Reports() {
         </button>
       </div>
 
-      {/* ================= GRÁFICA 1 ================= */}
-      {totalHoursBySprint.length > 0 && (
-        <div className="p-4 rounded bg-black bg-opacity-10">
-          <h2 className="text-white font-semibold mb-2">
-            Gráfica 1: Horas Totales trabajadas por Sprint
-          </h2>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={totalHoursBySprint}>
-              {/* Fondo tenue dentro del SVG */}
-              <rect
-                x="0"
-                y="0"
-                width="100%"
-                height="100%"
-                fill="rgba(0,0,0,0.1)"
-              />
-              {/* Gradiente negro→azul */}
-              <defs>
-                <linearGradient id="blackToRed700" x1="0" y1="1" x2="0" y2="0">
-                  <stop offset="0%" stopColor="#312D2A" />
-                  <stop offset="100%" stopColor="#60a5fa" />
-                </linearGradient>
-              </defs>
+    {/* ================= GRÁFICA 1 ================= */}
+    {totalHoursBySprint.length > 0 && (
+      <div className="p-4 rounded bg-black bg-opacity-10">
+        <h2 className="text-white font-semibold mb-2">
+          Gráfica 1: Horas Totales trabajadas por Sprint
+        </h2>
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={totalHoursBySprint}>
+            {/* Fondo tenue dentro del SVG */}
+            <rect x="0" y="0" width="100%" height="100%" fill="rgba(0,0,0,0.1)" />
+            {/* Gradiente negro→azul */}
+            <defs>
+              <linearGradient id="blackToRed700" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stopColor="#312D2A" />
+                <stop offset="100%" stopColor="#60a5fa" /> 
+              </linearGradient>
+            </defs>
 
-              <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-              <XAxis dataKey="sprintName" stroke="#ccc" />
-              <YAxis stroke="#ccc" />
-              <Tooltip
-                contentStyle={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-                labelStyle={{ color: "#fff" }}
-                itemStyle={{ color: "#fff" }}
-              />
+            <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+            <XAxis dataKey="sprintName" stroke="#ccc" />
+            <YAxis stroke="#ccc" />
+            <Tooltip
+              contentStyle={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+              labelStyle={{ color: '#fff' }}
+              itemStyle={{ color: '#fff' }}
+            />
 
-              <Bar
-                dataKey="hours"
-                name="Horas"
-                fill="url(#blackToRed700)"
-                onMouseOver={(e) =>
-                  e.target.setAttribute("fill", "rgba(0,0,0,0.3)")
-                }
-                onMouseOut={(e) =>
-                  e.target.setAttribute("fill", "url(#blackToRed700)")
-                }
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
+            <Bar
+              dataKey="hours"
+              name="Horas"
+              fill="url(#blackToRed700)"
+              onMouseOver={e => e.target.setAttribute('fill','rgba(0,0,0,0.3)')}
+              onMouseOut={e => e.target.setAttribute('fill','url(#blackToRed700)')}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    )}
 
       {/* ================= GRÁFICA 2 ================= */}
       {hoursByDevPerSprint.length > 0 && (
@@ -445,49 +430,38 @@ function Reports() {
             <BarChart data={hoursByDevPerSprint}>
               {/* un gradiente por cada dev, oscuro abajo→su color arriba */}
               <defs>
-                {members
-                  .filter((m) => m.id !== "all")
-                  .map((dev) => (
-                    <linearGradient
-                      key={dev.id}
-                      id={`grad-g2-${dev.id}`}
-                      x1="0"
-                      y1="1"
-                      x2="0"
-                      y2="0"
-                    >
-                      <stop offset="0%" stopColor="#312D2A" />
-                      <stop offset="100%" stopColor={dev.color} />
-                    </linearGradient>
-                  ))}
+                {members.filter(m => m.id !== "all").map(dev => (
+                  <linearGradient
+                    key={dev.id}
+                    id={`grad-g2-${dev.id}`}
+                    x1="0" y1="1" x2="0" y2="0"
+                  >
+                    <stop offset="0%" stopColor="#312D2A" />
+                    <stop offset="100%" stopColor={dev.color} />
+                  </linearGradient>
+                ))}
               </defs>
 
               <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-              <XAxis dataKey="sprintName" tick={{ fill: "#fff" }} />
-              <YAxis tick={{ fill: "#fff" }} />
+              <XAxis dataKey="sprintName" tick={{ fill: '#fff' }} />
+              <YAxis tick={{ fill: '#fff' }} />
               <Tooltip
-                contentStyle={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-                labelStyle={{ color: "#fff" }}
-                itemStyle={{ color: "#fff" }}
+                contentStyle={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+                labelStyle={{ color: '#fff' }}
+                itemStyle={{ color: '#fff' }}
               />
-              <Legend wrapperStyle={{ color: "#fff" }} />
+              <Legend wrapperStyle={{ color: '#fff' }} />
 
-              {members
-                .filter((m) => m.id !== "all")
-                .map((dev) => (
-                  <Bar
-                    key={dev.id}
-                    dataKey={String(dev.id)}
-                    name={dev.name}
-                    fill={`url(#grad-g2-${dev.id})`}
-                    onMouseOver={(e) =>
-                      e.target.setAttribute("fill", "rgba(0,0,0,0.3)")
-                    }
-                    onMouseOut={(e) =>
-                      e.target.setAttribute("fill", `url(#grad-g2-${dev.id})`)
-                    }
-                  />
-                ))}
+              {members.filter(m => m.id !== "all").map(dev => (
+                <Bar
+                  key={dev.id}
+                  dataKey={String(dev.id)}
+                  name={dev.name}
+                  fill={`url(#grad-g2-${dev.id})`}
+                  onMouseOver={e => e.target.setAttribute('fill','rgba(0,0,0,0.3)')}
+                  onMouseOut={e => e.target.setAttribute('fill',`url(#grad-g2-${dev.id})`)}
+                />
+              ))}
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -503,49 +477,38 @@ function Reports() {
             <BarChart data={tasksByDevPerSprint}>
               {/* mismo patrón de gradientes que en G2 */}
               <defs>
-                {members
-                  .filter((m) => m.id !== "all")
-                  .map((dev) => (
-                    <linearGradient
-                      key={dev.id}
-                      id={`grad-g3-${dev.id}`}
-                      x1="0"
-                      y1="1"
-                      x2="0"
-                      y2="0"
-                    >
-                      <stop offset="0%" stopColor="#312D2A" />
-                      <stop offset="100%" stopColor={dev.color} />
-                    </linearGradient>
-                  ))}
+                {members.filter(m => m.id !== "all").map(dev => (
+                  <linearGradient
+                    key={dev.id}
+                    id={`grad-g3-${dev.id}`}
+                    x1="0" y1="1" x2="0" y2="0"
+                  >
+                    <stop offset="0%" stopColor="#312D2A" />
+                    <stop offset="100%" stopColor={dev.color} />
+                  </linearGradient>
+                ))}
               </defs>
 
               <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-              <XAxis dataKey="sprintName" tick={{ fill: "#fff" }} />
-              <YAxis tick={{ fill: "#fff" }} />
+              <XAxis dataKey="sprintName" tick={{ fill: '#fff' }} />
+              <YAxis tick={{ fill: '#fff' }} />
               <Tooltip
-                contentStyle={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-                labelStyle={{ color: "#fff" }}
-                itemStyle={{ color: "#fff" }}
+                contentStyle={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+                labelStyle={{ color: '#fff' }}
+                itemStyle={{ color: '#fff' }}
               />
-              <Legend wrapperStyle={{ color: "#fff" }} />
+              <Legend wrapperStyle={{ color: '#fff' }} />
 
-              {members
-                .filter((m) => m.id !== "all")
-                .map((dev) => (
-                  <Bar
-                    key={dev.id}
-                    dataKey={String(dev.id)}
-                    name={dev.name}
-                    fill={`url(#grad-g3-${dev.id})`}
-                    onMouseOver={(e) =>
-                      e.target.setAttribute("fill", "rgba(0,0,0,0.3)")
-                    }
-                    onMouseOut={(e) =>
-                      e.target.setAttribute("fill", `url(#grad-g3-${dev.id})`)
-                    }
-                  />
-                ))}
+              {members.filter(m => m.id !== "all").map(dev => (
+                <Bar
+                  key={dev.id}
+                  dataKey={String(dev.id)}
+                  name={dev.name}
+                  fill={`url(#grad-g3-${dev.id})`}
+                  onMouseOver={e => e.target.setAttribute('fill','rgba(0,0,0,0.3)')}
+                  onMouseOut={e => e.target.setAttribute('fill',`url(#grad-g3-${dev.id})`)}
+                />
+              ))}
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -579,118 +542,100 @@ function Reports() {
         </div>
       )}
 
-      {/* ================= KPI-1 + COMPOSED detalle con scroll y área ==================== */}
-      {barChartData.length > 0 && (
-        <div className="grid grid-cols-6 gap-6 mt-10">
-          {/* KPI 1 */}
-          <div className="col-span-1 bg-black/30 rounded-2xl p-6 shadow-lg">
-            <h4 className="text-sm text-gray-400">KPI 1 Time Efficiency</h4>
-            <p className="text-3xl font-bold text-blue-400">
-              {reportData?.kpi1}
-            </p>
-          </div>
+     {/* ================= KPI-1 + COMPOSED detalle con scroll y área ==================== */}
+    {barChartData.length > 0 && (
+      <div className="grid grid-cols-6 gap-6 mt-10">
+        {/* KPI 1 */}
+        <div className="col-span-1 bg-black/30 rounded-2xl p-6 shadow-lg">
+          <h4 className="text-sm text-gray-400">KPI 1 Time Efficiency</h4>
+          <p className="text-3xl font-bold text-blue-400">
+            {reportData?.kpi1}
+          </p>
+        </div>
 
-          {/* Chart con scroll */}
-          <div className="col-span-5 bg-black/30 rounded-2xl p-4 overflow-x-auto">
-            <div
-              style={{
-                width: `${Math.max(barChartData.length * 80, 600)}px`,
-                minWidth: "100%",
-                height: "300px",
-              }}
+        {/* Chart con scroll */}
+        <div className="col-span-5 bg-black/30 rounded-2xl p-4 overflow-x-auto">
+          <div
+            style={{
+              width: `${Math.max(barChartData.length * 80, 600)}px`,
+              minWidth: '100%',
+              height: '300px',
+            }}
+          >
+            <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart
+              data={barChartData}
+              margin={{ top: 20, right: 20, bottom: 60, left: 0 }}
             >
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart
-                  data={barChartData}
-                  margin={{ top: 20, right: 20, bottom: 60, left: 0 }}
-                >
-                  {/* degradados de área */}
-                  <defs>
-                    {/* área real */}
-                    <linearGradient
-                      id="areaGradientReal"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.6} />
-                      <stop
-                        offset="100%"
-                        stopColor="#60a5fa"
-                        stopOpacity={0.1}
-                      />
-                    </linearGradient>
-                    {/* área estimada */}
-                    <linearGradient
-                      id="areaGradientEst"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop offset="0%" stopColor="#1d4ed8" stopOpacity={0.6} />
-                      <stop
-                        offset="100%"
-                        stopColor="#1d4ed8"
-                        stopOpacity={0.1}
-                      />
-                    </linearGradient>
-                  </defs>
+              {/* degradados de área */}
+              <defs>
+                {/* área real */}
+                <linearGradient id="areaGradientReal" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.6}/>
+                  <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.1}/>
+                </linearGradient>
+                {/* área estimada */}
+                <linearGradient id="areaGradientEst" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#1d4ed8" stopOpacity={0.6}/>
+                  <stop offset="100%" stopColor="#1d4ed8" stopOpacity={0.1}/>
+                </linearGradient>
+              </defs>
 
-                  <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-                  <XAxis
-                    dataKey="name"
-                    tick={false}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis tick={{ fill: "#fff" }} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-                    labelStyle={{ color: "#fff" }}
-                    itemStyle={{ color: "#fff" }}
-                  />
-                  <Legend wrapperStyle={{ color: "#fff" }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+              <XAxis
+                dataKey="name"
+                  tick={false}
+                  axisLine={false}
+                  tickLine={false}
+              />
+              <YAxis tick={{ fill: '#fff' }} />
+              <Tooltip
+                contentStyle={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+                labelStyle={{ color: '#fff' }}
+                itemStyle={{ color: '#fff' }}
+              />
+              <Legend wrapperStyle={{ color: '#fff' }} />
 
-                  {/* Área Horas Reales */}
-                  <Area
-                    type="monotone"
-                    dataKey="real"
-                    name="Horas Reales (área)"
-                    stroke="#60a5fa"
-                    fill="url(#areaGradientReal)"
-                    activeDot={{ r: 6, strokeWidth: 2, stroke: "#60a5fa" }}
-                  />
+              {/* Área Horas Reales */}
+              <Area
+                type="monotone"
+                dataKey="real"
+                name="Horas Reales (área)"
+                stroke="#60a5fa"
+                fill="url(#areaGradientReal)"
+                activeDot={{ r: 6, strokeWidth: 2, stroke: '#60a5fa' }}
+              />
 
-                  {/* Área Horas Estimadas */}
-                  <Area
-                    type="monotone"
-                    dataKey="estimated"
-                    name="Horas Estimadas (área)"
-                    stroke="#1d4ed8"
-                    fill="url(#areaGradientEst)"
-                    activeDot={{ r: 6, strokeWidth: 2, stroke: "#1d4ed8" }}
-                  />
-                  {/* Barras: estimadas y reales */}
-                  <Bar
-                    dataKey="estimated"
-                    name="Horas Estimadas"
-                    barSize={20}
-                    fill="#1d4ed8"
-                  />
-                  <Bar
-                    dataKey="real"
-                    name="Horas Reales"
-                    barSize={20}
-                    fill="#60a5fa"
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
+              {/* Área Horas Estimadas */}
+              <Area
+                type="monotone"
+                dataKey="estimated"
+                name="Horas Estimadas (área)"
+                stroke="#1d4ed8"
+                fill="url(#areaGradientEst)"
+                activeDot={{ r: 6, strokeWidth: 2, stroke: '#1d4ed8' }}
+              />
+              {/* Barras: estimadas y reales */}
+              <Bar
+                dataKey="estimated"
+                name="Horas Estimadas"
+                barSize={20}
+                fill="#1d4ed8"
+              />
+              <Bar
+                dataKey="real"
+                name="Horas Reales"
+                barSize={20}
+                fill="#60a5fa"
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+
           </div>
         </div>
-      )}
+      </div>
+    )}
+
 
       {/* ================= KPI-2 PIE ============================== */}
       {reportData?.spFrequencyChartData?.length > 0 && (

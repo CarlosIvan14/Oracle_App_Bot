@@ -157,6 +157,7 @@ public class TaskAssigneesService {
 		List<TaskAssignees> taskAssignees = getCompletedTasksByUserAndSprint(projectUserId, sprintId);
 		return getRealHoursFromTaskAssignees(taskAssignees);
 	}
+	
 
 	// tasks-user-daterange methods (R02 y R03)
 	public long getCountDoneTasksByUserByDateRange(int projectUserId, LocalDate from, LocalDate to) {
