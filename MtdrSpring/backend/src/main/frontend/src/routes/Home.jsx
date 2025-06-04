@@ -23,7 +23,7 @@ function Home({ user }) {
 
     // Usamos el id del usuario activo para obtener sus proyectos
     fetch(
-      `${config.apiBaseUr }/api/project-users/user/${currentUser.idUser}/projects`,
+      `${config.apiBaseUrl}/api/project-users/user/${currentUser.idUser}/projects`,
     )
       .then((response) => {
         if (!response.ok) {
