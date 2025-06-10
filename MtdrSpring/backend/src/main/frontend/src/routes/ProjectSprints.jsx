@@ -70,7 +70,7 @@ export default function ProjectSprints() {
   const create = () => {
     if (!newName || !newDate) return alert("Completa los campos");
     const payload = {
-      creation_ts: newDate,
+      creationTs: newDate,
       description: newDesc,
       name: newName,
       project: { id_project: +projectId },

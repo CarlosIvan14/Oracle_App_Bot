@@ -10,4 +10,8 @@ public interface SprintRepository extends JpaRepository<Sprint, Integer> {
 	// project.
 	List<Sprint> findByProject_IdProject(int projectId);
 
+	List<Sprint> findByProject_IdProjectOrderByCreationTsAsc(int projectId);
+
+	List<Sprint> findAllByOrderByCreationTsDesc();
+
 }
