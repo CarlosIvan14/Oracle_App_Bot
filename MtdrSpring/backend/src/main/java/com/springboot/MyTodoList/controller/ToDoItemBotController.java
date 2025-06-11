@@ -244,11 +244,16 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
 		/* ---------- reports ---------- */
 		if ("📊 Reports".equals(txt)) {
+			// 1) mandamos los 3 reportes automáticos
+			generateAutoReports(chatId, st);
+
+			// 2) luego retomamos el menú original de filtros
 			st.flow = Flow.REPORTS;
 			st.step = 1;
 			send(chatId, "Filtro:\n1️⃣ sprint\n2️⃣ week\n3️⃣ month\nEnvia 1/2/3", false);
 			return;
 		}
+
 
 		/* ---------- flujo activo ---------- */
 		if (st.loggedUser == null && st.flow != Flow.LOGIN) {
@@ -266,6 +271,57 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	 * @return true si el texto recibido era uno de los botones de navegación false si no
 	 * coincidió con ninguno
 	 */
+	private void generateAutoReports(long chatId, ChatState st) {
+		// 1) Recuperar sprints
+		List<Sprint> sprints = sprintsSvc.getSprintsByProjectId(st.currentProjectId);
+
+		// 2) Total horas por sprint
+		StringBuilder sbTotal = new StringBuilder("*Horas totales por sprint:*\n");
+		for (Sprint sp : sprints) {
+			Integer hrs = rest.getForObject(
+				baseUrl + "/api/task-assignees/team-sprint/" + sp.getId() + "/real-hours",
+				Integer.class);
+			sbTotal.append("• ").append(sp.getName()).append(": ")
+				.append(hrs != null ? hrs : 0).append("h\n");
+		}
+		send(chatId, sbTotal.toString(), true);
+
+		// 3) Horas por developer por sprint
+		List<OracleUser> users = getProjectUsers(st.currentProjectId);
+		StringBuilder sbDevHrs = new StringBuilder("*Horas por developer por sprint:*\n");
+		for (Sprint sp : sprints) {
+			sbDevHrs.append("\n*Sprint ").append(sp.getName()).append("*\n");
+			for (OracleUser u : users) {
+				Integer puId = Optional.ofNullable(rest.getForObject(
+					baseUrl + "/api/project-users/project-id/" + st.currentProjectId +
+					"/user-id/" + u.getIdUser(), Integer.class)).orElse(0);
+				Integer hrs = rest.getForObject(
+					baseUrl + "/api/task-assignees/user/" + puId +
+					"/sprint/" + sp.getId() + "/real-hours", Integer.class);
+				sbDevHrs.append("  - ").append(u.getName()).append(": ")
+						.append(hrs != null ? hrs : 0).append("h\n");
+			}
+		}
+		send(chatId, sbDevHrs.toString(), true);
+
+		// 4) Tareas completadas por developer por sprint
+		StringBuilder sbDevTasks = new StringBuilder("*Tareas completadas por developer por sprint:*\n");
+		for (Sprint sp : sprints) {
+			sbDevTasks.append("\n*Sprint ").append(sp.getName()).append("*\n");
+			for (OracleUser u : users) {
+				Integer puId = Optional.ofNullable(rest.getForObject(
+					baseUrl + "/api/project-users/project-id/" + st.currentProjectId +
+					"/user-id/" + u.getIdUser(), Integer.class)).orElse(0);
+				Integer cnt = rest.getForObject(
+					baseUrl + "/api/task-assignees/user/" + puId +
+					"/sprint/" + sp.getId() + "/done/count", Integer.class);
+				sbDevTasks.append("  - ").append(u.getName()).append(": ")
+						.append(cnt != null ? cnt : 0).append("\n");
+			}
+		}
+		send(chatId, sbDevTasks.toString(), true);
+	}	
+
 	private boolean navigate(long chatId, String txt, ChatState st) {
 
 		/* ← Volver al listado de proyectos */

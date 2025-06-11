@@ -35,11 +35,8 @@ public class MyTodoListApplication implements CommandLineRunner {
 	@Autowired
 	private SprintsServiceBot sprintsServiceBot;
 
-	/* -> NUEVO: URL del backend que usará el bot */
-	/* (se lee de application.properties o variable de entorno) */
-
+	@Autowired
 	private TaskServiceBot taskServiceBot;
-
 
 	@Autowired
 	private TaskCreationServiceBot taskCreationServiceBot;

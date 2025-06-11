@@ -396,7 +396,7 @@ function Reports() {
             {/* Gradiente negro→azul */}
             <defs>
               <linearGradient id="blackToRed700" x1="0" y1="1" x2="0" y2="0">
-                <stop offset="0%" stopColor="#312D2A" />
+                <stop offset="0%" stopColor="#007dff" />
                 <stop offset="100%" stopColor="#60a5fa" /> 
               </linearGradient>
             </defs>
