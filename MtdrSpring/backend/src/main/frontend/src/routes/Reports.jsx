@@ -29,8 +29,6 @@ const PALETTE = [
   "#3b82f6", // darkblue 
   "#6c0064", // pink
   "#ffb800", // yellow
-  "#000000", // black
-  "#ffffff", // white
 ];
 
 function Reports() {
