@@ -17,7 +17,6 @@ export default function ProjectSprints() {
 
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newDate, setNewDate] = useState("");
   const [newDesc, setNewDesc] = useState("Active");
 
   // 1) Carga sprints + rol
@@ -68,9 +67,9 @@ export default function ProjectSprints() {
 
   // 4) Crear sprint
   const create = () => {
-    if (!newName || !newDate) return alert("Completa los campos");
+    //if (!newName || !newDate) return alert("Completa los campos");
     const payload = {
-      creation_ts: newDate,
+      creationTs: new Date().toISOString().split(".")[0],
       description: newDesc,
       name: newName,
       project: { id_project: +projectId },
@@ -86,7 +85,6 @@ export default function ProjectSprints() {
       .finally(() => {
         setShowModal(false);
         setNewName("");
-        setNewDate("");
         setNewDesc("Active");
       });
   };
@@ -159,15 +157,6 @@ export default function ProjectSprints() {
                 <input
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="w-full rounded-full p-2 border bg-[#212233]"
-                />
-              </div>
-              <div>
-                <label className="block mb-1">Fecha</label>
-                <input
-                  type="date"
-                  value={newDate}
-                  onChange={(e) => setNewDate(e.target.value)}
                   className="w-full rounded-full p-2 border bg-[#212233]"
                 />
               </div>

@@ -34,7 +34,7 @@ public class SprintService {
 	}
 
 	public List<Sprint> findAllSprints() {
-		return sprintRepository.findAll();
+		return sprintRepository.findAllByOrderByCreationTsDesc();
 	}
 
 	public Optional<Sprint> getSprintById(int id) {
@@ -95,7 +95,7 @@ public class SprintService {
 
 	// Nuevo método para obtener sprints por id de proyecto
 	public List<Sprint> findSprintsByProjectId(int projectId) {
-		return sprintRepository.findByProject_IdProject(projectId);
+		return sprintRepository.findByProject_IdProjectOrderByCreationTsAsc(projectId);
 	}
 
 }

@@ -23,14 +23,12 @@ import {
 /* ---------- colores fijos para cada developer ---------- */
 /* ---------- colores fijos para cada developer (azul) ---------- */
 const PALETTE = [
-  "#60a5fa", // blue-400
-  "#3b82f6", // blue-500
-  "#2563eb", // blue-600
-  "#1d4ed8", // blue-700
-  "#1e40af", // blue-800
-  "#1e3a8a", // blue-900
-  "#172554", // blue-950
-  "#0f172a", // custom ultra-dark blue
+  "#3ae7d7", // blue
+  "#730000", // red
+  "#007308", // green
+  "#3b82f6", // darkblue 
+  "#6c0064", // pink
+  "#ffb800", // yellow
 ];
 
 function Reports() {
@@ -50,6 +48,8 @@ function Reports() {
   const [totalHoursBySprint, setTotalHoursBySprint] = useState([]); // gráfica 1
   const [hoursByDevPerSprint, setHoursByDevPerSprint] = useState([]); // gráfica 2
   const [tasksByDevPerSprint, setTasksByDevPerSprint] = useState([]); // gráfica 3
+  // src/pages/Reports.jsx (arriba, justo dentro de Reports)
+  const EXCLUDED = ["OswaldoR", "Lorena"];
 
   /* ================= OBTENER SPRINTS =========================== */
   useEffect(() => {
@@ -394,7 +394,7 @@ function Reports() {
             {/* Gradiente negro→azul */}
             <defs>
               <linearGradient id="blackToRed700" x1="0" y1="1" x2="0" y2="0">
-                <stop offset="0%" stopColor="#312D2A" />
+                <stop offset="0%" stopColor="#007dff" />
                 <stop offset="100%" stopColor="#60a5fa" /> 
               </linearGradient>
             </defs>
@@ -430,7 +430,7 @@ function Reports() {
             <BarChart data={hoursByDevPerSprint}>
               {/* un gradiente por cada dev, oscuro abajo→su color arriba */}
               <defs>
-                {members.filter(m => m.id !== "all").map(dev => (
+                {members.filter(m => m.id !== "all" && !EXCLUDED.includes(m.name)).map(dev => (
                   <linearGradient
                     key={dev.id}
                     id={`grad-g2-${dev.id}`}
@@ -452,7 +452,7 @@ function Reports() {
               />
               <Legend wrapperStyle={{ color: '#fff' }} />
 
-              {members.filter(m => m.id !== "all").map(dev => (
+              {members.filter(m => m.id !== "all" && !EXCLUDED.includes(m.name)).map(dev => (
                 <Bar
                   key={dev.id}
                   dataKey={String(dev.id)}
@@ -477,7 +477,7 @@ function Reports() {
             <BarChart data={tasksByDevPerSprint}>
               {/* mismo patrón de gradientes que en G2 */}
               <defs>
-                {members.filter(m => m.id !== "all").map(dev => (
+                {members.filter(m => m.id !== "all" && !EXCLUDED.includes(m.name)).map(dev => (
                   <linearGradient
                     key={dev.id}
                     id={`grad-g3-${dev.id}`}
@@ -499,7 +499,7 @@ function Reports() {
               />
               <Legend wrapperStyle={{ color: '#fff' }} />
 
-              {members.filter(m => m.id !== "all").map(dev => (
+              {members.filter(m => m.id !== "all" && !EXCLUDED.includes(m.name)).map(dev => (
                 <Bar
                   key={dev.id}
                   dataKey={String(dev.id)}
