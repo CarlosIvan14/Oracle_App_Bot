@@ -34,6 +34,7 @@ test.describe('Login Tests', () => {
       await page.goto('http://localhost:8081/');
       await page.locator('input[type="text"]').click();
       await page.locator('input[type="text"]').fill(name);
+      await page.goto('chrome-error://chromewebdata/');
       await page.locator('input[type="password"]').click();
       await page.locator('input[type="password"]').fill(password);
       await page.getByRole('button', { name: 'Ingresar' }).click();
