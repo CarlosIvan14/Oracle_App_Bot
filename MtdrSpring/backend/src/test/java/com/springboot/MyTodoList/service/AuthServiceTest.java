@@ -43,7 +43,7 @@ public class AuthServiceTest {
 
 		ResponseEntity<OracleUser> responseEntity = new ResponseEntity<>(user, HttpStatus.OK);
 
-		when(restTemplate.postForEntity(eq("http://140.84.179.223api/users/login"), any(LoginRequest.class),
+		when(restTemplate.postForEntity(eq("http://140.84.179.223/api/users/login"), any(LoginRequest.class),
 				eq(OracleUser.class))).thenReturn(responseEntity);
 
 		// Act
@@ -54,7 +54,7 @@ public class AuthServiceTest {
 		Assert.assertEquals(result.getName(), "testuser");
 		Assert.assertEquals(result.getIdUser(), 1); // Adjust type if needed
 
-		verify(restTemplate).postForEntity(eq("http://140.84.179.223api/users/login"), any(LoginRequest.class),
+		verify(restTemplate).postForEntity(eq("http://140.84.179.223/api/users/login"), any(LoginRequest.class),
 				eq(OracleUser.class));
 	}
 
@@ -63,7 +63,7 @@ public class AuthServiceTest {
 		// Arrange
 		ResponseEntity<OracleUser> responseEntity = new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 
-		when(restTemplate.postForEntity(eq("http://140.84.179.223api/users/login"), any(LoginRequest.class),
+		when(restTemplate.postForEntity(eq("http://140.84.179.223/api/users/login"), any(LoginRequest.class),
 				eq(OracleUser.class))).thenReturn(responseEntity);
 
 		// Act
@@ -72,14 +72,14 @@ public class AuthServiceTest {
 		// Assert
 		Assert.assertNull(result);
 
-		verify(restTemplate).postForEntity(eq("http://140.84.179.223api/users/login"), any(LoginRequest.class),
+		verify(restTemplate).postForEntity(eq("http://140.84.179.223/api/users/login"), any(LoginRequest.class),
 				eq(OracleUser.class));
 	}
 
 	@Test
 	public void testDoLoginException() {
 		// Arrange
-		when(restTemplate.postForEntity(eq("http://140.84.179.223api/users/login"), any(LoginRequest.class),
+		when(restTemplate.postForEntity(eq("http://140.84.179.223/api/users/login"), any(LoginRequest.class),
 				eq(OracleUser.class))).thenThrow(new RuntimeException("Connection error"));
 
 		// Act
@@ -88,7 +88,7 @@ public class AuthServiceTest {
 		// Assert
 		Assert.assertNull(result);
 
-		verify(restTemplate).postForEntity(eq("http://140.84.179.223api/users/login"), any(LoginRequest.class),
+		verify(restTemplate).postForEntity(eq("http://140.84.179.223/api/users/login"), any(LoginRequest.class),
 				eq(OracleUser.class));
 	}
 

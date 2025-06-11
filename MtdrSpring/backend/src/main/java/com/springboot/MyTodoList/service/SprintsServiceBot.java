@@ -16,7 +16,7 @@ public class SprintsServiceBot {
 
 	private final RestTemplate restTemplate;
 
-	private final String apiBaseUrl = "http://140.84.179.223api";
+	private final String apiBaseUrl = "http://140.84.179.223/api";
 
 	@Autowired
 	public SprintsServiceBot(RestTemplateBuilder restTemplateBuilder) {
