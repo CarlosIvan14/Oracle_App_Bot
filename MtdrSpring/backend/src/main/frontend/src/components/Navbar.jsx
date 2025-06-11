@@ -192,8 +192,8 @@ export default function Navbar({ onLogout }) {
 
         {/* Icono perfil + dropdown (siempre) */}
         <div className="relative group">
-          <button className="focus:outline-none">
             <IconProfile />
+          {/* <button className="focus:outline-none">
           </button>
           <div className="absolute right-0 mt-2 w-32 bg-white text-black rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
             <button
@@ -208,7 +208,7 @@ export default function Navbar({ onLogout }) {
             >
               Cerrar sesión
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </nav>
