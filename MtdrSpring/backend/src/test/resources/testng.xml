@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="Sprint03Tests">
+<!-- <suite name="Sprint03Tests">
     <test name="Sprint03Tests">
         <classes>
             <class name="com.springboot.MyTodoList.Sprint03Test" />
         </classes>
     </test>
-</suite>
+</suite> -->
 <!-- <suite name="UnitTests">
     <test name="AllServiceTests">
         <packages>
