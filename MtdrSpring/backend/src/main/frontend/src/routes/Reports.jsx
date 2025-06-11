@@ -23,14 +23,14 @@ import {
 /* ---------- colores fijos para cada developer ---------- */
 /* ---------- colores fijos para cada developer (azul) ---------- */
 const PALETTE = [
-  "#000000", // 
   "#3ae7d7", // blue
   "#730000", // red
   "#007308", // green
   "#3b82f6", // darkblue 
   "#6c0064", // pink
   "#ffb800", // yellow
-  "#0f172a", // custom ultra-dark blue
+  "#000000", // black
+  "#ffffff", // white
 ];
 
 function Reports() {
