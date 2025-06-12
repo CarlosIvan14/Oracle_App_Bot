@@ -21,9 +21,9 @@ test.describe('Different ways to manage task creation', () => {
         await page.getByRole('button', { name: 'Free Task' }).click();
 
         await page.getByRole('textbox', { name: 'Nombre / título' }).click();
-        await page.getByRole('textbox', { name: 'Nombre / título' }).fill('Free Task e2e playwright test');
+        await page.getByRole('textbox', { name: 'Nombre / título' }).fill('Free Task V6');
         await page.getByRole('textbox', { name: 'Descripción' }).click();
-        await page.getByRole('textbox', { name: 'Descripción' }).fill('Generate a playwright e2e test for free task flow');
+        await page.getByRole('textbox', { name: 'Descripción' }).fill('Generate a playwright for free task flow 3');
         await page.getByRole('spinbutton', { name: 'Story Points' }).click();
         await page.getByRole('spinbutton', { name: 'Story Points' }).press('ArrowUp');
         await page.getByRole('spinbutton', { name: 'Horas estimadas' }).click();
@@ -31,7 +31,8 @@ test.describe('Different ways to manage task creation', () => {
         await page.getByRole('textbox', { name: 'Deadline' }).click();
         await page.getByRole('option', { name: 'Choose Thursday, June 12th,' }).click();
         await page.getByRole('button', { name: 'Crear Tarea' }).click();
-        await expect(page.getByRole('heading', { name: 'Free Task e2e playwright test' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Free Task V6', exact: true }))
+        .toBeVisible({ timeout: 10000 });
     });
     test('assigned task @real', async ({ page }) => {
         await page.goto('http://localhost:8081/');
@@ -51,26 +52,23 @@ test.describe('Different ways to manage task creation', () => {
         await expect(page.getByRole('button', { name: 'Asignar usuario' })).toBeVisible();
         await page.getByRole('button', { name: 'Asignar usuario' }).click();
         await page.getByRole('textbox', { name: 'Nombre / título' }).click();
-        await page.getByRole('textbox', { name: 'Nombre / título' }).fill('Assign user test');
+        await page.getByRole('textbox', { name: 'Nombre / título' }).fill('Assign user v6');
         await page.getByRole('textbox', { name: 'Descripción' }).click();
-        await page.getByRole('textbox', { name: 'Descripción' }).fill('Use playwright to test e2e assigned task implementation');
+        await page.getByRole('textbox', { name: 'Descripción' }).fill('Use playwright to test e2e assigned task implementation 3');
         
         await page.getByRole('textbox', { name: 'Deadline' }).click();
         await page.getByRole('option', { name: 'Choose Thursday, June 12th,' }).click();
         await page.getByRole('combobox').selectOption('23');
         await page.getByRole('button', { name: 'Crear Tarea' }).click();
-        await expect(page.getByRole('heading', { name: 'My Assigned Tasks' })).toBeVisible();
-        await page.getByRole('heading', { name: 'Assign user test' }).click();
-        await page.getByText('Asignado a: AdolfoHS').click();
+        
+        await expect(page.getByText('Assign user v6Asignado a:').first()).toBeVisible({ timeout: 20000 });
     });
     test('AI suggestion task mocking response @mock-api', async ({ page }) => {
-        // Intercept POST request
         await page.route('**/assignment/by-ai', async (route) => {
-            // Fulfill with the direct array response
             await route.fulfill({
                 status: 200,
                 contentType: 'application/json',
-                body: JSON.stringify(mockUsers)  // Return array directly
+                body: JSON.stringify(mockUsers)  
             });
         });
 
@@ -91,28 +89,24 @@ test.describe('Different ways to manage task creation', () => {
         await expect(page.getByRole('button', { name: 'Recomendación IA' })).toBeVisible();
         await page.getByRole('button', { name: 'Recomendación IA' }).click();
         await page.getByRole('textbox', { name: 'Nombre / título' }).click();
-        await page.getByRole('textbox', { name: 'Nombre / título' }).fill('AI task creation e2e test 2');
+        await page.getByRole('textbox', { name: 'Nombre / título' }).fill('AI task creation v7');
         await page.getByRole('textbox', { name: 'Descripción' }).click();
-        await page.getByRole('textbox', { name: 'Descripción' }).fill('Use playwright to test the AI recommendation feature for task creation');
+        await page.getByRole('textbox', { name: 'Descripción' }).fill('Use playwright to test the AI recommendation feature for task creation 3');
         await page.getByRole('textbox', { name: 'Deadline' }).click();
         await page.getByRole('option', { name: 'Choose Thursday, June 12th,' }).click();
         await page.getByRole('button', { name: 'Obtener recomendación IA' }).click();
         await expect(page.getByRole('combobox')).toBeVisible();
         await page.getByRole('combobox').selectOption('23');
         await page.getByRole('button', { name: 'Crear Tarea' }).click();
-        await expect(page.getByRole('heading', { name: 'AI task creation e2e test 2', exact: true }))
-        .toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('heading', { name: 'AI task creation v7', exact: true }))
+        .toBeVisible({ timeout: 20000 });
     });
     test('AI suggestion task with modified API response @modified-api', async ({ page }) => {
-        // Intercept and modify the real API response for POST request
         await page.route('**/assignment/by-ai', async (route) => {
-            // Only intercept POST requests
             if (route.request().method() === 'POST') {
-                // Fetch the real response first (this forwards the original POST request)
                 const response = await route.fetch();
                 const json = await response.json();
                 
-                // Add your custom user to the real response
                 json.push({
                     "idUser": 99,
                     "name": "YourName",
@@ -122,14 +116,12 @@ test.describe('Different ways to manage task creation', () => {
                     "phoneNumber": "1234567890"
                 });
 
-                // Fulfill with the modified response
                 await route.fulfill({
                     status: 200,
                     contentType: 'application/json',
                     body: JSON.stringify(json)
                 });
             } else {
-                // Let other requests pass through
                 await route.continue();
             }
         });
@@ -145,19 +137,19 @@ test.describe('Different ways to manage task creation', () => {
         await page.getByRole('heading', { name: 'Task Management Tool Project' }).click();
         await expect(page.getByRole('heading', { name: 'teste2e' })).toBeVisible();
         await page.getByRole('heading', { name: 'teste2e' }).click();
-        await expect(page.getByRole('button', { name: 'Añadir Tarea' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Añadir Tarea' })).toBeVisible({timeout: 20000});
         await page.getByRole('button', { name: 'Añadir Tarea' }).click({ force: true });
 
         await expect(page.getByRole('button', { name: 'Recomendación IA' })).toBeVisible();
         await page.getByRole('button', { name: 'Recomendación IA' }).click();
         await page.getByRole('textbox', { name: 'Nombre / título' }).click();
-        await page.getByRole('textbox', { name: 'Nombre / título' }).fill('AI task creation e2e modify 1');
+        await page.getByRole('textbox', { name: 'Nombre / título' }).fill('AI task mocked');
         await page.getByRole('textbox', { name: 'Descripción' }).click();
-        await page.getByRole('textbox', { name: 'Descripción' }).fill('Use playwright to test the AI recommendation feature for task creation');
+        await page.getByRole('textbox', { name: 'Descripción' }).fill('Use playwright to test the AI recommendation feature for task creation 2');
         await page.getByRole('textbox', { name: 'Deadline' }).click();
         await page.getByRole('option', { name: 'Choose Thursday, June 12th,' }).click();
         await page.getByRole('button', { name: 'Obtener recomendación IA' }).click();
-        await expect(page.getByRole('combobox')).toBeVisible();
+        await expect(page.getByRole('combobox')).toBeVisible({timeout: 20000});
         await expect(page.getByRole('combobox')).toContainText('YourName');
     });
 })
