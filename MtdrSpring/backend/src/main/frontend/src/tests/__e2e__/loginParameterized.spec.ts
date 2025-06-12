@@ -21,6 +21,9 @@ test.describe('Login Tests', () => {
       await expect(page.getByRole('button', { name: 'Perfil' })).toBeVisible();
       await page.getByRole('button', { name: 'Perfil' }).click();
       await expect(page.getByRole('heading', { name: `${name}` })).toBeVisible();
+
+      await expect(page).toHaveScreenshot(`valid-login-${name}.png`, { fullPage: true });
+
     });
   });
 
@@ -34,7 +37,6 @@ test.describe('Login Tests', () => {
       await page.goto('http://localhost:8081/');
       await page.locator('input[type="text"]').click();
       await page.locator('input[type="text"]').fill(name);
-      await page.goto('chrome-error://chromewebdata/');
       await page.locator('input[type="password"]').click();
       await page.locator('input[type="password"]').fill(password);
       await page.getByRole('button', { name: 'Ingresar' }).click();

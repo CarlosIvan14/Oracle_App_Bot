@@ -39,7 +39,7 @@ function Home({ user }) {
         setError(err.message);
         setLoading(false);
       });
-  }, [currentUser]);
+  }, []);
 
   const filtered = projects.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase()),

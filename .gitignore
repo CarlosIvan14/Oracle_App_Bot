@@ -50,5 +50,6 @@ frontend/yarn-debug.log*
 frontend/yarn-error.log*
 
 **/wallet
+**/wallet_tests
 
 /.vscode
