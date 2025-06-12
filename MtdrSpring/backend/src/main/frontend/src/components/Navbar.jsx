@@ -1,4 +1,4 @@
-// src/components/Navbar.jsx
+// src/components/Navbar.jsx ggs
 import React, { useState, useEffect } from "react";
 import { NavLink, useMatch, useNavigate, useParams } from "react-router-dom";
 import config from "../config";
