@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 
 
 test.describe('Different ways to manage task creation', () => {
-    test('free task @tasks', async ({ page }) => {
+    test('free task @real', async ({ page }) => {
         await page.goto('http://localhost:8081/');
         await page.locator('input[type="text"]').click();
         await page.locator('input[type="text"]').fill('AdolfoHS');
@@ -33,7 +33,7 @@ test.describe('Different ways to manage task creation', () => {
         await page.getByRole('button', { name: 'Crear Tarea' }).click();
         await expect(page.getByRole('heading', { name: 'Free Task e2e playwright test' })).toBeVisible();
     });
-    test('assigned task', async ({ page }) => {
+    test('assigned task @real', async ({ page }) => {
         await page.goto('http://localhost:8081/');
         await page.locator('input[type="text"]').click();
         await page.locator('input[type="text"]').fill('AdolfoHS');
@@ -63,7 +63,7 @@ test.describe('Different ways to manage task creation', () => {
         await page.getByRole('heading', { name: 'Assign user test' }).click();
         await page.getByText('Asignado a: AdolfoHS').click();
     });
-    test('AI suggestion task mocking response', async ({ page }) => {
+    test('AI suggestion task mocking response @mock-api', async ({ page }) => {
         // Intercept POST request
         await page.route('**/assignment/by-ai', async (route) => {
             // Fulfill with the direct array response
@@ -103,7 +103,7 @@ test.describe('Different ways to manage task creation', () => {
         await expect(page.getByRole('heading', { name: 'AI task creation e2e test 2', exact: true }))
         .toBeVisible({ timeout: 10000 });
     });
-    test('AI suggestion task with modified API response', async ({ page }) => {
+    test('AI suggestion task with modified API response @modified-api', async ({ page }) => {
         // Intercept and modify the real API response for POST request
         await page.route('**/assignment/by-ai', async (route) => {
             // Only intercept POST requests
