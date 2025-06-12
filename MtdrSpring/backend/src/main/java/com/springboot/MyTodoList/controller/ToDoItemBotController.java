@@ -1064,7 +1064,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 						.append(t.getEstimatedHours()).append("h\n").append("-----------------\n");
 			}
 		}
-		send(chatId, sbAssigned.toString(), true);
+		send(chatId, sbAssigned.toString(), false);
 
 		// 2) Construyo y envío la sección de libres
 		StringBuilder sbFree = new StringBuilder();
@@ -1079,7 +1079,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 						.append(t.getStoryPoints()).append("\n").append("-----------------\n");
 			}
 		}
-		send(chatId, sbFree.toString(), true);
+		send(chatId, sbFree.toString(), false);
 	}
 
 	/* ========================================================= */
