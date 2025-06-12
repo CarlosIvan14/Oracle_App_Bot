@@ -143,16 +143,16 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		this.taskSvc = taskSvc;
 		this.taskCreationSvc = taskCreationSvc;
 		this.roleSvc = roleSvc;
-		  // ELIMINAMOS CUALQUIER WEBHOOK ACTIVO ANTES DE EMPEZAR EL POLLING
-    try {
-        DeleteWebhook deleteWebhook = new DeleteWebhook();
-        // si quieres descartar también actualizaciones pendientes:
-        deleteWebhook.setDropPendingUpdates(true);
-        execute(deleteWebhook);
-        log.info("Webhook eliminado, listaso para getUpdates");
-    } catch (TelegramApiException e) {
-        log.error("No se pudo eliminar el webhook", e);
-    }
+
+		try {
+			DeleteWebhook deleteWebhook = new DeleteWebhook();
+			// si quieres descartar también actualizaciones pendientes:
+			deleteWebhook.setDropPendingUpdates(true);
+			execute(deleteWebhook);
+			log.info("Webhook eliminado, listaso para getUpdates");
+		} catch (TelegramApiException e) {
+			log.error("No se pudo eliminar el webhook", e);
+		}
 	}
 
 	@Override
@@ -1064,7 +1064,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 						.append(t.getEstimatedHours()).append("h\n").append("-----------------\n");
 			}
 		}
-		send(chatId, sbAssigned.toString(), true);
+		send(chatId, sbAssigned.toString(), false);
 
 		// 2) Construyo y envío la sección de libres
 		StringBuilder sbFree = new StringBuilder();
@@ -1079,7 +1079,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 						.append(t.getStoryPoints()).append("\n").append("-----------------\n");
 			}
 		}
-		send(chatId, sbFree.toString(), true);
+		send(chatId, sbFree.toString(), false);
 	}
 
 	/* ========================================================= */
