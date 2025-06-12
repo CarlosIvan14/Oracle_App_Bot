@@ -27,9 +27,8 @@ const PALETTE = [
   "#730000", // red
   "#007308", // green
   "#3b82f6", // darkblue 
-  "#ffb800", // yellow
   "#6c0064", // pink
-
+  "#ffb800", // yellow
 ];
 
 function Reports() {

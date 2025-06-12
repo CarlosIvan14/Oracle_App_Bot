@@ -23,6 +23,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updates.DeleteWebhook;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
@@ -142,6 +143,16 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		this.taskSvc = taskSvc;
 		this.taskCreationSvc = taskCreationSvc;
 		this.roleSvc = roleSvc;
+		  // ELIMINAMOS CUALQUIER WEBHOOK ACTIVO ANTES DE EMPEZAR EL POLLING
+    try {
+        DeleteWebhook deleteWebhook = new DeleteWebhook();
+        // si quieres descartar también actualizaciones pendientes:
+        deleteWebhook.setDropPendingUpdates(true);
+        execute(deleteWebhook);
+        log.info("Webhook eliminado, listaso para getUpdates");
+    } catch (TelegramApiException e) {
+        log.error("No se pudo eliminar el webhook", e);
+    }
 	}
 
 	@Override
